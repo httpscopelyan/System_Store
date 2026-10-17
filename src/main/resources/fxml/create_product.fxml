@@ -1,88 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.sun.javafx.scene.control.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="TOP_CENTER" prefHeight="356.0" prefWidth="415.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.scopel.pfv.beta.controller.CreateProductsController">
-    <Label text="Tela de Cadastro">
-      <VBox.margin>
-         <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
-      </VBox.margin></Label>
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.CreateProductsController"
+            stylesheets="@../css/styles.css"
+            styleClass="inicio-root"
+            prefWidth="720.0" prefHeight="700.0">
 
-    <Label text="Código do produto">
-        <VBox.margin>
-            <Insets top="2.0" />
-        </VBox.margin>
-    </Label>
-    <TextField fx:id="codeField">
-      <VBox.margin>
-         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-      </VBox.margin></TextField>
+    <!-- Cabeçalho azul-marinho -->
+    <top>
+        <VBox styleClass="panel-header">
+            <Label text="Produtos — Cadastro" styleClass="panel-header-title"/>
+            <Label text="Inclusão e manutenção de produtos" styleClass="panel-header-subtitle"/>
+        </VBox>
+    </top>
 
-    <Label text="Nome do Produto">
-        <VBox.margin>
-            <Insets top="2.0" />
-        </VBox.margin>
-    </Label>
-    <TextField fx:id="descriptionField" prefWidth="150.0">
-      <VBox.margin>
-         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-      </VBox.margin></TextField>
+    <center>
+        <VBox spacing="18">
+            <padding>
+                <Insets top="22" right="28" bottom="22" left="28"/>
+            </padding>
 
-    <Label text="Preço">
-        <VBox.margin>
-            <Insets top="2.0" />
-        </VBox.margin>
-    </Label>
-    <TextField fx:id="priceField" prefWidth="150.0">
-        <VBox.margin>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-        </VBox.margin>
-    </TextField>
+            <VBox styleClass="form-card" spacing="14" maxWidth="Infinity">
+                <Label text="Dados do produto" styleClass="form-section-title"/>
 
-    <Label text="Quantidade">
-        <VBox.margin>
-            <Insets top="2.0" />
-        </VBox.margin>
-    </Label>
-    <TextField fx:id="quantityField" prefWidth="150.0">
-        <VBox.margin>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-        </VBox.margin>
-    </TextField>
+                <VBox spacing="6">
+                    <Label text="Código do produto" styleClass="form-label"/>
+                    <TextField fx:id="codeField" promptText="Código de barras"
+                               styleClass="text-input" maxWidth="Infinity"/>
+                </VBox>
 
-    <Label text="Unidade">
-        <VBox.margin>
-            <Insets bottom="2.0" />
-        </VBox.margin>
-    </Label>
-    <ComboBox fx:id="unitBox" prefWidth="150.0">
-        <VBox.margin>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-        </VBox.margin>
-    </ComboBox>
+                <VBox spacing="6">
+                    <Label text="Nome do produto" styleClass="form-label"/>
+                    <TextField fx:id="descriptionField" promptText="Descrição"
+                               styleClass="text-input" maxWidth="Infinity"/>
+                </VBox>
 
-    <Label text="Ativo/Inativo">
-        <VBox.margin>
-            <Insets bottom="2.0" />
-        </VBox.margin>
-    </Label>
-    <CheckBox fx:id="activeBox">
-        <VBox.margin>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-        </VBox.margin>
-    </CheckBox>
+                <HBox spacing="16">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Preço" styleClass="form-label"/>
+                        <TextField fx:id="priceField" promptText="Ex: 9.90"
+                                   styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Quantidade" styleClass="form-label"/>
+                        <TextField fx:id="quantityField" promptText="Ex: 10"
+                                   styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
 
-    <Button alignment="CENTER" contentDisplay="CENTER" layoutX="50.0" onAction="#onSave" prefHeight="26.0" prefWidth="75.0" text="Salvar" textAlignment="CENTER" />
+                <HBox spacing="16" alignment="BOTTOM_LEFT">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Unidade" styleClass="form-label"/>
+                        <ComboBox fx:id="unitBox" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Situação" styleClass="form-label"/>
+                        <CheckBox fx:id="activeBox" text="Ativo">
+                            <padding>
+                                <Insets top="8" bottom="8"/>
+                            </padding>
+                        </CheckBox>
+                    </VBox>
+                </HBox>
+            </VBox>
 
-    <Label fx:id="messageLabel" />
+            <!-- Ações -->
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button onAction="#onSave" text="Salvar" styleClass="success-button"/>
+                <Button fx:id="ButtonVenda" onAction="#onVenda" text="Ir para Venda"
+                        styleClass="secondary-button"/>
+            </HBox>
 
-    <VBox.margin>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </VBox.margin>
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
 
-
-
-</VBox>
+</BorderPane>

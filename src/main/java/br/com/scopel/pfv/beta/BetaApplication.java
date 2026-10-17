@@ -15,7 +15,7 @@ import java.awt.*;
 @SpringBootApplication
 public class BetaApplication extends Application{
 
-	private ConfigurableApplicationContext springContext;
+	public static ConfigurableApplicationContext springContext;
 
 	@Override
 	public void init() {
@@ -25,7 +25,7 @@ public class BetaApplication extends Application{
 	@Override
 	public void start(Stage stage) throws Exception {
 		FXMLLoader loader = new FXMLLoader(
-				getClass().getResource("/fxml/create_product.fxml")
+				getClass().getResource("/fxml/login.fxml")
 		);
 		loader.setControllerFactory(springContext::getBean);
 		Scene scene = new Scene(loader.load(), 1365, 720);

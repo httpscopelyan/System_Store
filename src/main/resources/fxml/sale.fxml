@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.SaleController"
+            stylesheets="@../css/styles.css"
+            styleClass="sale-root"
+            prefWidth="1200.0" prefHeight="720.0">
+
+    <!-- Cabeçalho azul-marinho -->
+    <top>
+        <VBox styleClass="sale-header">
+            <Label text="Venda — Mercado Scopel" styleClass="sale-header-title"/>
+            <Label text="Ponto de Venda" styleClass="sale-header-subtitle"/>
+        </VBox>
+    </top>
+
+    <!-- Área central: código, tabela de itens e feedback -->
+    <center>
+        <VBox spacing="14">
+            <padding>
+                <Insets top="18" right="24" bottom="18" left="24"/>
+            </padding>
+
+            <!-- Campo de código de barras grande, mantém o foco (RNF03) -->
+            <VBox spacing="6">
+                <Label text="Código de barras" styleClass="code-label"/>
+                <TextField fx:id="codeField" promptText="Bipe ou digite o código"
+                           onAction="#onAddItem" styleClass="code-field"/>
+            </VBox>
+
+            <!-- Tabela de itens -->
+            <TableView fx:id="itemsTable" styleClass="items-table" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="descriptionCol" prefWidth="520.0" text="Descrição"/>
+                    <TableColumn fx:id="quantityCol" prefWidth="140.0" text="Qtd"/>
+                    <TableColumn fx:id="unitPriceCol" prefWidth="200.0" text="Preço"/>
+                    <TableColumn fx:id="totalPriceCol" prefWidth="240.0" text="Total"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                </columnResizePolicy>
+            </TableView>
+
+            <Label fx:id="statusLabel" styleClass="sale-status"/>
+        </VBox>
+    </center>
+
+    <!-- Painel lateral: TOTAL enorme + finalizar (RNF04) -->
+    <right>
+        <VBox spacing="20" alignment="TOP_CENTER" prefWidth="360.0">
+            <padding>
+                <Insets top="18" right="24" bottom="18" left="0"/>
+            </padding>
+
+            <VBox styleClass="total-panel" spacing="4" maxWidth="Infinity">
+                <Label text="TOTAL" styleClass="total-caption"/>
+                <Label fx:id="totalLabel" text="R$ 0,00" styleClass="total-value"/>
+            </VBox>
+
+            <Button text="Finalizar Venda (F10)" onAction="#onFinalize"
+                    styleClass="finalize-button" maxWidth="Infinity"/>
+        </VBox>
+    </right>
+
+    <!-- Rodapé só-visual com dicas de teclado -->
+    <bottom>
+        <HBox styleClass="sale-footer" spacing="8" alignment="CENTER_LEFT">
+            <Label text="F10" styleClass="key-hint"/>
+            <Label text="Finalizar venda"/>
+            <Label text="   Enter" styleClass="key-hint"/>
+            <Label text="Adicionar item"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

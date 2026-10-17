@@ -1,5 +1,4 @@
 CREATE TABLE product (
-
     id  BIGSERIAL PRIMARY KEY ,
     code VARCHAR(15) NOT NULL UNIQUE,
     description VARCHAR(100) NOT NULL,

@@ -8,23 +8,30 @@ import br.com.scopel.pfv.beta.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 class BetaApplicationTests {
 
 	@Autowired
 
 	private ProductService productService;
 
+	private static String uniqueCode() {
+		return "T" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+	}
+
 	@Test
 	void SaveProduct() {
 		Product p = new Product();
 
-		p.setCode("1231");
+		p.setCode(uniqueCode());
 		p.setDescription("Test");
 		p.setPrice(new BigDecimal("1.00"));
 		p.setQuantity(new BigDecimal("50.2"));
@@ -46,9 +53,10 @@ class BetaApplicationTests {
 
 	@Test
 	void FindExistingProduct(){
+		String code = uniqueCode();
 		Product p = new Product();
 
-		p.setCode("7777");
+		p.setCode(code);
 		p.setDescription("Test");
 		p.setPrice(new BigDecimal("1.00"));
 		p.setQuantity(new BigDecimal("50.2"));
@@ -57,16 +65,17 @@ class BetaApplicationTests {
 		productService.save(p);
 
 
-		Product encontrado = productService.findCode("7777");
+		Product encontrado = productService.findCode(code);
 
 		assertNotNull(encontrado);
-		assertEquals("7777", encontrado.getCode());
+		assertEquals(code, encontrado.getCode());
 	}
 
 	@Test
 	void SaveDuplicateProduct() {
+		String code = uniqueCode();
 		Product p1 = new Product();
-		p1.setCode("8888");
+		p1.setCode(code);
 		p1.setDescription("Test");
 		p1.setPrice(new BigDecimal("1.00"));
 		p1.setQuantity(new BigDecimal("50.2"));
@@ -75,7 +84,7 @@ class BetaApplicationTests {
 		productService.save(p1);
 
 		Product p2 = new Product();
-		p2.setCode("8888");
+		p2.setCode(code);
 		p2.setDescription("Test");
 		p2.setPrice(new BigDecimal("1.00"));
 		p2.setQuantity(new BigDecimal("50.2"));

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.CaixaController"
+            stylesheets="@../css/styles.css"
+            styleClass="inicio-root"
+            prefWidth="820.0" prefHeight="620.0">
+
+    <!-- Cabeçalho azul-marinho -->
+    <top>
+        <VBox styleClass="panel-header">
+            <Label text="Caixa — Mercado Scopel" styleClass="panel-header-title"/>
+            <Label text="Abertura, movimentação e fechamento" styleClass="panel-header-subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="18">
+            <padding>
+                <Insets top="22" right="28" bottom="22" left="28"/>
+            </padding>
+
+            <!-- Abertura -->
+            <VBox styleClass="form-card" spacing="10" maxWidth="Infinity">
+                <Label text="Abertura" styleClass="form-section-title"/>
+                <Label text="Fundo de troco" styleClass="form-label"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <TextField fx:id="openingAmountField" promptText="Ex: 100.00"
+                               styleClass="text-input" prefWidth="220"/>
+                    <Button text="Abrir Caixa" onAction="#onOpen" styleClass="primary-button"/>
+                </HBox>
+            </VBox>
+
+            <!-- Movimentação (sangria / suprimento) -->
+            <VBox styleClass="form-card" spacing="10" maxWidth="Infinity">
+                <Label text="Movimentação" styleClass="form-section-title"/>
+                <Label text="Valor da movimentação" styleClass="form-label"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <TextField fx:id="movementAmountField" promptText="Ex: 50.00"
+                               styleClass="text-input" prefWidth="220"/>
+                    <Button text="Suprimento" onAction="#onSupplement" styleClass="primary-button"/>
+                    <Button text="Sangria" onAction="#onWithdrawal" styleClass="secondary-button"/>
+                </HBox>
+            </VBox>
+
+            <!-- Fechamento -->
+            <VBox styleClass="form-card" spacing="10" maxWidth="Infinity">
+                <Label text="Fechamento" styleClass="form-section-title"/>
+                <Label text="Valor contado" styleClass="form-label"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <TextField fx:id="countedAmountField" promptText="Ex: 120.00"
+                               styleClass="text-input" prefWidth="220"/>
+                    <Button text="Fechar Caixa" onAction="#onClose" styleClass="danger-button"/>
+                </HBox>
+            </VBox>
+
+            <!-- Status -->
+            <Label fx:id="statusLabel" text="" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+
+</BorderPane>
