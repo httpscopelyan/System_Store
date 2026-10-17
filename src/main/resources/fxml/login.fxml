@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="br.com.scopel.pfv.beta.controller.LoginController"
+           stylesheets="@../css/styles.css"
+           styleClass="login-root"
+           prefWidth="900.0" prefHeight="600.0">
+
+    <VBox alignment="CENTER" spacing="26" maxWidth="420">
+
+        <!-- Marca -->
+        <VBox alignment="CENTER" spacing="4">
+            <Label text="Mercado Scopel" styleClass="login-brand"/>
+            <Label text="PDV — Ponto de Venda" styleClass="login-brand-subtitle"/>
+        </VBox>
+
+        <!-- Cartão central de acesso -->
+        <VBox styleClass="login-card" spacing="16" maxWidth="Infinity">
+            <Label text="Acesso ao sistema" styleClass="login-card-title"/>
+
+            <VBox spacing="6">
+                <Label text="Login" styleClass="form-label"/>
+                <TextField fx:id="loginField" promptText="Digite seu login"
+                           styleClass="text-input" maxWidth="Infinity"/>
+            </VBox>
+
+            <VBox spacing="6">
+                <Label text="Senha" styleClass="form-label"/>
+                <PasswordField fx:id="passField" promptText="Digite sua senha"
+                               onAction="#onLogin" styleClass="text-input" maxWidth="Infinity"/>
+            </VBox>
+
+            <Button fx:id="enterButton" text="Entrar" onAction="#onLogin"
+                    styleClass="primary-button" maxWidth="Infinity"/>
+
+            <Label fx:id="mensage" styleClass="form-message" wrapText="true"
+                   style="-fx-text-fill: #c62828;"/>
+        </VBox>
+    </VBox>
+
+</StackPane>

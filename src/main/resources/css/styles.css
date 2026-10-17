@@ -1,4 +1,19 @@
-/* Identidade visual — Mercado Scopel (PDV) */
+/* Identidade visual — Mercado Scopel (PDV) — azul-marinho */
+
+/* ============================================================
+   Paleta
+   Azul-marinho escuro  #15325F  (barras/painéis de operar)
+   Azul-marinho médio   #1E4C8A
+   Azul destaque        #2E6CB5
+   Fundo gestão         #F4F6F9
+   Painel branco        #FFFFFF
+   Texto sobre azul     #FFFFFF / secundário #CBD9EC
+   Texto sobre claro    #22303F / secundário #6B7683
+   Sucesso              #2E7D32
+   Perigo               #C62828
+   ============================================================ */
+
+/* ---------- Tela inicial (gestão) ---------- */
 
 .inicio-root {
     -fx-background-color: #f4f6f9;
@@ -6,7 +21,7 @@
 
 /* Barra superior de ícones */
 .top-bar {
-    -fx-background-color: linear-gradient(to bottom, #1b5e20, #2e7d32);
+    -fx-background-color: linear-gradient(to bottom, #1e4c8a, #15325f);
     -fx-padding: 6 10 6 10;
     -fx-spacing: 6;
 }
@@ -43,7 +58,7 @@
 
 .menu-item {
     -fx-background-color: transparent;
-    -fx-text-fill: #2c3e50;
+    -fx-text-fill: #22303f;
     -fx-font-size: 13px;
     -fx-alignment: center-left;
     -fx-background-radius: 4;
@@ -52,7 +67,8 @@
 }
 
 .menu-item:hover {
-    -fx-background-color: #e8f0e9;
+    -fx-background-color: #e7eefa;
+    -fx-text-fill: #15325f;
 }
 
 .menu-item:disabled {
@@ -68,19 +84,27 @@
 .brand-title {
     -fx-font-size: 42px;
     -fx-font-weight: bold;
-    -fx-text-fill: #2e7d32;
+    -fx-text-fill: #15325f;
 }
 
 .brand-subtitle {
     -fx-font-size: 16px;
-    -fx-text-fill: #8a96a3;
+    -fx-text-fill: #6b7683;
 }
 
 .caixa-status {
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-text-fill: #d32f2f;
+    -fx-text-fill: #c62828;
     -fx-padding: 14 0 0 0;
+}
+
+.caixa-status-aberto {
+    -fx-text-fill: #2e7d32;
+}
+
+.caixa-status-fechado {
+    -fx-text-fill: #c62828;
 }
 
 /* Barra de status inferior */
@@ -94,4 +118,310 @@
 
 .status-bar .label {
     -fx-text-fill: #44515e;
+}
+
+/* ============================================================
+   Tela de venda (operacional — azul-marinho)
+   ============================================================ */
+
+.sale-root {
+    -fx-background-color: #f4f6f9;
+}
+
+/* Cabeçalho azul-marinho */
+.sale-header {
+    -fx-background-color: linear-gradient(to right, #15325f, #1e4c8a);
+    -fx-padding: 16 24 16 24;
+}
+
+.sale-header-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.sale-header-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #cbd9ec;
+}
+
+/* Campo de código de barras em destaque */
+.code-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #22303f;
+}
+
+.code-field {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15325f;
+    -fx-background-color: white;
+    -fx-border-color: #2e6cb5;
+    -fx-border-width: 2;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 10 16 10 16;
+    -fx-prompt-text-fill: #9aa7b5;
+}
+
+.code-field:focused {
+    -fx-border-color: #15325f;
+    -fx-effect: dropshadow(gaussian, rgba(21, 50, 95, 0.35), 8, 0, 0, 0);
+}
+
+/* Tabela de itens */
+.items-table {
+    -fx-background-color: white;
+    -fx-border-color: #d9dee5;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-size: 15px;
+}
+
+.items-table .column-header-background {
+    -fx-background-color: #15325f;
+    -fx-background-radius: 6 6 0 0;
+}
+
+.items-table .column-header,
+.items-table .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-alignment: center-left;
+    -fx-padding: 10 8 10 8;
+}
+
+.items-table .table-row-cell {
+    -fx-cell-size: 38px;
+}
+
+.items-table .table-row-cell:odd {
+    -fx-background-color: #f4f6f9;
+}
+
+.items-table .table-row-cell:selected {
+    -fx-background-color: #cbd9ec;
+    -fx-text-fill: #15325f;
+}
+
+/* Painel de total enorme (RNF04 — legível a 1 m) */
+.total-panel {
+    -fx-background-color: linear-gradient(to right, #15325f, #1e4c8a);
+    -fx-background-radius: 8;
+    -fx-padding: 18 28 18 28;
+}
+
+.total-caption {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #cbd9ec;
+}
+
+.total-value {
+    -fx-font-size: 56px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+/* Botão finalizar proeminente */
+.finalize-button {
+    -fx-background-color: #2e7d32;
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-padding: 16 32 16 32;
+}
+
+.finalize-button:hover {
+    -fx-background-color: #1f5f24;
+}
+
+/* Feedback de status da venda */
+.sale-status {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15325f;
+}
+
+/* Rodapé com dicas de teclado (só visual) */
+.sale-footer {
+    -fx-background-color: #15325f;
+    -fx-padding: 8 24 8 24;
+}
+
+.sale-footer .label {
+    -fx-text-fill: #cbd9ec;
+    -fx-font-size: 12px;
+}
+
+.key-hint {
+    -fx-background-color: #2e6cb5;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-padding: 2 8 2 8;
+}
+
+/* ============================================================
+   Tela de login
+   ============================================================ */
+
+.login-root {
+    -fx-background-color: linear-gradient(to bottom, #1e4c8a, #15325f);
+}
+
+.login-brand {
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.login-brand-subtitle {
+    -fx-font-size: 15px;
+    -fx-text-fill: #cbd9ec;
+}
+
+.login-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 32 36 32 36;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 18, 0, 0, 6);
+}
+
+.login-card-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15325f;
+}
+
+/* ============================================================
+   Formulários / telas de gestão (caixa, produtos)
+   ============================================================ */
+
+/* Cabeçalho azul-marinho reaproveitável */
+.panel-header {
+    -fx-background-color: linear-gradient(to right, #15325f, #1e4c8a);
+    -fx-padding: 16 24 16 24;
+}
+
+.panel-header-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.panel-header-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #cbd9ec;
+}
+
+/* Cartão de seção claro */
+.form-card {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #d9dee5;
+    -fx-border-radius: 8;
+    -fx-padding: 18 20 18 20;
+    -fx-effect: dropshadow(gaussian, rgba(21, 50, 95, 0.08), 8, 0, 0, 2);
+}
+
+.form-section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15325f;
+}
+
+.form-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #44515e;
+}
+
+.text-input {
+    -fx-font-size: 15px;
+    -fx-text-fill: #22303f;
+    -fx-background-color: white;
+    -fx-border-color: #c3ccd6;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12 8 12;
+    -fx-prompt-text-fill: #9aa7b5;
+}
+
+.text-input:focused {
+    -fx-border-color: #2e6cb5;
+    -fx-effect: dropshadow(gaussian, rgba(46, 108, 181, 0.3), 6, 0, 0, 0);
+}
+
+/* Botões reaproveitáveis */
+.primary-button {
+    -fx-background-color: #2e6cb5;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-padding: 10 22 10 22;
+}
+
+.primary-button:hover {
+    -fx-background-color: #1e4c8a;
+}
+
+.secondary-button {
+    -fx-background-color: white;
+    -fx-text-fill: #15325f;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-border-color: #2e6cb5;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-padding: 9 22 9 22;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #e7eefa;
+}
+
+.success-button {
+    -fx-background-color: #2e7d32;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-padding: 10 22 10 22;
+}
+
+.success-button:hover {
+    -fx-background-color: #1f5f24;
+}
+
+.danger-button {
+    -fx-background-color: #c62828;
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-padding: 10 22 10 22;
+}
+
+.danger-button:hover {
+    -fx-background-color: #a31d1d;
+}
+
+/* Mensagem de feedback em formulário */
+.form-message {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15325f;
 }

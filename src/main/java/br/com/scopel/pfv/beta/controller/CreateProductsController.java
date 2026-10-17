@@ -1,12 +1,17 @@
 package br.com.scopel.pfv.beta.controller;
 
+import br.com.scopel.pfv.beta.BetaApplication;
 import br.com.scopel.pfv.beta.exception.RegisterProductDuplicateException;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.service.ProductService;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 
 @Component
@@ -14,13 +19,20 @@ public class CreateProductsController {
 
     private final ProductService productService;
 
-    @FXML private TextField codeField;
-    @FXML private TextField descriptionField;
-    @FXML private TextField priceField;
-    @FXML private TextField quantityField;
-    @FXML private ComboBox<Product.Unidade> unitBox;
-    @FXML private CheckBox activeBox;
-    @FXML private Label messageLabel;
+    @FXML
+    private TextField codeField;
+    @FXML
+    private TextField descriptionField;
+    @FXML
+    private TextField priceField;
+    @FXML
+    private TextField quantityField;
+    @FXML
+    private ComboBox<Product.Unidade> unitBox;
+    @FXML
+    private CheckBox activeBox;
+    @FXML
+    private Label messageLabel;
 
     public CreateProductsController(ProductService productService) {
         this.productService = productService;
@@ -66,5 +78,23 @@ public class CreateProductsController {
         } catch (Exception e) {
             messageLabel.setText("Verifique os campos e tente novamente");
         }
+    }
+
+    @FXML
+    public void onVenda() {
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/sale.fxml"));
+            loader.setControllerFactory(BetaApplication.springContext::getBean);
+            Scene scene = new Scene(loader.load());
+            Stage stage = (Stage) priceField.getScene().getWindow();
+            stage.setScene(scene);
+        }
+        catch (RuntimeException | IOException e) {
+            throw new RuntimeException();
+
+        }
+
+
     }
 }

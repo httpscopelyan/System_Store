@@ -5,6 +5,7 @@ import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.exception.InvalidPasswordException;
 import br.com.scopel.pfv.beta.exception.UserNotFindException;
 import br.com.scopel.pfv.beta.model.User;
+import br.com.scopel.pfv.beta.service.CashRegisterService;
 import br.com.scopel.pfv.beta.service.UserService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,14 +23,16 @@ public class LoginController {
 
     private final UserService userService;
     private final UserSession userSession;
+    private final CashRegisterService cashRegisterService;
 
     @FXML private TextField loginField;
     @FXML private PasswordField passField;
     @FXML private Label mensage;
 
-    public LoginController(UserService userService, UserSession userSession) {
+    public LoginController(UserService userService, UserSession userSession, CashRegisterService cashRegisterService) {
         this.userService = userService;
         this.userSession = userSession;
+        this.cashRegisterService = cashRegisterService;
     }
 
     @FXML
@@ -41,6 +44,7 @@ public class LoginController {
             User loggedUser = userService.login(loginText, passText);
 
             userSession.setLoggedUser(loggedUser);
+            userSession.setCaixaAtual(cashRegisterService.findOpenByOperator(loggedUser).orElse(null));
 
             loginField.clear();
             passField.clear();

@@ -8,10 +8,14 @@ import br.com.scopel.pfv.beta.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 class UserServiceTests {
 
     @Autowired
@@ -20,9 +24,10 @@ class UserServiceTests {
     // 1. A SENHA É GUARDADA COMO HASH, NÃO EM TEXTO PURO (o teste mais importante)
     @Test
     void passwordIsHashedOnSave() {
+        String login = "joao_" + UUID.randomUUID();
         User user = new User();
         user.setName("Joao");
-        user.setLogin("joao1");
+        user.setLogin(login);
         user.setPassword("senha123");      // senha pura
         user.setRole(User.Role.OPERADOR);
         user.setActive(true);
@@ -35,48 +40,52 @@ class UserServiceTests {
 
     @Test
     void loginWithCorrectPassword() {
+        String login = "maria_" + UUID.randomUUID();
         User user = new User();
         user.setName("Maria");
-        user.setLogin("maria1");
+        user.setLogin(login);
         user.setPassword("abc123");
         user.setRole(User.Role.GERENTE);
         user.setActive(true);
         userService.save(user);
 
-        User logged = userService.login("maria1", "abc123");
+        User logged = userService.login(login, "abc123");
 
         assertNotNull(logged);
-        assertEquals("maria1", logged.getLogin());
+        assertEquals(login, logged.getLogin());
     }
 
     @Test
     void loginWithWrongPassword() {
+        String login = "carlos_" + UUID.randomUUID();
         User user = new User();
         user.setName("Carlos");
-        user.setLogin("carlos1");
+        user.setLogin(login);
         user.setPassword("certa123");
         user.setRole(User.Role.OPERADOR);
         user.setActive(true);
         userService.save(user);
 
         assertThrows(InvalidPasswordException.class, () -> {
-            userService.login("carlos1", "errada999");
+            userService.login(login, "errada999");
         });
     }
 
     @Test
     void loginWithNonexistentUser() {
         assertThrows(UserNotFindException.class, () -> {
-            userService.login("naoexiste", "qualquer");
+            userService.login("naoexiste_" + UUID.randomUUID(), "qualquer");
         });
     }
 
     // 5. LOGIN DUPLICADO lança exceção ao cadastrar
     @Test
     void saveDuplicateLogin() {
+        String login = "ana_" + UUID.randomUUID();
+
         User u1 = new User();
         u1.setName("Ana");
-        u1.setLogin("ana1");
+        u1.setLogin(login);
         u1.setPassword("senha1");
         u1.setRole(User.Role.OPERADOR);
         u1.setActive(true);
@@ -84,7 +93,7 @@ class UserServiceTests {
 
         User u2 = new User();
         u2.setName("Ana Segunda");
-        u2.setLogin("ana1");           // mesmo login
+        u2.setLogin(login);           // mesmo login
         u2.setPassword("senha2");
         u2.setRole(User.Role.OPERADOR);
         u2.setActive(true);

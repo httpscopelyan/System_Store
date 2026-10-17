@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.PaymentController"
+            stylesheets="@../css/styles.css"
+            styleClass="sale-root"
+            prefWidth="1200.0" prefHeight="720.0">
+
+    <!-- Cabeçalho azul-marinho -->
+    <top>
+        <VBox styleClass="sale-header">
+            <Label text="Finalizar Venda — Mercado Scopel" styleClass="sale-header-title"/>
+            <Label text="Pagamento" styleClass="sale-header-subtitle"/>
+        </VBox>
+    </top>
+
+    <!-- Área central: forma de pagamento + valor recebido -->
+    <center>
+        <VBox spacing="18" alignment="TOP_LEFT">
+            <padding>
+                <Insets top="24" right="28" bottom="24" left="28"/>
+            </padding>
+
+            <!-- Forma de pagamento -->
+            <VBox spacing="6">
+                <Label text="Forma de pagamento" styleClass="code-label"/>
+                <ComboBox fx:id="methodBox" styleClass="code-field" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Valor recebido -->
+            <VBox spacing="6">
+                <Label text="Valor recebido" styleClass="code-label"/>
+                <TextField fx:id="amountReceivedField" promptText="0,00"
+                           onAction="#onConfirm" styleClass="code-field"/>
+            </VBox>
+
+            <Label fx:id="statusLabel" styleClass="sale-status"/>
+
+            <Button text="Confirmar pagamento (Enter)" onAction="#onConfirm"
+                    styleClass="finalize-button" maxWidth="Infinity"/>
+        </VBox>
+    </center>
+
+    <!-- Painel lateral: TOTAL e TROCO enormes (RNF04) -->
+    <right>
+        <VBox spacing="20" alignment="TOP_CENTER" prefWidth="420.0">
+            <padding>
+                <Insets top="24" right="28" bottom="24" left="0"/>
+            </padding>
+
+            <VBox styleClass="total-panel" spacing="4" maxWidth="Infinity">
+                <Label text="TOTAL" styleClass="total-caption"/>
+                <Label fx:id="totalLabel" text="R$ 0,00" styleClass="total-value"/>
+            </VBox>
+
+            <VBox styleClass="total-panel" spacing="4" maxWidth="Infinity">
+                <Label text="TROCO" styleClass="total-caption"/>
+                <Label fx:id="changeLabel" text="R$ 0,00" styleClass="total-value"/>
+            </VBox>
+        </VBox>
+    </right>
+
+    <!-- Rodapé só-visual com dicas de teclado -->
+    <bottom>
+        <HBox styleClass="sale-footer" spacing="8" alignment="CENTER_LEFT">
+            <Label text="Enter" styleClass="key-hint"/>
+            <Label text="Confirmar pagamento"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
