@@ -7,14 +7,13 @@
 <BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.scopel.pfv.beta.controller.CreateProductsController"
             stylesheets="@../css/styles.css"
-            styleClass="inicio-root"
-            prefWidth="720.0" prefHeight="700.0">
+            styleClass="inicio-root">
 
     <!-- Cabeçalho azul-marinho -->
     <top>
-        <VBox styleClass="panel-header">
-            <Label text="Produtos — Cadastro" styleClass="panel-header-title"/>
-            <Label text="Inclusão e manutenção de produtos" styleClass="panel-header-subtitle"/>
+        <VBox styleClass="page-header">
+            <Label text="Produtos — Cadastro" styleClass="page-header-title"/>
+            <Label text="Inclusão e manutenção de produtos" styleClass="page-header-subtitle"/>
         </VBox>
     </top>
 
@@ -71,8 +70,6 @@
             <!-- Ações -->
             <HBox spacing="12" alignment="CENTER_LEFT">
                 <Button onAction="#onSave" text="Salvar" styleClass="success-button"/>
-                <Button fx:id="ButtonVenda" onAction="#onVenda" text="Ir para Venda"
-                        styleClass="secondary-button"/>
             </HBox>
 
             <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>

@@ -72,8 +72,12 @@ direto com repository.
 ### JavaFX
 - `FXMLLoader` + `setControllerFactory(BetaApplication.springContext::getBean)`
   para o Spring injetar o controller.
-- Navegação de tela: `Stage stage = (Stage) algumCampo.getScene().getWindow();`
-  depois `stage.setScene(...)`.
+- Navegação de tela: **shell único persistente** (`main_layout.fxml` /
+  `MainController` — ToolBar + menu lateral + barra de status fixos). Os
+  controllers de página trocam só o centro via `Navigator.navigate(Page)`
+  (`config/Navigator` + enum `config/Page`), **não** `stage.setScene(...)`. O
+  login fica fora do shell; a transição login→sistema usa `scene.setRoot(...)`.
+  (ADR 0012)
 - `UserSession` (@Component em config/) guarda operador logado + caixa atual.
 
 ---

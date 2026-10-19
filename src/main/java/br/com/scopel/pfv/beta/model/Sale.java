@@ -44,6 +44,30 @@ public class Sale {
     @Column(nullable = false, length = 20)
     private Status status;
 
+    // Cliente da venda (tele-entrega / venda a prazo). Opcional.
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
+    // Desconto e acréscimo no total da venda (RF19/RF20).
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal discount = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal surcharge = BigDecimal.ZERO;
+
+    // RN17: venda cancelada mantém registro (status, usuário, motivo).
+    @Column(name = "cancel_reason", length = 200)
+    private String cancelReason;
+
+    @Column(name = "canceled_at")
+    private LocalDateTime canceledAt;
+
+    // Gerente que autorizou operação sensível (desconto acima do limite, cancelamento).
+    @ManyToOne
+    @JoinColumn(name = "authorized_by_id")
+    private User authorizedBy;
+
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleItem> items = new ArrayList<>();
 }

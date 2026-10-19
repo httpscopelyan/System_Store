@@ -2,71 +2,16 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.*?>
 
-<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="br.com.scopel.pfv.beta.controller.InicioController"
-            stylesheets="@../css/styles.css"
-            styleClass="inicio-root"
-            prefWidth="1365" prefHeight="720">
+<StackPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="br.com.scopel.pfv.beta.controller.InicioController"
+           stylesheets="@../css/styles.css"
+           styleClass="center-area">
 
-    <!-- Barra superior de ícones -->
-    <top>
-        <ToolBar styleClass="top-bar">
-            <Button text="🛒  Vender" styleClass="tool-button" onAction="#onVender"/>
-            <Button text="💰  Caixa" styleClass="tool-button" onAction="#onCaixa"/>
-            <Button text="📦  Produtos" styleClass="tool-button" onAction="#onProdutos"/>
-        </ToolBar>
-    </top>
+    <VBox alignment="CENTER" spacing="10">
+        <Label text="Mercado Scopel" styleClass="brand-title"/>
+        <Label text="PDV — Ponto de Venda" styleClass="brand-subtitle"/>
+        <Label fx:id="caixaStatusLabel" text="" styleClass="caixa-status"/>
+    </VBox>
 
-    <!-- Menu lateral esquerdo -->
-    <left>
-        <VBox styleClass="side-menu" spacing="4">
-            <padding>
-                <Insets top="12" right="10" bottom="12" left="10"/>
-            </padding>
-
-            <Label text="Operação" styleClass="menu-group"/>
-            <Button text="Vender" styleClass="menu-item" maxWidth="Infinity" onAction="#onVender"/>
-            <Button text="Caixa" styleClass="menu-item" maxWidth="Infinity" onAction="#onCaixa"/>
-
-            <Label text="Cadastros" styleClass="menu-group"/>
-            <Button text="Produtos" styleClass="menu-item" maxWidth="Infinity" onAction="#onProdutos"/>
-
-            <!-- Grupo visível apenas para GERENTE -->
-            <VBox fx:id="usersGroup" spacing="4">
-                <Label text="Administração" styleClass="menu-group"/>
-                <Button text="Usuários" styleClass="menu-item" maxWidth="Infinity" disable="true"/>
-            </VBox>
-
-            <Label text="Relatórios" styleClass="menu-group"/>
-            <Button text="Relatórios" styleClass="menu-item" maxWidth="Infinity" disable="true"/>
-        </VBox>
-    </left>
-
-    <!-- Área central com a marca -->
-    <center>
-        <StackPane styleClass="center-area">
-            <VBox alignment="CENTER" spacing="10">
-                <Label text="Mercado Scopel" styleClass="brand-title"/>
-                <Label text="PDV — Ponto de Venda" styleClass="brand-subtitle"/>
-                <Label fx:id="caixaStatusLabel" text="" styleClass="caixa-status"/>
-            </VBox>
-        </StackPane>
-    </center>
-
-    <!-- Barra de status inferior -->
-    <bottom>
-        <HBox styleClass="status-bar" spacing="20" alignment="CENTER_LEFT">
-            <padding>
-                <Insets top="4" right="12" bottom="4" left="12"/>
-            </padding>
-            <Label fx:id="dateTimeLabel" text=""/>
-            <Label fx:id="userLabel" text="Usuário: -"/>
-            <Label fx:id="roleLabel" text="Grupo: -"/>
-            <Label text="Empresa: Mercado Scopel"/>
-            <Label fx:id="terminalLabel" text="Terminal: CAIXA 01"/>
-        </HBox>
-    </bottom>
-
-</BorderPane>
+</StackPane>

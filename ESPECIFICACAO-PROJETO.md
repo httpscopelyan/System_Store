@@ -101,8 +101,17 @@ O controller **nunca** acessa o repository direto.
 - Cada controller é um **bean Spring** (`@Component`). O FXML é carregado com
   `FXMLLoader` + `setControllerFactory(BetaApplication.springContext::getBean)`,
   para o Spring injetar as dependências no controller.
-- Navegação entre telas:
-  `Stage stage = (Stage) algumCampo.getScene().getWindow(); stage.setScene(novaCena);`
+- Navegação entre telas (**shell único persistente** — ADR 0012): o sistema roda
+  num único shell `main_layout.fxml` (`MainController`), um `BorderPane` com
+  ToolBar de ícones, menu lateral e barra de status **fixos**; só o **centro**
+  troca de página. O roteamento é central: `config/Navigator` (`@Component`) faz
+  `bind(BorderPane)` no `initialize()` do `MainController` e `navigate(Page)` troca
+  o `setCenter` carregando o FXML pela controller factory do Spring; o enum
+  `config/Page` lista os destinos (INICIO, VENDA, CAIXA, PRODUTOS, PAGAMENTO). Os
+  controllers de página chamam `navigator.navigate(...)` — **não** criam
+  `Scene`/`Stage` nem usam `stage.setScene(...)`. O **login fica fora do shell**: a
+  transição login→sistema usa `scene.setRoot(...)`. A janela nasce uma vez
+  (1365×720) e não redimensiona.
 - **`UserSession`** (`@Component` em `config/`) é um singleton que guarda o
   **operador logado** (`loggedUser`) e o **caixa atual** (`caixaAtual`).
 
@@ -385,11 +394,16 @@ Status por módulo:
   `UserSession` passou a guardar também a `vendaAtual`.
 - **Documentação** — ADRs registradas; `CLAUDE.md` + arquivos de contexto
   (`TASK.md`, `REVISION.md`, `FIXES.md`).
-- **Design (em andamento)** — mockup visual de **login** e **menu inicial**; a
-  próxima tela a ganhar o layout "de mercado" é a tela inicial (copiando a
-  disposição de um ERP de referência: barra de ícones + menu lateral + área
-  central + barra de status), por enquanto só com as funções existentes (Vender,
-  Caixa, Produtos; Usuários/Relatórios como placeholder).
+- **Design (em andamento)** — mockup visual de **login** e **menu inicial**.
+  **Shell único de janela** (2026-10-17): o sistema agora roda num shell
+  persistente (`main_layout.fxml` / `MainController`) com barra de ícones, menu
+  lateral e barra de status **fixos**; só o centro troca de página via
+  `Navigator`/`Page` (ver seção 4.3 e ADR 0012). Janela única de 1365×720, sem
+  redimensionar; login fora do shell. As 5 páginas (inicio/sale/caixa/pagamento/
+  create_product) perderam `prefWidth/prefHeight` e ganharam cabeçalho padronizado
+  `.page-header`. Rotas corrigidas: abrir caixa agora navega para **Venda** (antes
+  ia para Produtos) e o botão "Ir para Venda" saiu da tela de Produtos. Validação
+  visual ainda pendente (`mvn javafx:run`).
 
 **Fluxo operacional atual:** funciona de ponta a ponta — login → abrir caixa →
 venda → bipar → somar → finalizar → baixa de estoque.
@@ -458,8 +472,10 @@ venda → bipar → somar → finalizar → baixa de estoque.
 2. ~~Recuperar caixa aberto ao reabrir o app (resolver o bug conhecido).~~
    **Concluído** (2026-10-17): login recupera o caixa OPEN via
    `findOpenByOperator`. Falta validação manual da UI (ver seção 12).
-3. **Design** das telas (em andamento): tela inicial → venda → pagamento → login →
-   telas de gestão.
+3. **Design** das telas (em andamento): **shell único de janela** entregue
+   (2026-10-17) — `main_layout` + `Navigator`/`Page`, 5 páginas padronizadas sem
+   `prefSize`, cabeçalho `.page-header`, rotas corrigidas (ADR 0012). Falta a
+   validação visual (`mvn javafx:run`) e o refino de CSS "de mercado" das telas.
 4. Tela de **pagamento** (forma de pagamento + troco) — **feita para DINHEIRO**
    (2026-10-17): service `goToPayment`/`calculateChange`/`pay` testado + tela
    `pagamento.fxml`. Faltam CARTAO/PIX, pagamento múltiplo (RN18) e impressão
@@ -496,6 +512,22 @@ venda → bipar → somar → finalizar → baixa de estoque.
   garantir a RN09 (venda só finaliza com pagamento gravado). Evolui para **1:N**
   (pagamento múltiplo) no RN18 / F4 sem reescrever o modelo — a `Sale` passa a ter
   vários `Payment`. Troco só se aplica a DINHEIRO.
+- **0012 — Shell único persistente + Navigator central (navegação JavaFX):**
+  - **Contexto:** a navegação por `stage.setScene(...)` recriava a janela a cada
+    troca de tela, causando "salto" visual e redimensionamento; cada controller
+    montava `Scene`/`Stage` e os destinos ficavam espalhados (abrir caixa ia parar
+    em Produtos).
+  - **Decisão:** um **shell único** (`main_layout.fxml` / `MainController`), um
+    `BorderPane` com ToolBar, menu lateral e barra de status **fixos**; só o
+    **centro** troca. Roteamento central no `config/Navigator` (`bind(BorderPane)`
+    + `navigate(Page)` via `setCenter`) com o enum `config/Page` (INICIO, VENDA,
+    CAIXA, PRODUTOS, PAGAMENTO). O **login fica fora do shell** — a transição
+    login→sistema usa `scene.setRoot(...)`, não `stage.setScene`.
+  - **Consequências:** fim do redimensionamento (janela única 1365×720), destinos
+    centralizados (abrir caixa → Venda; botão "Ir para Venda" removido de
+    Produtos), páginas sem `prefWidth/prefHeight` e cabeçalho `.page-header`
+    padronizado. **Não** altera schema nem service — mudança só de UI. Validação
+    visual pendente (`mvn javafx:run`).
 
 ---
 
