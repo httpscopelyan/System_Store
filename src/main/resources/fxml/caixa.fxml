@@ -6,61 +6,126 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.scopel.pfv.beta.controller.CaixaController"
-            stylesheets="@../css/styles.css"
-            styleClass="inicio-root"
-            prefWidth="820.0" prefHeight="620.0">
+            stylesheets="@../css/styles.css" styleClass="win-root">
 
-    <!-- Cabeçalho azul-marinho -->
     <top>
-        <VBox styleClass="panel-header">
-            <Label text="Caixa — Mercado Scopel" styleClass="panel-header-title"/>
-            <Label text="Abertura, movimentação e fechamento" styleClass="panel-header-subtitle"/>
-        </VBox>
+        <HBox styleClass="win-titlebar" alignment="CENTER_LEFT">
+            <padding><Insets top="4" right="10" bottom="4" left="10"/></padding>
+            <Label text="Abertura / Fechamento do Caixa" styleClass="win-titlebar-text"/>
+        </HBox>
     </top>
 
+    <!-- Painel esquerdo: Status do Caixa (rolável; o botão Abrir nunca é cortado) -->
+    <left>
+        <ScrollPane fitToWidth="true" prefWidth="312" styleClass="group-box"
+                    hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <VBox spacing="8">
+                <padding><Insets top="10" right="12" bottom="12" left="12"/></padding>
+                <Label text="Status do Caixa" styleClass="group-title"/>
+
+                <Label text="Terminal Caixa" styleClass="win-label"/>
+                <ComboBox fx:id="terminalBox" maxWidth="Infinity"/>
+
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <TextField fx:id="openingAmountField" promptText="Fundo" styleClass="win-input" HBox.hgrow="ALWAYS"/>
+                    <Button text="🗄 Abrir (F4)" onAction="#onOpen" styleClass="win-button-primary"/>
+                </HBox>
+
+                <Label fx:id="statusBigLabel" text="FECHADO" styleClass="status-closed"/>
+
+                <Label text="Últimas Aberturas" styleClass="win-label"/>
+                <TableView fx:id="historyTable" prefHeight="170" styleClass="win-grid">
+                    <columns>
+                        <TableColumn fx:id="colHistDate" text="Data" prefWidth="150"/>
+                        <TableColumn fx:id="colHistBalance" text="Saldo Final" prefWidth="110"/>
+                    </columns>
+                </TableView>
+
+                <Label text="Dados da Abertura:" styleClass="win-label-bold"/>
+                <Label fx:id="openingInfoLabel" text="-" styleClass="win-label" wrapText="true"/>
+                <Label text="Dados do Fechamento:" styleClass="win-label-bold"/>
+                <Label fx:id="closingInfoLabel" text="-" styleClass="win-label" wrapText="true"/>
+            </VBox>
+        </ScrollPane>
+    </left>
+
+    <!-- Centro: Movimentação -->
     <center>
-        <VBox spacing="18">
-            <padding>
-                <Insets top="22" right="28" bottom="22" left="28"/>
-            </padding>
+        <VBox spacing="6" styleClass="group-box">
+            <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+            <HBox alignment="CENTER_LEFT">
+                <Label fx:id="periodLabel" text="Movimentação do Caixa" styleClass="group-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="F5 - Atualizar" styleClass="win-label-bold"/>
+            </HBox>
 
-            <!-- Abertura -->
-            <VBox styleClass="form-card" spacing="10" maxWidth="Infinity">
-                <Label text="Abertura" styleClass="form-section-title"/>
-                <Label text="Fundo de troco" styleClass="form-label"/>
-                <HBox spacing="12" alignment="CENTER_LEFT">
-                    <TextField fx:id="openingAmountField" promptText="Ex: 100.00"
-                               styleClass="text-input" prefWidth="220"/>
-                    <Button text="Abrir Caixa" onAction="#onOpen" styleClass="primary-button"/>
-                </HBox>
-            </VBox>
+            <TableView fx:id="movTable" VBox.vgrow="ALWAYS" styleClass="win-grid">
+                <columns>
+                    <TableColumn fx:id="colMovDate" text="Data/Hora" prefWidth="140"/>
+                    <TableColumn fx:id="colMovOp" text="Op." prefWidth="40"/>
+                    <TableColumn fx:id="colMovDinheiro" text="Dinheiro" prefWidth="95"/>
+                    <TableColumn fx:id="colMovCheque" text="Cheque" prefWidth="85"/>
+                    <TableColumn fx:id="colMovCredito" text="Cartão Crédito" prefWidth="110"/>
+                    <TableColumn fx:id="colMovDebito" text="Cartão Débito" prefWidth="105"/>
+                    <TableColumn fx:id="colMovTotal" text="Total" prefWidth="95"/>
+                    <TableColumn fx:id="colMovVenda" text="Venda" prefWidth="70"/>
+                    <TableColumn fx:id="colMovHist" text="Histórico" prefWidth="150"/>
+                </columns>
+            </TableView>
 
-            <!-- Movimentação (sangria / suprimento) -->
-            <VBox styleClass="form-card" spacing="10" maxWidth="Infinity">
-                <Label text="Movimentação" styleClass="form-section-title"/>
-                <Label text="Valor da movimentação" styleClass="form-label"/>
-                <HBox spacing="12" alignment="CENTER_LEFT">
-                    <TextField fx:id="movementAmountField" promptText="Ex: 50.00"
-                               styleClass="text-input" prefWidth="220"/>
-                    <Button text="Suprimento" onAction="#onSupplement" styleClass="primary-button"/>
-                    <Button text="Sangria" onAction="#onWithdrawal" styleClass="secondary-button"/>
-                </HBox>
-            </VBox>
-
-            <!-- Fechamento -->
-            <VBox styleClass="form-card" spacing="10" maxWidth="Infinity">
-                <Label text="Fechamento" styleClass="form-section-title"/>
-                <Label text="Valor contado" styleClass="form-label"/>
-                <HBox spacing="12" alignment="CENTER_LEFT">
-                    <TextField fx:id="countedAmountField" promptText="Ex: 120.00"
-                               styleClass="text-input" prefWidth="220"/>
-                    <Button text="Fechar Caixa" onAction="#onClose" styleClass="danger-button"/>
-                </HBox>
-            </VBox>
-
-            <!-- Status -->
-            <Label fx:id="statusLabel" text="" styleClass="form-message" wrapText="true"/>
+            <HBox spacing="18" alignment="CENTER_LEFT">
+                <Label text="● Crédito" styleClass="legend-credito"/>
+                <Label text="● Débito" styleClass="legend-debito"/>
+            </HBox>
         </VBox>
     </center>
+
+    <!-- Painel direito: Resumo do Caixa -->
+    <right>
+        <VBox styleClass="group-box" spacing="6" prefWidth="270">
+            <padding><Insets top="10" right="12" bottom="12" left="12"/></padding>
+            <Label text="Resumo do Caixa" styleClass="group-title"/>
+
+            <Label text="Saldo Inicial" styleClass="win-label-bold"/>
+            <TextField fx:id="resSaldoInicial" text="R$ 0,00" editable="false" styleClass="money-field"/>
+
+            <Label text="(+) Totais das Entradas" styleClass="section-plus"/>
+            <Label text="Dinheiro" styleClass="win-label"/>
+            <TextField fx:id="resEntDinheiro" text="R$ 0,00" editable="false" styleClass="money-field"/>
+            <Label text="Cheque" styleClass="win-label"/>
+            <TextField fx:id="resEntCheque" text="R$ 0,00" editable="false" styleClass="money-field"/>
+            <Label text="Cartão de Crédito" styleClass="win-label"/>
+            <TextField fx:id="resEntCredito" text="R$ 0,00" editable="false" styleClass="money-field"/>
+            <Label text="Cartão de Débito" styleClass="win-label"/>
+            <TextField fx:id="resEntDebito" text="R$ 0,00" editable="false" styleClass="money-field"/>
+            <Label text="Total (Entradas):" styleClass="win-label-bold"/>
+            <TextField fx:id="resEntTotal" text="R$ 0,00" editable="false" styleClass="money-field"/>
+
+            <Label text="(-) Totais das Saídas" styleClass="section-minus"/>
+            <Label text="Dinheiro" styleClass="win-label"/>
+            <TextField fx:id="resSaiDinheiro" text="R$ 0,00" editable="false" styleClass="money-field"/>
+            <Label text="Total (Saídas):" styleClass="win-label-bold"/>
+            <TextField fx:id="resSaiTotal" text="R$ 0,00" editable="false" styleClass="money-field"/>
+
+            <Label text="(=) Saldo Caixa (Em Dinheiro)" styleClass="section-equals"/>
+            <Label text="Saldo Final:" styleClass="win-label-bold"/>
+            <TextField fx:id="resSaldoFinal" text="R$ 0,00" editable="false" styleClass="money-field"/>
+        </VBox>
+    </right>
+
+    <!-- Rodapé: ações — FlowPane quebra para a próxima linha, nada fica oculto -->
+    <bottom>
+        <FlowPane styleClass="win-footer" hgap="8" vgap="8" alignment="CENTER_LEFT" prefWrapLength="900">
+            <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
+            <TextField fx:id="movementAmountField" promptText="Valor" styleClass="win-input" prefWidth="90"/>
+            <Button text="💲 Suprimento" onAction="#onSupplement" styleClass="win-button"/>
+            <Button text="💲 Sangria (F9)" onAction="#onWithdrawal" styleClass="win-button"/>
+            <TextField fx:id="countedAmountField" promptText="Contado" styleClass="win-input" prefWidth="90"/>
+            <Button text="🔒 Fechar Caixa" onAction="#onClose" styleClass="win-button"/>
+            <Button text="🖨 Imprimir Movimentação (F7)" onAction="#onPrintMovimentacao" styleClass="win-button"/>
+            <Button text="🖨 Imprimir Fechamento (F8)" onAction="#onPrintFechamento" styleClass="win-button"/>
+            <Button text="🔄 Atualizar (F5)" onAction="#onRefresh" styleClass="win-button"/>
+        </FlowPane>
+    </bottom>
 
 </BorderPane>

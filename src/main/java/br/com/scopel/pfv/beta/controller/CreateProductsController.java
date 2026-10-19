@@ -1,17 +1,13 @@
 package br.com.scopel.pfv.beta.controller;
 
-import br.com.scopel.pfv.beta.BetaApplication;
 import br.com.scopel.pfv.beta.exception.RegisterProductDuplicateException;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.service.ProductService;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 
 @Component
@@ -41,6 +37,8 @@ public class CreateProductsController {
     @FXML
     public void initialize() {
         unitBox.getItems().addAll(Product.Unidade.values());
+        // Foco no campo de código ao abrir a tela (digitação/teclado pronto).
+        Platform.runLater(() -> codeField.requestFocus());
     }
 
     @FXML
@@ -78,23 +76,5 @@ public class CreateProductsController {
         } catch (Exception e) {
             messageLabel.setText("Verifique os campos e tente novamente");
         }
-    }
-
-    @FXML
-    public void onVenda() {
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/sale.fxml"));
-            loader.setControllerFactory(BetaApplication.springContext::getBean);
-            Scene scene = new Scene(loader.load());
-            Stage stage = (Stage) priceField.getScene().getWindow();
-            stage.setScene(scene);
-        }
-        catch (RuntimeException | IOException e) {
-            throw new RuntimeException();
-
-        }
-
-
     }
 }

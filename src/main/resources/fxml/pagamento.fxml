@@ -7,14 +7,13 @@
 <BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.scopel.pfv.beta.controller.PaymentController"
             stylesheets="@../css/styles.css"
-            styleClass="sale-root"
-            prefWidth="1200.0" prefHeight="720.0">
+            styleClass="sale-root">
 
     <!-- Cabeçalho azul-marinho -->
     <top>
-        <VBox styleClass="sale-header">
-            <Label text="Finalizar Venda — Mercado Scopel" styleClass="sale-header-title"/>
-            <Label text="Pagamento" styleClass="sale-header-subtitle"/>
+        <VBox styleClass="page-header">
+            <Label text="Finalizar Venda — Mercado Scopel" styleClass="page-header-title"/>
+            <Label text="Pagamento" styleClass="page-header-subtitle"/>
         </VBox>
     </top>
 
@@ -42,6 +41,33 @@
 
             <Button text="Confirmar pagamento (Enter)" onAction="#onConfirm"
                     styleClass="finalize-button" maxWidth="Infinity"/>
+
+            <!-- Pagamento dividido (RN18) -->
+            <VBox styleClass="form-card" spacing="8" maxWidth="Infinity">
+                <Label text="Pagamento dividido (2ª forma)" styleClass="form-section-title"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <ComboBox fx:id="methodBox2"/>
+                    <TextField fx:id="amount2Field" promptText="Valor da 2ª forma"/>
+                    <Button text="Pagar dividido" onAction="#onPayMixed"/>
+                </HBox>
+            </VBox>
+
+            <!-- PIX (F12) -->
+            <VBox styleClass="form-card" spacing="8" maxWidth="Infinity">
+                <Label text="PIX — Copia e Cola" styleClass="form-section-title"/>
+                <Button text="Gerar QR PIX (F12)" onAction="#onGeneratePix"/>
+                <TextArea fx:id="pixArea" editable="false" prefHeight="80" wrapText="true"/>
+            </VBox>
+
+            <!-- Crediário / a prazo -->
+            <VBox styleClass="form-card" spacing="8" maxWidth="Infinity">
+                <Label text="Venda a prazo (crediário)" styleClass="form-section-title"/>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="installmentsField" promptText="Nº parcelas"/>
+                    <DatePicker fx:id="firstDueField"/>
+                    <Button text="Fechar a prazo" onAction="#onCredit"/>
+                </HBox>
+            </VBox>
         </VBox>
     </center>
 

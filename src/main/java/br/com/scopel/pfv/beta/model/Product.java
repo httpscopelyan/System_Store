@@ -26,6 +26,12 @@ public class Product {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 2)
     private Unidade unit;
+    @Column(name = "cost_price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal costPrice = BigDecimal.ZERO;
+    @Column(name = "min_stock", nullable = false, precision = 10, scale = 3)
+    private BigDecimal minStock = BigDecimal.ZERO;
+    @Column(length = 50)
+    private String category;
     @Column(nullable = false)
     private Boolean active = true;
 
@@ -56,6 +62,18 @@ public class Product {
 
     public Boolean getActive() {
         return active;
+    }
+
+    public BigDecimal getCostPrice() {
+        return costPrice;
+    }
+
+    public BigDecimal getMinStock() {
+        return minStock;
+    }
+
+    public String getCategory() {
+        return category;
     }
 
 
@@ -89,4 +107,16 @@ public class Product {
     public void setId(Long id) {
         this.id = id;
     }// n usado
+
+    public void setCostPrice(BigDecimal costPrice) {
+        this.costPrice = costPrice;
+    }
+
+    public void setMinStock(BigDecimal minStock) {
+        this.minStock = minStock;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
 }

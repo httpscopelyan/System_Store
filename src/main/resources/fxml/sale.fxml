@@ -7,14 +7,13 @@
 <BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.scopel.pfv.beta.controller.SaleController"
             stylesheets="@../css/styles.css"
-            styleClass="sale-root"
-            prefWidth="1200.0" prefHeight="720.0">
+            styleClass="sale-root">
 
     <!-- Cabeçalho azul-marinho -->
     <top>
-        <VBox styleClass="sale-header">
-            <Label text="Venda — Mercado Scopel" styleClass="sale-header-title"/>
-            <Label text="Ponto de Venda" styleClass="sale-header-subtitle"/>
+        <VBox styleClass="page-header">
+            <Label text="Venda — Mercado Scopel" styleClass="page-header-title"/>
+            <Label text="Ponto de Venda" styleClass="page-header-subtitle"/>
         </VBox>
     </top>
 
@@ -46,6 +45,20 @@
             </TableView>
 
             <Label fx:id="statusLabel" styleClass="sale-status"/>
+
+            <!-- Venda+ : desconto, cliente, cancelamentos -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="discountField" promptText="Desconto R$ (F5)"/>
+                <Button text="Aplicar desconto" onAction="#onApplyDiscount"/>
+                <TextField fx:id="customerIdField" promptText="Cliente ID (F9)"/>
+                <Button text="Vincular cliente" onAction="#onSetCustomer"/>
+            </HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="cancelItemCodeField" promptText="Código p/ cancelar item (F6)"/>
+                <Button text="Cancelar item" onAction="#onCancelItem"/>
+                <TextField fx:id="cancelReasonField" promptText="Motivo do cancelamento (F7)"/>
+                <Button text="Cancelar venda" onAction="#onCancelSale"/>
+            </HBox>
         </VBox>
     </center>
 

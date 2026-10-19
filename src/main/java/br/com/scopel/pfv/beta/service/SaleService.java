@@ -1,8 +1,12 @@
 package br.com.scopel.pfv.beta.service;
 
+import br.com.scopel.pfv.beta.exception.ChangeNotAvailableException;
 import br.com.scopel.pfv.beta.exception.IllegalSaleStateException;
 import br.com.scopel.pfv.beta.exception.InsufficientPaymentException;
+import br.com.scopel.pfv.beta.exception.InvalidDiscountException;
+import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.PaymentMethodNotAvailableException;
+import br.com.scopel.pfv.beta.exception.SaleItemNotFoundException;
 import br.com.scopel.pfv.beta.model.*;
 import br.com.scopel.pfv.beta.repository.PaymentRepository;
 import br.com.scopel.pfv.beta.repository.ProductRepository;
@@ -13,20 +17,27 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class SaleService {
+
+    private static final BigDecimal HUNDRED = new BigDecimal("100");
 
     private final SaleRepository saleRepository;
     private final ProductRepository productRepository;
     private final ProductService productService;
     private final PaymentRepository paymentRepository;
+    private final AppSettingService appSettingService;
 
-    public SaleService(SaleRepository saleRepository, ProductService productService, ProductRepository productRepository, PaymentRepository paymentRepository) {
+    public SaleService(SaleRepository saleRepository, ProductService productService,
+                       ProductRepository productRepository, PaymentRepository paymentRepository,
+                       AppSettingService appSettingService) {
         this.saleRepository = saleRepository;
         this.productRepository = productRepository;
         this.productService = productService;
         this.paymentRepository = paymentRepository;
+        this.appSettingService = appSettingService;
     }
 
     public Sale openSale(User operator, CashRegister cashRegister) {
@@ -34,6 +45,8 @@ public class SaleService {
         sale.setOperator(operator);
         sale.setCashRegister(cashRegister);
         sale.setCreatedAt(LocalDateTime.now());
+        sale.setDiscount(BigDecimal.ZERO);
+        sale.setSurcharge(BigDecimal.ZERO);
         sale.setTotal(BigDecimal.ZERO);
         sale.setStatus(Sale.Status.ABERTA);
         return saleRepository.save(sale);
@@ -46,31 +59,125 @@ public class SaleService {
 
         Product product = productService.findCode(productCode);
 
-        SaleItem existing = null;
-        for (SaleItem item : sale.getItems()) {
-            if (item.getProduct().getId().equals(product.getId())) {
-                existing = item;
-                break;
-            }
-        }
+        SaleItem existing = findItem(sale, product.getId());
 
         if (existing != null) {
-
             existing.setQuantity(existing.getQuantity().add(quantity));
-            existing.setTotalPrice(existing.getUnitPrice().multiply(existing.getQuantity()).setScale(2, RoundingMode.HALF_UP));
-
+            existing.setTotalPrice(lineTotal(existing));
         } else {
             SaleItem item = new SaleItem();
             item.setSale(sale);
             item.setProduct(product);
             item.setQuantity(quantity);
             item.setUnitPrice(product.getPrice());
-            item.setTotalPrice(product.getPrice().multiply(quantity).setScale(2, RoundingMode.HALF_UP));
+            item.setDiscount(BigDecimal.ZERO);
+            item.setTotalPrice(lineTotal(item));
             sale.getItems().add(item);
         }
 
         sale.setTotal(calculateTotal(sale));
         return saleRepository.save(sale);
+    }
+
+    /** Vincula um cliente à venda (tele-entrega / venda a prazo). */
+    public Sale setCustomer(Sale sale, Customer customer) {
+        requireNotClosed(sale);
+        sale.setCustomer(customer);
+        return saleRepository.save(sale);
+    }
+
+    /** Desconto em um item (RF19). Acima do limite percentual exige gerente (RN08). */
+    public Sale applyItemDiscount(Sale sale, String productCode, BigDecimal discount, User authorizedBy) {
+        if (sale.getStatus() != Sale.Status.ABERTA) {
+            throw new IllegalSaleStateException();
+        }
+        requirePositive(discount, "não pode ser negativo");
+
+        Product product = productService.findCode(productCode);
+        SaleItem item = findItem(sale, product.getId());
+        if (item == null) {
+            throw new SaleItemNotFoundException(productCode);
+        }
+
+        BigDecimal gross = item.getUnitPrice().multiply(item.getQuantity()).setScale(2, RoundingMode.HALF_UP);
+        if (discount.compareTo(gross) > 0) {
+            throw new InvalidDiscountException("maior que o valor do item");
+        }
+        if (percent(discount, gross).compareTo(discountLimitPercent()) > 0) {
+            requireManager(authorizedBy);
+            sale.setAuthorizedBy(authorizedBy);
+        }
+
+        item.setDiscount(discount.setScale(2, RoundingMode.HALF_UP));
+        item.setTotalPrice(lineTotal(item));
+        sale.setTotal(calculateTotal(sale));
+        return saleRepository.save(sale);
+    }
+
+    /** Desconto no total da venda (RF20). Acima do limite percentual exige gerente (RN08). */
+    public Sale applySaleDiscount(Sale sale, BigDecimal discount, User authorizedBy) {
+        if (sale.getStatus() != Sale.Status.ABERTA && sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
+            throw new IllegalSaleStateException();
+        }
+        requirePositive(discount, "não pode ser negativo");
+
+        BigDecimal subtotal = subtotal(sale);
+        if (discount.compareTo(subtotal) > 0) {
+            throw new InvalidDiscountException("maior que o subtotal da venda");
+        }
+        if (percent(discount, subtotal).compareTo(discountLimitPercent()) > 0) {
+            requireManager(authorizedBy);
+            sale.setAuthorizedBy(authorizedBy);
+        }
+
+        sale.setDiscount(discount.setScale(2, RoundingMode.HALF_UP));
+        sale.setTotal(calculateTotal(sale));
+        return saleRepository.save(sale);
+    }
+
+    /** Acréscimo no total da venda (RF19 — acréscimo). */
+    public Sale applySurcharge(Sale sale, BigDecimal surcharge) {
+        if (sale.getStatus() != Sale.Status.ABERTA && sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
+            throw new IllegalSaleStateException();
+        }
+        requirePositive(surcharge, "acréscimo não pode ser negativo");
+
+        sale.setSurcharge(surcharge.setScale(2, RoundingMode.HALF_UP));
+        sale.setTotal(calculateTotal(sale));
+        return saleRepository.save(sale);
+    }
+
+    /** Remove um item da venda (RF18) — exige autorização de gerente. */
+    public Sale cancelItem(Sale sale, String productCode, User authorizedBy) {
+        if (sale.getStatus() != Sale.Status.ABERTA) {
+            throw new IllegalSaleStateException();
+        }
+        requireManager(authorizedBy);
+
+        Product product = productService.findCode(productCode);
+        SaleItem item = findItem(sale, product.getId());
+        if (item == null) {
+            throw new SaleItemNotFoundException(productCode);
+        }
+
+        sale.getItems().remove(item);          // orphanRemoval apaga o item
+        sale.setAuthorizedBy(authorizedBy);
+        sale.setTotal(calculateTotal(sale));
+        return saleRepository.save(sale);
+    }
+
+    /** Cancela a venda (RF21) — exige gerente e mantém o registro (RN17). */
+    public Sale cancelSale(Sale sale, String reason, User authorizedBy) {
+        if (sale.getStatus() == Sale.Status.FINALIZADA || sale.getStatus() == Sale.Status.CANCELADA) {
+            throw new IllegalSaleStateException();
+        }
+        requireManager(authorizedBy);
+
+        sale.setStatus(Sale.Status.CANCELADA);
+        sale.setCancelReason(reason);
+        sale.setCanceledAt(LocalDateTime.now());
+        sale.setAuthorizedBy(authorizedBy);
+        return saleRepository.save(sale);     // RN17: registro preservado
     }
 
     private Sale finalizeSale(Sale sale) {
@@ -120,6 +227,85 @@ public class SaleService {
         return finalizeSale(sale);
     }
 
+    /**
+     * Pagamento múltiplo / dividido (RN18): soma das formas ≥ total; só o
+     * dinheiro gera troco, e o troco não pode exceder o dinheiro recebido.
+     * Diferente de {@link #pay}, aceita CARTAO/PIX como recebidos (confirmação
+     * manual; a integração com maquininha/PSP é fase posterior).
+     */
+    @Transactional
+    public Sale payMixed(Sale sale, List<PaymentInput> inputs) {
+        if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
+            throw new IllegalSaleStateException();
+        }
+        if (inputs == null || inputs.isEmpty()) {
+            throw new InsufficientPaymentException();
+        }
+
+        BigDecimal sum = BigDecimal.ZERO;
+        BigDecimal cash = BigDecimal.ZERO;
+        for (PaymentInput in : inputs) {
+            if (in.method() == null || in.amount() == null
+                    || in.amount().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new InvalidDiscountException("valor de pagamento inválido");
+            }
+            BigDecimal amount = in.amount().setScale(2, RoundingMode.HALF_UP);
+            sum = sum.add(amount);
+            if (in.method() == PaymentMethod.DINHEIRO) {
+                cash = cash.add(amount);
+            }
+        }
+
+        if (sum.compareTo(sale.getTotal()) < 0) {
+            throw new InsufficientPaymentException();
+        }
+        BigDecimal change = sum.subtract(sale.getTotal()).setScale(2, RoundingMode.HALF_UP);
+        if (change.compareTo(BigDecimal.ZERO) > 0 && cash.compareTo(change) < 0) {
+            throw new ChangeNotAvailableException();
+        }
+
+        boolean changeAssigned = false;
+        for (PaymentInput in : inputs) {
+            Payment payment = new Payment();
+            payment.setSale(sale);
+            payment.setMethod(in.method());
+            payment.setAmountReceived(in.amount().setScale(2, RoundingMode.HALF_UP));
+
+            BigDecimal thisChange = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+            if (!changeAssigned && in.method() == PaymentMethod.DINHEIRO
+                    && change.compareTo(BigDecimal.ZERO) > 0) {
+                thisChange = change;
+                changeAssigned = true;
+            }
+            payment.setChange(thisChange);
+            payment.setCreatedAt(LocalDateTime.now());
+            paymentRepository.save(payment);
+        }
+
+        return finalizeSale(sale);
+    }
+
+    /**
+     * Fecha a venda a prazo / crediário: registra o tender PRAZO e finaliza
+     * (baixa estoque). Os títulos a receber são gerados pelo ReceivableService,
+     * orquestrado por CreditSaleService — por isso este método não valida limite.
+     */
+    @Transactional
+    public Sale finalizeOnCredit(Sale sale) {
+        if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
+            throw new IllegalSaleStateException();
+        }
+        Payment payment = new Payment();
+        payment.setSale(sale);
+        payment.setMethod(PaymentMethod.PRAZO);
+        payment.setAmountReceived(sale.getTotal());
+        payment.setChange(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+        payment.setCreatedAt(LocalDateTime.now());
+        paymentRepository.save(payment);
+
+        return finalizeSale(sale);
+    }
+
     private void decreaseStock(Sale sale) {
         for (SaleItem item : sale.getItems()) {
             Product product = item.getProduct();
@@ -129,10 +315,72 @@ public class SaleService {
     }
 
     private BigDecimal calculateTotal(Sale sale) {
-        BigDecimal total = BigDecimal.ZERO;
-        for (SaleItem item : sale.getItems()) {
-            total = total.add(item.getTotalPrice());
+        BigDecimal total = subtotal(sale)
+                .subtract(nz(sale.getDiscount()))
+                .add(nz(sale.getSurcharge()));
+        if (total.compareTo(BigDecimal.ZERO) < 0) {
+            total = BigDecimal.ZERO;               // RN04: total nunca negativo
         }
         return total.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal subtotal(Sale sale) {
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (SaleItem item : sale.getItems()) {
+            subtotal = subtotal.add(item.getTotalPrice());
+        }
+        return subtotal.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal lineTotal(SaleItem item) {
+        BigDecimal gross = item.getUnitPrice().multiply(item.getQuantity());
+        BigDecimal net = gross.subtract(nz(item.getDiscount()));
+        if (net.compareTo(BigDecimal.ZERO) < 0) {
+            net = BigDecimal.ZERO;
+        }
+        return net.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private SaleItem findItem(Sale sale, Long productId) {
+        for (SaleItem item : sale.getItems()) {
+            if (item.getProduct().getId().equals(productId)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    private void requireManager(User authorizedBy) {
+        if (authorizedBy == null || authorizedBy.getRole() != User.Role.GERENTE) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+    }
+
+    private void requireNotClosed(Sale sale) {
+        if (sale.getStatus() == Sale.Status.FINALIZADA || sale.getStatus() == Sale.Status.CANCELADA) {
+            throw new IllegalSaleStateException();
+        }
+    }
+
+    private void requirePositive(BigDecimal value, String detail) {
+        if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidDiscountException(detail);
+        }
+    }
+
+    private BigDecimal discountLimitPercent() {
+        return appSettingService.getBigDecimal(
+                AppSettingService.SALE_DISCOUNT_LIMIT_PERCENT, new BigDecimal("10"));
+    }
+
+    private BigDecimal percent(BigDecimal part, BigDecimal whole) {
+        if (whole.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+        return part.multiply(HUNDRED).divide(whole, 2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal nz(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
     }
 }
