@@ -18,6 +18,9 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
     // Movimentação do caixa: vendas do caixa, mais antigas primeiro.
     List<Sale> findByCashRegister_IdOrderByCreatedAtAsc(Long cashRegisterId);
 
+    // Histórico de vendas: por status, mais recentes primeiro.
+    List<Sale> findByStatusOrderByCreatedAtDesc(Sale.Status status);
+
     // --- Relatórios ---
 
     @Query("""

@@ -4,97 +4,56 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.scopel.pfv.beta.controller.PaymentController"
             stylesheets="@../css/styles.css"
-            styleClass="sale-root">
+            styleClass="sale-root"
+            onKeyPressed="#onKey">
 
-    <!-- Cabeçalho azul-marinho -->
     <top>
         <VBox styleClass="page-header">
-            <Label text="Finalizar Venda — Mercado Scopel" styleClass="page-header-title"/>
-            <Label text="Pagamento" styleClass="page-header-subtitle"/>
+            <Label text="Pagamento — Mercado Scopel" styleClass="page-header-title"/>
+            <Label text="Escolha a forma de pagamento" styleClass="page-header-subtitle"/>
         </VBox>
     </top>
 
-    <!-- Área central: forma de pagamento + valor recebido -->
     <center>
-        <VBox spacing="18" alignment="TOP_LEFT">
-            <padding>
-                <Insets top="24" right="28" bottom="24" left="28"/>
-            </padding>
+        <!-- Rola em telas baixas (1366x768) sem roubar o foco do teclado 1/2/3. -->
+        <ScrollPane fitToWidth="true" focusTraversable="false">
+            <VBox spacing="18" alignment="TOP_CENTER">
+                <padding>
+                    <Insets top="24" right="40" bottom="24" left="40"/>
+                </padding>
 
-            <!-- Forma de pagamento -->
-            <VBox spacing="6">
-                <Label text="Forma de pagamento" styleClass="code-label"/>
-                <ComboBox fx:id="methodBox" styleClass="code-field" maxWidth="Infinity"/>
+                <!-- TOTAL grande -->
+                <VBox styleClass="total-panel" spacing="4" maxWidth="Infinity">
+                    <Label text="TOTAL A PAGAR" styleClass="total-caption"/>
+                    <Label fx:id="totalLabel" text="R$ 0,00" styleClass="total-value"/>
+                </VBox>
+
+                <!-- Formas de pagamento -->
+                <Button fx:id="dinheiroOption" text="1  —  DINHEIRO" onAction="#onDinheiro"
+                        styleClass="pay-option" maxWidth="Infinity"/>
+                <Button text="2  —  CARTÃO" onAction="#onCartao"
+                        styleClass="pay-option" maxWidth="Infinity"/>
+                <Button text="3  —  PIX" onAction="#onPix"
+                        styleClass="pay-option" maxWidth="Infinity"/>
+
+                <Label fx:id="statusLabel" styleClass="sale-status"/>
             </VBox>
-
-            <!-- Valor recebido -->
-            <VBox spacing="6">
-                <Label text="Valor recebido" styleClass="code-label"/>
-                <TextField fx:id="amountReceivedField" promptText="0,00"
-                           onAction="#onConfirm" styleClass="code-field"/>
-            </VBox>
-
-            <Label fx:id="statusLabel" styleClass="sale-status"/>
-
-            <Button text="Confirmar pagamento (Enter)" onAction="#onConfirm"
-                    styleClass="finalize-button" maxWidth="Infinity"/>
-
-            <!-- Pagamento dividido (RN18) -->
-            <VBox styleClass="form-card" spacing="8" maxWidth="Infinity">
-                <Label text="Pagamento dividido (2ª forma)" styleClass="form-section-title"/>
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <ComboBox fx:id="methodBox2"/>
-                    <TextField fx:id="amount2Field" promptText="Valor da 2ª forma"/>
-                    <Button text="Pagar dividido" onAction="#onPayMixed"/>
-                </HBox>
-            </VBox>
-
-            <!-- PIX (F12) -->
-            <VBox styleClass="form-card" spacing="8" maxWidth="Infinity">
-                <Label text="PIX — Copia e Cola" styleClass="form-section-title"/>
-                <Button text="Gerar QR PIX (F12)" onAction="#onGeneratePix"/>
-                <TextArea fx:id="pixArea" editable="false" prefHeight="80" wrapText="true"/>
-            </VBox>
-
-            <!-- Crediário / a prazo -->
-            <VBox styleClass="form-card" spacing="8" maxWidth="Infinity">
-                <Label text="Venda a prazo (crediário)" styleClass="form-section-title"/>
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <TextField fx:id="installmentsField" promptText="Nº parcelas"/>
-                    <DatePicker fx:id="firstDueField"/>
-                    <Button text="Fechar a prazo" onAction="#onCredit"/>
-                </HBox>
-            </VBox>
-        </VBox>
+        </ScrollPane>
     </center>
 
-    <!-- Painel lateral: TOTAL e TROCO enormes (RNF04) -->
-    <right>
-        <VBox spacing="20" alignment="TOP_CENTER" prefWidth="420.0">
-            <padding>
-                <Insets top="24" right="28" bottom="24" left="0"/>
-            </padding>
-
-            <VBox styleClass="total-panel" spacing="4" maxWidth="Infinity">
-                <Label text="TOTAL" styleClass="total-caption"/>
-                <Label fx:id="totalLabel" text="R$ 0,00" styleClass="total-value"/>
-            </VBox>
-
-            <VBox styleClass="total-panel" spacing="4" maxWidth="Infinity">
-                <Label text="TROCO" styleClass="total-caption"/>
-                <Label fx:id="changeLabel" text="R$ 0,00" styleClass="total-value"/>
-            </VBox>
-        </VBox>
-    </right>
-
-    <!-- Rodapé só-visual com dicas de teclado -->
     <bottom>
         <HBox styleClass="sale-footer" spacing="8" alignment="CENTER_LEFT">
-            <Label text="Enter" styleClass="key-hint"/>
-            <Label text="Confirmar pagamento"/>
+            <Label text="1" styleClass="key-hint"/>
+            <Label text="Dinheiro"/>
+            <Label text="2" styleClass="key-hint"/>
+            <Label text="Cartão"/>
+            <Label text="3" styleClass="key-hint"/>
+            <Label text="PIX"/>
+            <Label text="   ESC" styleClass="key-hint"/>
+            <Label text="Voltar à venda"/>
         </HBox>
     </bottom>
 

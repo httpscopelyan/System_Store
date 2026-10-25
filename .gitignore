@@ -1,5 +1,10 @@
 HELP.md
 target/
+
+### Segredos (regra 8 / RNF08) — nunca commitar ###
+.env
+*.env
+!.env.example
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

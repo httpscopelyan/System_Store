@@ -6,6 +6,7 @@ import br.com.scopel.pfv.beta.exception.CashRegisterAlreadyOpenException;
 import br.com.scopel.pfv.beta.exception.InsufficientCashException;
 import br.com.scopel.pfv.beta.model.*;
 import br.com.scopel.pfv.beta.service.CashRegisterService;
+import br.com.scopel.pfv.beta.service.ReceiptService;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -33,8 +34,11 @@ public class CaixaController {
     private final CashRegisterService cashRegisterService;
     private final UserSession userSession;
     private final Navigator navigator;
+    private final ReceiptService receiptService;
 
     private CashRegister caixaAtual;
+    // Caixa exibido na tela (aberto atual ou o último do histórico): alvo da impressão.
+    private CashRegister displayed;
     private Timeline autoRefresh;
 
     public record MovRow(LocalDateTime at, String dataHora, boolean entrada,
@@ -77,10 +81,12 @@ public class CaixaController {
     @FXML private TextField countedAmountField;
     @FXML private Label statusLabel;
 
-    public CaixaController(CashRegisterService cashRegisterService, UserSession userSession, Navigator navigator) {
+    public CaixaController(CashRegisterService cashRegisterService, UserSession userSession, Navigator navigator,
+                           ReceiptService receiptService) {
         this.cashRegisterService = cashRegisterService;
         this.userSession = userSession;
         this.navigator = navigator;
+        this.receiptService = receiptService;
     }
 
     @FXML
@@ -151,6 +157,7 @@ public class CaixaController {
 
         CashRegister display = caixaAtual != null ? caixaAtual
                 : (history.isEmpty() ? null : history.get(0));
+        this.displayed = display;
 
         if (display == null) {
             statusBigLabel.setText("FECHADO");
@@ -176,34 +183,42 @@ public class CaixaController {
     }
 
     private void buildMovimentacaoAndResumo(CashRegister display) {
-        // Pagamentos por venda, somados por forma.
-        Map<Long, BigDecimal[]> byMethod = new HashMap<>();   // [dinheiro, cartao]
-        for (Payment p : cashRegisterService.payments(display)) {
-            Long sid = p.getSale().getId();
-            BigDecimal net = nz(p.getAmountReceived()).subtract(nz(p.getChange()));
-            BigDecimal[] arr = byMethod.computeIfAbsent(sid, k -> new BigDecimal[]{BigDecimal.ZERO, BigDecimal.ZERO});
-            if (p.getMethod() == PaymentMethod.DINHEIRO) {
-                arr[0] = arr[0].add(net);
-            } else if (p.getMethod() == PaymentMethod.CARTAO) {
-                arr[1] = arr[1].add(net);
+        // Pagamentos por venda, somados por forma de recebimento (dinheiro/crédito/débito).
+        Map<Long, SaleReceiptTotals> totalsBySale = new HashMap<>();
+        for (Payment payment : cashRegisterService.payments(display)) {
+            Long saleId = payment.getSale().getId();
+            BigDecimal net = nz(payment.getAmountReceived()).subtract(nz(payment.getChange()));
+            SaleReceiptTotals totals = totalsBySale.computeIfAbsent(saleId, key -> new SaleReceiptTotals());
+            if (payment.getMethod() == PaymentMethod.DINHEIRO) {
+                totals.addCash(net);
+            } else if (payment.getMethod() == PaymentMethod.CARTAO) {
+                // Cartão de débito entra no débito; crédito — ou cartão sem tipo
+                // (dado legado/null) — cai no crédito como fallback seguro.
+                if (payment.getCardType() == CardType.DEBITO) {
+                    totals.addDebit(net);
+                } else {
+                    totals.addCredit(net);
+                }
             }
         }
 
         List<MovRow> rows = new ArrayList<>();
-        BigDecimal entDinheiro = BigDecimal.ZERO;
-        BigDecimal entCredito = BigDecimal.ZERO;
+        BigDecimal entradaDinheiro = BigDecimal.ZERO;
+        BigDecimal entradaCredito = BigDecimal.ZERO;
+        BigDecimal entradaDebito = BigDecimal.ZERO;
 
-        for (Sale s : cashRegisterService.sales(display)) {
-            if (s.getStatus() != Sale.Status.FINALIZADA) {
+        for (Sale sale : cashRegisterService.sales(display)) {
+            if (sale.getStatus() != Sale.Status.FINALIZADA) {
                 continue;
             }
-            BigDecimal[] arr = byMethod.getOrDefault(s.getId(), new BigDecimal[]{BigDecimal.ZERO, BigDecimal.ZERO});
-            entDinheiro = entDinheiro.add(arr[0]);
-            entCredito = entCredito.add(arr[1]);
-            rows.add(new MovRow(s.getCreatedAt(), DT.format(s.getCreatedAt()), true,
-                    money(arr[0]), money(BigDecimal.ZERO), money(arr[1]), money(BigDecimal.ZERO),
-                    money(s.getTotal()), String.valueOf(s.getId()),
-                    s.getCustomer() != null ? s.getCustomer().getName() : "CONSUMIDOR"));
+            SaleReceiptTotals totals = totalsBySale.getOrDefault(sale.getId(), new SaleReceiptTotals());
+            entradaDinheiro = entradaDinheiro.add(totals.getCash());
+            entradaCredito = entradaCredito.add(totals.getCredit());
+            entradaDebito = entradaDebito.add(totals.getDebit());
+            rows.add(new MovRow(sale.getCreatedAt(), DT.format(sale.getCreatedAt()), true,
+                    money(totals.getCash()), money(BigDecimal.ZERO), money(totals.getCredit()),
+                    money(totals.getDebit()), money(sale.getTotal()), String.valueOf(sale.getId()),
+                    sale.getCustomer() != null ? sale.getCustomer().getName() : "CONSUMIDOR"));
         }
 
         BigDecimal supr = BigDecimal.ZERO;
@@ -224,17 +239,53 @@ public class CaixaController {
         movTable.setItems(FXCollections.observableArrayList(rows));
 
         // Resumo
-        BigDecimal entDinheiroTotal = entDinheiro.add(supr);
-        BigDecimal entTotal = entDinheiroTotal.add(entCredito);
+        BigDecimal entradaDinheiroTotal = entradaDinheiro.add(supr);
+        BigDecimal entradaTotal = entradaDinheiroTotal.add(entradaCredito).add(entradaDebito);
         resSaldoInicial.setText(money(display.getOpeningAmount()));
-        resEntDinheiro.setText(money(entDinheiroTotal));
+        resEntDinheiro.setText(money(entradaDinheiroTotal));
         resEntCheque.setText(money(BigDecimal.ZERO));
-        resEntCredito.setText(money(entCredito));
-        resEntDebito.setText(money(BigDecimal.ZERO));
-        resEntTotal.setText(money(entTotal));
+        resEntCredito.setText(money(entradaCredito));
+        resEntDebito.setText(money(entradaDebito));
+        resEntTotal.setText(money(entradaTotal));
         resSaiDinheiro.setText(money(sangr));
         resSaiTotal.setText(money(sangr));
-        resSaldoFinal.setText(money(nz(display.getOpeningAmount()).add(entDinheiroTotal).subtract(sangr)));
+        resSaldoFinal.setText(money(nz(display.getOpeningAmount()).add(entradaDinheiroTotal).subtract(sangr)));
+    }
+
+    /**
+     * Totais de uma venda agrupados pela forma de recebimento, para o resumo do
+     * caixa. Substitui o antigo array indexado por posição: cada valor tem nome
+     * de domínio (dinheiro/crédito/débito) e acumula via {@code .add} (HALF_UP
+     * preservado no {@code BigDecimal}).
+     */
+    private static final class SaleReceiptTotals {
+        private BigDecimal cash = BigDecimal.ZERO;
+        private BigDecimal credit = BigDecimal.ZERO;
+        private BigDecimal debit = BigDecimal.ZERO;
+
+        private void addCash(BigDecimal value) {
+            cash = cash.add(value);
+        }
+
+        private void addCredit(BigDecimal value) {
+            credit = credit.add(value);
+        }
+
+        private void addDebit(BigDecimal value) {
+            debit = debit.add(value);
+        }
+
+        private BigDecimal getCash() {
+            return cash;
+        }
+
+        private BigDecimal getCredit() {
+            return credit;
+        }
+
+        private BigDecimal getDebit() {
+            return debit;
+        }
     }
 
     private void clearResumo() {
@@ -331,9 +382,17 @@ public class CaixaController {
             userSession.setCaixaAtual(null);
             caixaAtual = null;
             countedAmountField.clear();
-            statusLabel.setText("Caixa FECHADO!  Esperado: " + money(nz(fechado.getExpectedAmount()))
+            String resumo = "Caixa FECHADO!  Esperado: " + money(nz(fechado.getExpectedAmount()))
                     + "  |  Contado: " + money(nz(fechado.getClosingAmount()))
-                    + "  |  Diferença: " + money(nz(fechado.getDifference())));
+                    + "  |  Diferença: " + money(nz(fechado.getDifference()));
+            // REVISÕES2 item 2: imprime o fechamento automaticamente. Falha de
+            // impressão NÃO derruba o fechamento já gravado (RNF06).
+            try {
+                receiptService.printCashCloseReceipt(fechado);
+            } catch (Exception ex) {
+                resumo += "  |  Aviso: impressão falhou (" + ex.getMessage() + ")";
+            }
+            statusLabel.setText(resumo);
             onRefresh();
         } catch (NumberFormatException e) {
             statusLabel.setText("Valor contado inválido.");
@@ -349,7 +408,21 @@ public class CaixaController {
 
     @FXML
     public void onPrintFechamento() {
-        statusLabel.setText("Impressão do fechamento: use a impressora configurada (em ajuste).");
+        CashRegister alvo = displayed;
+        if (alvo == null) {
+            statusLabel.setText("Nenhum caixa para imprimir o fechamento.");
+            return;
+        }
+        if (alvo.getStatus() != CashRegister.Status.CLOSED) {
+            statusLabel.setText("Feche o caixa antes de imprimir o fechamento.");
+            return;
+        }
+        try {
+            receiptService.printCashCloseReceipt(alvo);
+            statusLabel.setText("Fechamento enviado para impressão.");
+        } catch (Exception e) {
+            statusLabel.setText("Não foi possível imprimir: " + e.getMessage());
+        }
     }
 
     private BigDecimal nz(BigDecimal v) {

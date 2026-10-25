@@ -25,6 +25,10 @@ public class Payment {
     @Column(length = 20, nullable = false)
     private PaymentMethod method;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "card_type", length = 20)
+    private CardType cardType;
+
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal amountReceived;
 
