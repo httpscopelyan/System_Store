@@ -1,0 +1,39 @@
+/* Tema SILVER — cinza neutro, sóbrio. Override. */
+
+.top-bar { -fx-background-color: linear-gradient(to bottom, #8a96a5, #5c6773); }
+
+.menu-item:hover { -fx-background-color: #e8ecf1; -fx-text-fill: #333b45; }
+
+.page-header, .sale-header, .panel-header {
+    -fx-background-color: linear-gradient(to right, #5c6773, #8a96a5);
+}
+.page-header-subtitle, .sale-header-subtitle, .panel-header-subtitle { -fx-text-fill: #eef1f5; }
+
+.code-field { -fx-text-fill: #333b45; -fx-border-color: #7a8694; }
+.code-field:focused { -fx-border-color: #5c6773; -fx-effect: dropshadow(gaussian, rgba(92,103,115,0.35), 8, 0, 0, 0); }
+
+.items-table .column-header-background { -fx-background-color: #5c6773; }
+.items-table .table-row-cell:selected { -fx-background-color: #d5dbe3; -fx-text-fill: #333b45; }
+
+.total-panel { -fx-background-color: linear-gradient(to right, #5c6773, #8a96a5); }
+.total-caption { -fx-text-fill: #eef1f5; }
+
+.sale-status { -fx-text-fill: #44515e; }
+.sale-footer { -fx-background-color: #5c6773; }
+.sale-footer .label { -fx-text-fill: #eef1f5; }
+.key-hint { -fx-background-color: #7a8694; }
+
+.login-root { -fx-background-color: linear-gradient(to bottom, #9aa6b4, #5c6773); }
+.login-brand-subtitle { -fx-text-fill: #eef1f5; }
+.login-card-title { -fx-text-fill: #44515e; }
+
+.brand-title { -fx-text-fill: #44515e; }
+.form-section-title { -fx-text-fill: #44515e; }
+.form-message { -fx-text-fill: #44515e; }
+
+.primary-button { -fx-background-color: #5c6773; }
+.primary-button:hover { -fx-background-color: #44515e; }
+.secondary-button { -fx-text-fill: #44515e; -fx-border-color: #7a8694; }
+.secondary-button:hover { -fx-background-color: #e8ecf1; }
+
+.brand-bar { -fx-background-color: #5c6773; }

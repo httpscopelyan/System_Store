@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.SupplierFormController"
+            stylesheets="@../css/styles.css" styleClass="inicio-root">
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Fornecedores — Cadastro" styleClass="page-header-title"/>
+            <Label text="Inclusão e manutenção de fornecedores" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="18">
+            <padding><Insets top="22" right="28" bottom="22" left="28"/></padding>
+            <VBox styleClass="form-card" spacing="14" maxWidth="Infinity">
+                <Label text="Dados do fornecedor" styleClass="form-section-title"/>
+                <VBox spacing="6">
+                    <Label text="Nome / Razão social" styleClass="form-label"/>
+                    <TextField fx:id="nameField" promptText="Nome" styleClass="text-input" maxWidth="Infinity"/>
+                </VBox>
+                <HBox spacing="16">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="CNPJ" styleClass="form-label"/>
+                        <TextField fx:id="cnpjField" promptText="Só números (opcional)" styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Telefone" styleClass="form-label"/>
+                        <TextField fx:id="phoneField" styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+                <VBox spacing="6">
+                    <Label text="E-mail" styleClass="form-label"/>
+                    <TextField fx:id="emailField" styleClass="text-input" maxWidth="Infinity"/>
+                </VBox>
+                <CheckBox fx:id="activeBox" text="Ativo" selected="true"/>
+            </VBox>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button onAction="#onSave" text="Salvar" styleClass="success-button"/>
+            </HBox>
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+</BorderPane>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.PagamentoCartaoController"
+            stylesheets="@../css/styles.css"
+            styleClass="sale-root"
+            onKeyPressed="#onKey">
+
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Pagamento em Cartão — Mercado Scopel" styleClass="page-header-title"/>
+            <Label text="Escolha o tipo do cartão" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="18" alignment="TOP_CENTER">
+            <padding>
+                <Insets top="24" right="40" bottom="24" left="40"/>
+            </padding>
+
+            <VBox styleClass="total-panel" spacing="4" maxWidth="Infinity">
+                <Label text="TOTAL A PAGAR" styleClass="total-caption"/>
+                <Label fx:id="totalLabel" text="R$ 0,00" styleClass="total-value"/>
+            </VBox>
+
+            <Button fx:id="debitoOption" text="1  —  DÉBITO" onAction="#onDebito"
+                    styleClass="pay-option" maxWidth="Infinity"/>
+            <Button text="2  —  CRÉDITO" onAction="#onCredito"
+                    styleClass="pay-option" maxWidth="Infinity"/>
+
+            <Button text="Voltar (ESC)" onAction="#onVoltar" styleClass="secondary-button"/>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox styleClass="sale-footer" spacing="8" alignment="CENTER_LEFT">
+            <Label text="1" styleClass="key-hint"/>
+            <Label text="Débito"/>
+            <Label text="2" styleClass="key-hint"/>
+            <Label text="Crédito"/>
+            <Label text="   ESC" styleClass="key-hint"/>
+            <Label text="Voltar"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

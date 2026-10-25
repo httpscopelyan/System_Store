@@ -1,0 +1,55 @@
+/* Tema CLASSIC — look Windows clássico (cinza, barra de título azul), igual às
+   prints de referência (Yzidro / Caixa). Override por cima do styles.css. */
+
+.app-shell, .inicio-root, .sale-root, .center-area { -fx-background-color: #f0f0f0; }
+
+/* Faixa de marca e toolbar: barra de título azul + toolbar cinza */
+.brand-bar { -fx-background-color: linear-gradient(to bottom, #3a8de0, #0a6cc4); }
+.brand-bar-title { -fx-text-fill: white; }
+
+.top-bar { -fx-background-color: #f0f0f0; -fx-border-color: #c8c8c8 transparent #a6a6a6 transparent; -fx-border-width: 1 0 1 0; }
+.tool-button { -fx-text-fill: #202020; -fx-font-weight: normal; }
+.tool-button:hover { -fx-background-color: #d8e9ff; }
+
+/* Cabeçalho das páginas = barra de título azul */
+.page-header, .sale-header, .panel-header {
+    -fx-background-color: linear-gradient(to bottom, #3a8de0, #0a6cc4);
+}
+.page-header-title, .sale-header-title, .panel-header-title { -fx-text-fill: white; }
+.page-header-subtitle, .sale-header-subtitle, .panel-header-subtitle { -fx-text-fill: #e8f0fb; }
+
+/* Cartões = group box cinza com borda */
+.form-card { -fx-background-color: #f7f7f4; -fx-border-color: #a6a6a6; -fx-effect: null; }
+.form-section-title { -fx-text-fill: #0a3d7a; }
+.form-message { -fx-text-fill: #0a3d7a; }
+.form-label { -fx-text-fill: #202020; }
+.brand-title { -fx-text-fill: #0a3d7a; }
+
+/* Campos */
+.text-input { -fx-border-color: #7f9db9; -fx-border-width: 1; }
+.text-input:focused { -fx-border-color: #3a8de0; }
+.code-field { -fx-text-fill: #0a3d7a; -fx-border-color: #3a8de0; }
+
+/* Botões estilo clássico */
+.primary-button { -fx-background-color: linear-gradient(to bottom, #eaf3ff, #cfe3fb); -fx-text-fill: #0a3d7a; -fx-border-color: #3a8de0; -fx-border-radius: 3; }
+.primary-button:hover { -fx-background-color: linear-gradient(to bottom, #ffffff, #d8e9ff); }
+.secondary-button { -fx-background-color: linear-gradient(to bottom, #f6f6f6, #e1e1e1); -fx-text-fill: #202020; -fx-border-color: #8c8c8c; }
+.secondary-button:hover { -fx-background-color: linear-gradient(to bottom, #ffffff, #e8f0fb); }
+
+/* Tabelas com cabeçalho azul clássico */
+.items-table .column-header-background { -fx-background-color: linear-gradient(to bottom, #3a8de0, #0a6cc4); }
+.items-table .table-row-cell:selected { -fx-background-color: #b8d6f0; -fx-text-fill: black; }
+
+/* Painel de total e rodapé da venda em azul */
+.total-panel { -fx-background-color: linear-gradient(to bottom, #3a8de0, #0a6cc4); }
+.total-caption { -fx-text-fill: #e8f0fb; }
+.sale-footer { -fx-background-color: #0a6cc4; }
+.key-hint { -fx-background-color: #3a8de0; }
+.sale-status { -fx-text-fill: #0a3d7a; }
+
+/* Barra de status inferior bege clássica */
+.status-bar { -fx-background-color: #ece9d8; }
+
+/* Login / Home mantém a barra azul */
+.login-root { -fx-background-color: linear-gradient(to bottom, #3a8de0, #0a4e9c); }
+.login-card-title { -fx-text-fill: #0a3d7a; }

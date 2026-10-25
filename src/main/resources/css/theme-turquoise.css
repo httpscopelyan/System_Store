@@ -1,0 +1,39 @@
+/* Tema TURQUOISE — verde-água/teal, liso. Override. */
+
+.top-bar { -fx-background-color: linear-gradient(to bottom, #33b5a6, #1e8a7e); }
+
+.menu-item:hover { -fx-background-color: #d9f2ee; -fx-text-fill: #0f7a6e; }
+
+.page-header, .sale-header, .panel-header {
+    -fx-background-color: linear-gradient(to right, #1e8a7e, #33b5a6);
+}
+.page-header-subtitle, .sale-header-subtitle, .panel-header-subtitle { -fx-text-fill: #ddf4f0; }
+
+.code-field { -fx-text-fill: #0f7a6e; -fx-border-color: #27a699; }
+.code-field:focused { -fx-border-color: #1e8a7e; -fx-effect: dropshadow(gaussian, rgba(30,138,126,0.35), 8, 0, 0, 0); }
+
+.items-table .column-header-background { -fx-background-color: #1e8a7e; }
+.items-table .table-row-cell:selected { -fx-background-color: #c3e8e2; -fx-text-fill: #0a5a51; }
+
+.total-panel { -fx-background-color: linear-gradient(to right, #1e8a7e, #33b5a6); }
+.total-caption { -fx-text-fill: #ddf4f0; }
+
+.sale-status { -fx-text-fill: #0f7a6e; }
+.sale-footer { -fx-background-color: #1e8a7e; }
+.sale-footer .label { -fx-text-fill: #ddf4f0; }
+.key-hint { -fx-background-color: #27a699; }
+
+.login-root { -fx-background-color: linear-gradient(to bottom, #3cc2b2, #1e8a7e); }
+.login-brand-subtitle { -fx-text-fill: #ddf4f0; }
+.login-card-title { -fx-text-fill: #0f7a6e; }
+
+.brand-title { -fx-text-fill: #0f7a6e; }
+.form-section-title { -fx-text-fill: #0f7a6e; }
+.form-message { -fx-text-fill: #0f7a6e; }
+
+.primary-button { -fx-background-color: #1e8a7e; }
+.primary-button:hover { -fx-background-color: #0f7a6e; }
+.secondary-button { -fx-text-fill: #0f7a6e; -fx-border-color: #27a699; }
+.secondary-button:hover { -fx-background-color: #d9f2ee; }
+
+.brand-bar { -fx-background-color: #1e8a7e; }

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.PagamentoPixController"
+            stylesheets="@../css/styles.css"
+            styleClass="sale-root"
+            onKeyPressed="#onKey">
+
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Pagamento via PIX — Mercado Scopel" styleClass="page-header-title"/>
+            <Label text="Copia e cola (confirmação manual do recebimento)" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="18" alignment="TOP_LEFT">
+            <padding>
+                <Insets top="24" right="28" bottom="24" left="28"/>
+            </padding>
+
+            <VBox spacing="6" maxWidth="Infinity">
+                <Label text="PIX Copia e Cola" styleClass="code-label"/>
+                <TextArea fx:id="pixArea" editable="false" wrapText="true" prefHeight="120"
+                          styleClass="receipt-preview" maxWidth="Infinity"/>
+            </VBox>
+
+            <Label fx:id="statusLabel" styleClass="sale-status"/>
+
+            <HBox spacing="12">
+                <Button fx:id="confirmButton" text="Confirmar recebimento" onAction="#onConfirm"
+                        styleClass="finalize-button"/>
+                <Button text="Voltar (ESC)" onAction="#onVoltar" styleClass="secondary-button"/>
+            </HBox>
+        </VBox>
+    </center>
+
+    <right>
+        <VBox spacing="20" alignment="TOP_CENTER" prefWidth="420.0">
+            <padding>
+                <Insets top="24" right="28" bottom="24" left="0"/>
+            </padding>
+
+            <VBox styleClass="total-panel" spacing="4" maxWidth="Infinity">
+                <Label text="TOTAL" styleClass="total-caption"/>
+                <Label fx:id="totalLabel" text="R$ 0,00" styleClass="total-value"/>
+            </VBox>
+        </VBox>
+    </right>
+
+    <bottom>
+        <HBox styleClass="sale-footer" spacing="8" alignment="CENTER_LEFT">
+            <Label text="ESC" styleClass="key-hint"/>
+            <Label text="Voltar"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

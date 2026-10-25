@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.ManagerAuthorizationController"
+      stylesheets="@../css/styles.css"
+      styleClass="login-card" spacing="16" maxWidth="420" prefWidth="420">
+
+    <padding>
+        <Insets top="22" right="24" bottom="22" left="24"/>
+    </padding>
+
+    <Label text="Autorização de gerente" styleClass="login-card-title"/>
+    <Label text="Informe o login e a senha de um gerente para autorizar esta operação."
+           wrapText="true" styleClass="form-label"/>
+
+    <VBox spacing="6">
+        <Label text="Login" styleClass="form-label"/>
+        <TextField fx:id="managerLoginField" promptText="Login do gerente"
+                   styleClass="text-input" maxWidth="Infinity"/>
+    </VBox>
+
+    <VBox spacing="6">
+        <Label text="Senha" styleClass="form-label"/>
+        <PasswordField fx:id="managerPasswordField" promptText="Senha do gerente"
+                       onAction="#onConfirm" styleClass="text-input" maxWidth="Infinity"/>
+    </VBox>
+
+    <Label fx:id="errorLabel" styleClass="form-message" wrapText="true"
+           style="-fx-text-fill: #c62828;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cancelar (Esc)" onAction="#onCancel" styleClass="secondary-button"/>
+        <Button text="Autorizar (Enter)" onAction="#onConfirm"
+                styleClass="primary-button" defaultButton="true"/>
+    </HBox>
+
+</VBox>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.BatchFormController"
+            stylesheets="@../css/styles.css" styleClass="inicio-root">
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Estoque — Lotes de validade" styleClass="page-header-title"/>
+            <Label text="Controle de vencimento por lote" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="18">
+            <padding><Insets top="22" right="28" bottom="22" left="28"/></padding>
+            <VBox styleClass="form-card" spacing="14" maxWidth="Infinity">
+                <VBox spacing="6">
+                    <Label text="Código do produto" styleClass="form-label"/>
+                    <TextField fx:id="codeField" styleClass="text-input" maxWidth="Infinity"/>
+                </VBox>
+                <HBox spacing="16">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Lote / Identificador" styleClass="form-label"/>
+                        <TextField fx:id="batchCodeField" styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Quantidade" styleClass="form-label"/>
+                        <TextField fx:id="quantityField" promptText="Ex: 50" styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+                <VBox spacing="6">
+                    <Label text="Validade" styleClass="form-label"/>
+                    <DatePicker fx:id="expiryPicker" maxWidth="Infinity"/>
+                </VBox>
+            </VBox>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button onAction="#onSave" text="Registrar lote" styleClass="success-button"/>
+            </HBox>
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+</BorderPane>

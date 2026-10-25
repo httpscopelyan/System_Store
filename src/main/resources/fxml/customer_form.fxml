@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.CustomerFormController"
+            stylesheets="@../css/styles.css"
+            styleClass="inicio-root">
+
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Clientes — Cadastro" styleClass="page-header-title"/>
+            <Label text="Inclusão e manutenção de clientes" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="18">
+            <padding>
+                <Insets top="22" right="28" bottom="22" left="28"/>
+            </padding>
+
+            <VBox styleClass="form-card" spacing="14" maxWidth="Infinity">
+                <Label text="Dados do cliente" styleClass="form-section-title"/>
+
+                <VBox spacing="6">
+                    <Label text="Nome" styleClass="form-label"/>
+                    <TextField fx:id="nameField" promptText="Nome do cliente"
+                               styleClass="text-input" maxWidth="Infinity"/>
+                </VBox>
+
+                <HBox spacing="16">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="CPF/CNPJ" styleClass="form-label"/>
+                        <TextField fx:id="cpfField" promptText="Só números (opcional)"
+                                   styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Telefone" styleClass="form-label"/>
+                        <TextField fx:id="phoneField" promptText="(xx) xxxxx-xxxx"
+                                   styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+
+                <VBox spacing="6">
+                    <Label text="Endereço" styleClass="form-label"/>
+                    <TextField fx:id="addressField" promptText="Endereço (tele-entrega)"
+                               styleClass="text-input" maxWidth="Infinity"/>
+                </VBox>
+
+                <HBox spacing="16" alignment="BOTTOM_LEFT">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Limite de crédito (crediário)" styleClass="form-label"/>
+                        <TextField fx:id="creditLimitField" promptText="Ex: 300.00"
+                                   styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Situação" styleClass="form-label"/>
+                        <CheckBox fx:id="activeBox" text="Ativo" selected="true">
+                            <padding>
+                                <Insets top="8" bottom="8"/>
+                            </padding>
+                        </CheckBox>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button onAction="#onSave" text="Salvar" styleClass="success-button"/>
+            </HBox>
+
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+
+</BorderPane>

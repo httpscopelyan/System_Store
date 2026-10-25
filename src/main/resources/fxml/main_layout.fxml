@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.MainController"
+            stylesheets="@../css/styles.css"
+            styleClass="app-shell"
+            prefWidth="1365" prefHeight="720">
+
+    <!-- Barra superior de módulos (navegação por botões no topo; sem menu lateral) -->
+    <top>
+        <VBox>
+            <HBox styleClass="brand-bar" alignment="CENTER_LEFT" spacing="10">
+                <padding><Insets top="6" right="14" bottom="6" left="14"/></padding>
+                <Label text="SCOPEL STORE" styleClass="brand-bar-title"/>
+            </HBox>
+            <ToolBar styleClass="top-bar">
+                <Button text="🏷&#10;Preço (F1)" styleClass="block-button" onAction="#onConsultaPreco"/>
+                <Button text="🛒&#10;Nova Venda (F2)" styleClass="block-button" onAction="#onVender"/>
+                <Button text="📜&#10;Histórico" styleClass="block-button" onAction="#onHistoricoVendas"/>
+                <Button text="💰&#10;Caixa (F4)" styleClass="block-button" onAction="#onCaixa"/>
+                <Button text="📦&#10;Estoque (F3)" styleClass="block-button" onAction="#onEstoque"/>
+                <Separator orientation="VERTICAL"/>
+                <Button text="🧾&#10;Compras (F5)" styleClass="block-button" onAction="#onCompras"/>
+                <Button text="👥&#10;Clientes (F6)" styleClass="block-button" onAction="#onClientes"/>
+                <Button text="🚚&#10;Fornecedores (F7)" styleClass="block-button" onAction="#onFornecedores"/>
+                <Button text="📝&#10;Orçamentos" styleClass="block-button" onAction="#onOrcamento"/>
+                <Separator orientation="VERTICAL"/>
+                <Button text="＄&#10;A Receber" styleClass="block-button" onAction="#onContasReceber"/>
+                <Button text="＄&#10;A Pagar" styleClass="block-button" onAction="#onContasPagar"/>
+                <Button text="🏷&#10;Preços" styleClass="block-button" onAction="#onTabelasPreco"/>
+                <Separator orientation="VERTICAL"/>
+                <Button text="📊&#10;Relatórios (F8)" styleClass="block-button" onAction="#onRelatorios"/>
+                <Button fx:id="configButton" text="⚙&#10;Config" styleClass="block-button" onAction="#onConfig"/>
+            </ToolBar>
+        </VBox>
+    </top>
+
+    <!-- Centro: preenchido pelo Navigator -->
+    <center>
+    </center>
+
+    <!-- Barra de status inferior -->
+    <bottom>
+        <HBox styleClass="status-bar" spacing="20" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="4" right="12" bottom="4" left="12"/>
+            </padding>
+            <Label fx:id="dateTimeLabel" text=""/>
+            <Label fx:id="userLabel" text="Usuário: -"/>
+            <Label fx:id="roleLabel" text="Grupo: -"/>
+            <Label fx:id="caixaStatusLabel" text="Caixa fechado"/>
+            <Label text="Empresa: Mercado Scopel"/>
+            <Label fx:id="terminalLabel" text="Terminal: CAIXA 01"/>
+            <Label fx:id="hintLabel" text="" styleClass="status-hint"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

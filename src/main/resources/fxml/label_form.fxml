@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.LabelFormController"
+            stylesheets="@../css/styles.css" styleClass="inicio-root">
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Etiquetas de código de barras" styleClass="page-header-title"/>
+            <Label text="Imprime etiquetas do produto" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="18">
+            <padding><Insets top="22" right="28" bottom="22" left="28"/></padding>
+            <VBox styleClass="form-card" spacing="14" maxWidth="Infinity">
+                <HBox spacing="16">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Código do produto" styleClass="form-label"/>
+                        <TextField fx:id="codeField" styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Cópias" styleClass="form-label"/>
+                        <TextField fx:id="copiesField" text="1" styleClass="text-input"/>
+                    </VBox>
+                </HBox>
+                <Label fx:id="previewLabel" styleClass="form-label" wrapText="true"/>
+            </VBox>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button onAction="#onPreview" text="Pré-visualizar"/>
+                <Button onAction="#onPrint" text="Imprimir" styleClass="success-button"/>
+            </HBox>
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+</BorderPane>

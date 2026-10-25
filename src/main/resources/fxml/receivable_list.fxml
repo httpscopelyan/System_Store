@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.ReceivableListController"
+            stylesheets="@../css/styles.css" styleClass="inicio-root">
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Contas a Receber / Crediário" styleClass="page-header-title"/>
+            <Label text="Dívida do cliente, recebimento e renegociação" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="14">
+            <padding><Insets top="18" right="28" bottom="18" left="28"/></padding>
+
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Label text="Cliente (ID):"/>
+                <TextField fx:id="customerIdField" promptText="ID do cliente" styleClass="text-input"/>
+                <Button text="Carregar" onAction="#onLoad"/>
+                <Label fx:id="debtLabel" styleClass="form-section-title" text="Dívida: -"/>
+            </HBox>
+
+            <TableView fx:id="table" prefHeight="300">
+                <columns>
+                    <TableColumn fx:id="colDesc" text="Parcela" prefWidth="240"/>
+                    <TableColumn fx:id="colDue" text="Vencimento" prefWidth="120"/>
+                    <TableColumn fx:id="colAmount" text="Valor" prefWidth="100"/>
+                    <TableColumn fx:id="colRemaining" text="Saldo" prefWidth="100"/>
+                </columns>
+            </TableView>
+
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <TextField fx:id="receiveField" promptText="Valor recebido" styleClass="text-input"/>
+                <Button text="Receber selecionada" onAction="#onReceive" styleClass="success-button"/>
+            </HBox>
+
+            <VBox styleClass="form-card" spacing="10">
+                <Label text="Renegociar (redefinir parcelamento do saldo em aberto)" styleClass="form-section-title"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <TextField fx:id="installmentsField" promptText="Nº parcelas" styleClass="text-input"/>
+                    <DatePicker fx:id="firstDueField"/>
+                    <TextField fx:id="intervalField" promptText="Intervalo (dias)" text="30" styleClass="text-input"/>
+                    <Button text="Renegociar" onAction="#onRenegotiate"/>
+                </HBox>
+            </VBox>
+
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+</BorderPane>

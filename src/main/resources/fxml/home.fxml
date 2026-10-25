@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.HomeController"
+            stylesheets="@../css/styles.css" styleClass="win-root">
+
+    <top>
+        <VBox>
+            <HBox styleClass="win-titlebar" alignment="CENTER_LEFT">
+                <padding><Insets top="5" right="12" bottom="5" left="12"/></padding>
+                <Label text="SCOPEL STORE" styleClass="win-titlebar-text"/>
+            </HBox>
+            <!-- Blocos no topo (nada centralizado) -->
+            <HBox styleClass="top-bar" spacing="10" alignment="CENTER_LEFT">
+                <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
+                <Button text="🛒&#10;PDV" styleClass="block-button" onAction="#onPdv"/>
+                <Button text="⚙&#10;Configuração" styleClass="block-button" onAction="#onConfig"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox alignment="TOP_LEFT" spacing="8">
+            <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+            <Label text="Sistema de loja de varejo" styleClass="estoque-title"/>
+            <Label text="Clique em PDV para entrar (será solicitado login)." styleClass="win-label"/>
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+
+</BorderPane>
