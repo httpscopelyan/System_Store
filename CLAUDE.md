@@ -98,7 +98,11 @@ direto com repository.
 7. **Código em inglês** (classes, campos, métodos, tabelas). Mensagens ao usuário
    e docs em português. Termos de domínio BR (sangria, suprimento) podem ficar.
    (ADR 0008)
-8. **Nunca commitar** `.env`, senhas ou `target/` no Git.
+8. **Nunca commitar** `.env`, senhas ou `target/` no Git. O `.env` **deve ficar
+   fora do versionamento** (já está no `.gitignore`). Pendência de segurança ALTA
+   em aberto: o `.env` foi rastreado no histórico (commit 98d4de8) — `git rm
+   --cached .env`, usar `${DB_PASSWORD}` em `application.properties` e **rotacionar**
+   a senha do Postgres (ver REVISION.md).
 9. **Flyway é a fonte do schema**, Hibernate em `ddl-auto=validate`. Migration
    aplicada não se edita nem renomeia — mudança = nova migration. (ADR 0005)
 
@@ -128,6 +132,31 @@ direto com repository.
 - **Sale / SaleItem**: entidades, migrations V5/V6, service (openSale, addItem
   com RN07, finalizeSale com RN10), controller com TableView. **Testado**
   (`SaleServiceTests`, 8 casos).
+- **Pagamento (fluxo guiado, 2026-10-20)**: seleção 1-Dinheiro / 2-Cartão / 3-PIX
+  (`pagamento.fxml`). Dinheiro = valor recebido + troco; Cartão = débito/crédito →
+  tela de espera que aciona a maquininha; PIX = copia-e-cola + confirmação manual.
+  Service: `pay` (DINHEIRO), `payCard(Sale, CardType)`, `payPix(Sale)` — todos
+  `@Transactional`, só de EM_PAGAMENTO, gravam `Payment` e baixam estoque. Enum
+  `CardType {DEBITO, CREDITO}`, `Payment.cardType`, migration V28. Gateway de
+  cartão: porta `CardPaymentGateway` + `MockCardPaymentGateway` (@Primary) que
+  simula a Mercado Pago Point; integração real fica na F4 (ADR 0013).
+- **Prévia do cupom** na tela de venda: painel só-leitura
+  (`ReceiptService.buildSaleReceipt`) com aviso "NÃO É DOCUMENTO FISCAL" (RNF15).
+- **Tela "Venda finalizada"** (`venda_finalizada.fxml`): confirma total/forma/troco.
+- **Impressão do fechamento de caixa**: `ReceiptService.buildCashCloseReceipt` /
+  `printCashCloseReceipt`; `CaixaController.onClose` imprime ao fechar (falha de
+  impressão não derruba o fechamento, RNF06); `onPrintFechamento` reimprime.
+  Ainda sem quebra por forma de pagamento/sangrias (ver REVISION.md).
+- **Histórico de vendas** (`historico_vendas.fxml`) via `SaleService.history()`
+  (vendas FINALIZADA, desc).
+- **Atualização remota completa (2026-10-25)**: `UpdateService` (verifica 15 s após o
+  boot e a cada 60 min, SemVer) → botão "Atualizar e reiniciar" (`MainController`) →
+  download validado (SHA-256 + tamanho) → `UpdaterMain` em processo separado troca o
+  JAR, reabre, confirma pelo marcador `updates/started.ok` e faz rollback se falhar.
+  Versão vem do `pom.xml` (`@project.version@`), nunca hardcoded. Release só no
+  Windows/JDK 25 (`release.yml`). Detalhes e limites: `sistema_atualizacao_remota.md`.
+  Testes: `SemVerAndManifestTests`, `UpdaterLifecycleTests`, `UpdateServiceLifecycleTests`
+  (sem Spring/banco, processos reais).
 - UI básica: login, caixa (abrir/fechar), venda (bipar/finalizar). Navegação
   caixa→venda após abrir.
 
@@ -138,9 +167,14 @@ direto com repository.
 1. ~~Teste unitário do `SaleService`.~~ **Concluído** (`SaleServiceTests`, 2026-10-17).
 2. ~~Recuperar caixa aberto ao reabrir app.~~ **Concluído** (2026-10-17, ver abaixo).
 3. Design / CSS (telas não parecem PDV de mercado ainda).
-4. Impressão de cupom + abertura de gaveta (escpos-coffee).
+4. Impressão de cupom de venda + abertura de gaveta (escpos-coffee). (Fechamento
+   de caixa já imprime via `ReceiptService`; prévia do cupom de venda já existe.)
 5. NFC-e (fase 3).
-6. Pagamento integrado Mercado Pago Point via API + polling (ADR 0007, fase 4).
+6. Pagamento integrado Mercado Pago Point via API + polling (ADR 0007/0013,
+   fase 4). O fluxo guiado e o `MockCardPaymentGateway` já existem; falta plugar a
+   implementação real (Orders API + polling, Access Token + device id).
+7. Enriquecer o cupom de fechamento com quebra por forma de pagamento e sangrias
+   (exige resumo exposto por service — ver REVISION.md).
 
 ### Bug resolvido (2026-10-17)
 Recuperação do caixa aberto ao reabrir o app. No login,

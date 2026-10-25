@@ -56,6 +56,9 @@
             <Label text="Empresa: Mercado Scopel"/>
             <Label fx:id="terminalLabel" text="Terminal: CAIXA 01"/>
             <Label fx:id="hintLabel" text="" styleClass="status-hint"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="updateButton" visible="false" managed="false" styleClass="update-button"
+                    onAction="#onUpdateAndRestart"/>
         </HBox>
     </bottom>
 

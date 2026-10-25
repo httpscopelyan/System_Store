@@ -2,6 +2,7 @@ package br.com.scopel.pfv.beta;
 
 import br.com.scopel.pfv.beta.config.ThemeManager;
 import br.com.scopel.pfv.beta.service.AppSettingService;
+import br.com.scopel.pfv.beta.service.UpdateService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -44,6 +45,9 @@ public class BetaApplication extends Application{
 		}
 
 		stage.show();
+
+		// Confirma ao atualizador que esta versão subiu de verdade (rollback se não houver).
+		springContext.getBean(UpdateService.class).markStarted();
 	}
 
 	@Override

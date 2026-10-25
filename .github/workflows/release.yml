@@ -1,9 +1,14 @@
 # =====================================================================
 # GitHub Actions — Build & Release automático do Scopel Store PDV
 # =====================================================================
-# Dispara quando uma tag no formato v*.*.* é pushada (ex: v1.0.0).
-# Faz o build do JAR com Maven e publica como GitHub Release.
-# O app instalado nos clientes consulta essa Release para atualizar.
+# Dispara quando uma tag v*.*.* é enviada (ex.: v1.1.0).
+#
+# Pontos que NÃO podem mudar sem quebrar a atualização remota:
+#  - runs-on windows: o JAR embute os natives da JavaFX da plataforma do build
+#    (-win); buildar em Linux geraria um JAR que não abre nos PDVs (Windows).
+#  - JDK 25: a JavaFX 26 não compila/roda com JDK 21 (ver CLAUDE.md).
+#  - O version.json só é publicado DEPOIS de o asset existir na Release, com o
+#    SHA-256 e o tamanho do arquivo exato que foi anexado.
 # =====================================================================
 
 name: Build & Release
@@ -18,72 +23,87 @@ permissions:
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
 
     steps:
-      # 1. Checkout do código
-      - name: Checkout código
+      - name: Checkout (tag)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # 2. Configura JDK 21
-      - name: Configura JDK 21
+      - name: JDK 25
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
           cache: 'maven'
 
-      # 3. Injeta a versão da tag no pom.xml
-      - name: Define versão a partir da tag
+      - name: Versão a partir da tag
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
-          mvn versions:set -DnewVersion=$VERSION -DgenerateBackupPoms=false
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          mvn -B -q versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
 
-      # 4. Build do JAR (skip tests em release, rode antes)
-      - name: Build com Maven
-        run: mvn clean package -DskipTests -Pproduction
+      # Testes do ciclo de atualização (processos reais; sem banco).
+      # A suíte completa exige PostgreSQL e roda localmente antes do release.
+      - name: Testes do sistema de atualização
+        run: >
+          mvn -B test
+          -Dtest='SemVerAndManifestTests,UpdaterLifecycleTests,UpdateServiceLifecycleTests'
+          -Dsurefire.failIfNoSpecifiedTests=false
 
-      # 5. Renomeia o JAR para nome padronizado
-      - name: Prepara artefato
+      - name: Build do JAR
+        run: mvn -B clean package -DskipTests
+
+      - name: Prepara asset, checksum e tamanho
         run: |
           mkdir -p staging
-          cp target/*.jar staging/scopel-store.jar
-          echo "${{ env.APP_VERSION }}" > staging/VERSION.txt
+          cp "target/beta-${APP_VERSION}.jar" staging/scopel-store.jar
+          SHA=$(sha256sum staging/scopel-store.jar | cut -d' ' -f1)
+          SIZE=$(stat -c%s staging/scopel-store.jar)
+          echo "$SHA  scopel-store.jar" > staging/scopel-store.jar.sha256
+          echo "APP_SHA256=$SHA" >> "$GITHUB_ENV"
+          echo "APP_SIZE=$SIZE" >> "$GITHUB_ENV"
 
-      # 6. Atualiza version.json na branch main
-      - name: Atualiza version.json
-        run: |
-          cat > version.json <<EOF
-          {
-            "version": "${{ env.APP_VERSION }}",
-            "releaseDate": "$(date -u +%Y-%m-%d)",
-            "minJavaVersion": "21",
-            "changelog": "Release ${{ env.APP_VERSION }}",
-            "mandatory": false,
-            "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/${GITHUB_REF_NAME}/scopel-store.jar"
-          }
-          EOF
-
-      # 7. Cria a Release no GitHub com o JAR anexado
-      - name: Criar Release no GitHub
+      - name: Cria a Release com o JAR anexado
         uses: softprops/action-gh-release@v2
         with:
           name: "Scopel Store ${{ env.APP_VERSION }}"
           body: |
             ## Scopel Store v${{ env.APP_VERSION }}
-            
-            **Data:** ${{ env.APP_VERSION }}
-            
-            ### Download
-            Baixe o `scopel-store.jar` abaixo e substitua o JAR atual.
-            
-            ### Atualização automática
-            O PDV detectará esta versão automaticamente na próxima inicialização.
+
+            SHA-256: `${{ env.APP_SHA256 }}`
+
+            Os PDVs detectam esta versão sozinhos e oferecem **Atualizar e reiniciar**.
           files: |
             staging/scopel-store.jar
-            staging/VERSION.txt
+            staging/scopel-store.jar.sha256
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Só agora que o asset existe é que os PDVs passam a enxergar a versão.
+      - name: Publica version.json na main
+        run: |
+          CHANGELOG=$(git for-each-ref "refs/tags/${GITHUB_REF_NAME}" --format='%(contents:subject)')
+          [ -z "$CHANGELOG" ] && CHANGELOG="Release ${APP_VERSION}"
+          git fetch origin main
+          git checkout -f -B main origin/main
+          jq -n \
+            --arg version "$APP_VERSION" \
+            --arg date "$(date -u +%Y-%m-%d)" \
+            --arg changelog "$CHANGELOG" \
+            --arg sha "$APP_SHA256" \
+            --argjson size "$APP_SIZE" \
+            --arg url "https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/scopel-store.jar" \
+            '{version:$version, releaseDate:$date, minJavaVersion:24, changelog:$changelog,
+              mandatory:false, sha256:$sha, size:$size, downloadUrl:$url}' > version.json
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add version.json
+          git commit -m "chore(release): version.json -> ${APP_VERSION} [skip ci]"
+          git push origin main
