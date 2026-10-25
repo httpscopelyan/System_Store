@@ -31,6 +31,13 @@
                            onAction="#onAddItem" styleClass="code-field"/>
             </VBox>
 
+            <!-- Faixa azul fina do último item lançado — só o nome; não rouba foco (RNF03) -->
+            <VBox fx:id="lastItemDisplay" styleClass="last-item-display"
+                  focusTraversable="false" maxWidth="Infinity">
+                <Label fx:id="lastItemLabel" text="—" styleClass="last-item-name"
+                       focusTraversable="false" wrapText="true" maxWidth="Infinity"/>
+            </VBox>
+
             <!-- Tabela de itens -->
             <TableView fx:id="itemsTable" styleClass="items-table" VBox.vgrow="ALWAYS">
                 <columns>
@@ -62,9 +69,9 @@
         </VBox>
     </center>
 
-    <!-- Painel lateral: TOTAL enorme + finalizar (RNF04) -->
+    <!-- Painel lateral: TOTAL enorme + finalizar (RNF04) + prévia do cupom -->
     <right>
-        <VBox spacing="20" alignment="TOP_CENTER" prefWidth="360.0">
+        <VBox spacing="16" alignment="TOP_CENTER" prefWidth="380.0">
             <padding>
                 <Insets top="18" right="24" bottom="18" left="0"/>
             </padding>
@@ -76,6 +83,14 @@
 
             <Button text="Finalizar Venda (F10)" onAction="#onFinalize"
                     styleClass="finalize-button" maxWidth="Infinity"/>
+
+            <!-- Item 1: prévia do cupom (igual ao que será impresso) -->
+            <VBox spacing="6" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                <Label text="Prévia do cupom — NÃO É DOCUMENTO FISCAL" styleClass="form-section-title"/>
+                <TextArea fx:id="receiptPreview" editable="false" focusTraversable="false"
+                          wrapText="false" styleClass="receipt-preview" maxWidth="Infinity"
+                          VBox.vgrow="ALWAYS"/>
+            </VBox>
         </VBox>
     </right>
 

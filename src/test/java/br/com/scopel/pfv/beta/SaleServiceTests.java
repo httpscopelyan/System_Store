@@ -2,6 +2,7 @@ package br.com.scopel.pfv.beta;
 
 import br.com.scopel.pfv.beta.exception.IllegalSaleStateException;
 import br.com.scopel.pfv.beta.exception.InsufficientPaymentException;
+import br.com.scopel.pfv.beta.exception.InvalidQuantityException;
 import br.com.scopel.pfv.beta.exception.PaymentMethodNotAvailableException;
 import br.com.scopel.pfv.beta.exception.ProductNotfindException;
 import br.com.scopel.pfv.beta.model.CashRegister;
@@ -373,5 +374,172 @@ class SaleServiceTests {
         // RN21: addItem recusado fora de ABERTA
         assertThrows(IllegalSaleStateException.class,
                 () -> saleService.addItem(inPayment, product.getCode(), new BigDecimal("1")));
+    }
+
+    // ---- #G2: quantidade/multiplicador e peso (RN05 / RN07 / RN19) ----
+
+    @Test
+    void addItemUnWithIntegerQuantityIsAccepted() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Sale sale = saleService.openSale(operator, caixa);
+
+        Product product = newProduct("Lata", new BigDecimal("3.00"), new BigDecimal("50.000"), Product.Unidade.UN);
+
+        sale = saleService.addItem(sale, product.getCode(), new BigDecimal("6"));
+
+        assertEquals(1, sale.getItems().size());
+        SaleItem item = sale.getItems().get(0);
+        // RN05: UN inteiro aceito; quantidade normalizada para escala 0
+        assertEquals(0, new BigDecimal("6").compareTo(item.getQuantity()));
+        assertEquals(0, new BigDecimal("18.00").compareTo(item.getTotalPrice()));
+        assertEquals(0, new BigDecimal("18.00").compareTo(sale.getTotal()));
+    }
+
+    @Test
+    void addItemUnWithFractionalQuantityThrows() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Sale sale = saleService.openSale(operator, caixa);
+
+        Product product = newProduct("Sabonete", new BigDecimal("2.50"), new BigDecimal("50.000"), Product.Unidade.UN);
+
+        // RN05: UN não aceita fração
+        assertThrows(InvalidQuantityException.class,
+                () -> saleService.addItem(sale, product.getCode(), new BigDecimal("2.5")));
+        assertTrue(sale.getItems().isEmpty());
+    }
+
+    @Test
+    void addItemUnWithZeroThrows() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Sale sale = saleService.openSale(operator, caixa);
+
+        Product product = newProduct("Vela", new BigDecimal("1.00"), new BigDecimal("50.000"), Product.Unidade.UN);
+
+        // RN05: quantidade zero recusada
+        assertThrows(InvalidQuantityException.class,
+                () -> saleService.addItem(sale, product.getCode(), new BigDecimal("0")));
+        assertTrue(sale.getItems().isEmpty());
+    }
+
+    @Test
+    void addItemUnWithNegativeThrows() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Sale sale = saleService.openSale(operator, caixa);
+
+        Product product = newProduct("Fosforo", new BigDecimal("1.00"), new BigDecimal("50.000"), Product.Unidade.UN);
+
+        // RN05: quantidade negativa recusada
+        assertThrows(InvalidQuantityException.class,
+                () -> saleService.addItem(sale, product.getCode(), new BigDecimal("-2")));
+        assertTrue(sale.getItems().isEmpty());
+    }
+
+    @Test
+    void addItemKgWithThreeDecimalsIsNormalized() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Sale sale = saleService.openSale(operator, caixa);
+
+        Product product = newProduct("Queijo", new BigDecimal("40.00"), new BigDecimal("500.000"), Product.Unidade.KG);
+
+        sale = saleService.addItem(sale, product.getCode(), new BigDecimal("1.250"));
+
+        SaleItem item = sale.getItems().get(0);
+        // RN05: KG aceito, quantidade normalizada em 3 casas
+        assertEquals(0, new BigDecimal("1.250").compareTo(item.getQuantity()));
+        assertEquals(3, item.getQuantity().scale());
+        // 1.250 * 40.00 = 50.00
+        assertEquals(0, new BigDecimal("50.00").compareTo(item.getTotalPrice()));
+        assertEquals(0, new BigDecimal("50.00").compareTo(sale.getTotal()));
+    }
+
+    @Test
+    void addItemKgWithMoreThanThreeDecimalsThrows() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Sale sale = saleService.openSale(operator, caixa);
+
+        Product product = newProduct("Presunto", new BigDecimal("30.00"), new BigDecimal("500.000"), Product.Unidade.KG);
+
+        // RN05: KG aceita no máximo 3 casas decimais
+        assertThrows(InvalidQuantityException.class,
+                () -> saleService.addItem(sale, product.getCode(), new BigDecimal("1.2505")));
+        assertTrue(sale.getItems().isEmpty());
+    }
+
+    @Test
+    void addItemKgWithZeroThrows() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Sale sale = saleService.openSale(operator, caixa);
+
+        Product product = newProduct("Mortadela", new BigDecimal("20.00"), new BigDecimal("500.000"), Product.Unidade.KG);
+
+        // RN05: peso zero recusado
+        assertThrows(InvalidQuantityException.class,
+                () -> saleService.addItem(sale, product.getCode(), new BigDecimal("0")));
+        assertTrue(sale.getItems().isEmpty());
+    }
+
+    @Test
+    void addItemUnFractionIsRejectedBeforeSummingExistingItem() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Sale sale = saleService.openSale(operator, caixa);
+
+        Product product = newProduct("Iogurte", new BigDecimal("3.00"), new BigDecimal("50.000"), Product.Unidade.UN);
+
+        // primeiro item válido (UN 2)
+        final Sale saleRef = saleService.addItem(sale, product.getCode(), new BigDecimal("2"));
+
+        // RN07 + RN05: fração barrada mesmo entrando como parcela de soma
+        assertThrows(InvalidQuantityException.class,
+                () -> saleService.addItem(saleRef, product.getCode(), new BigDecimal("0.5")));
+
+        // item permanece intacto com a quantidade original
+        assertEquals(1, saleRef.getItems().size());
+        assertEquals(0, new BigDecimal("2").compareTo(saleRef.getItems().get(0).getQuantity()));
+        assertEquals(0, new BigDecimal("6.00").compareTo(saleRef.getTotal()));
+    }
+
+    @Test
+    void addSameUnProductSumsIntegerQuantities() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Sale sale = saleService.openSale(operator, caixa);
+
+        Product product = newProduct("Suco", new BigDecimal("4.00"), new BigDecimal("50.000"), Product.Unidade.UN);
+
+        sale = saleService.addItem(sale, product.getCode(), new BigDecimal("2"));
+        sale = saleService.addItem(sale, product.getCode(), new BigDecimal("3"));
+
+        // RN07: linha única, quantidades somadas (2 + 3 = 5)
+        assertEquals(1, sale.getItems().size());
+        SaleItem item = sale.getItems().get(0);
+        assertEquals(0, new BigDecimal("5").compareTo(item.getQuantity()));
+        assertEquals(0, new BigDecimal("20.00").compareTo(item.getTotalPrice()));
+        assertEquals(0, new BigDecimal("20.00").compareTo(sale.getTotal()));
+    }
+
+    @Test
+    void unitPriceStaysFrozenAcrossMultipleQuantities() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Sale sale = saleService.openSale(operator, caixa);
+
+        Product product = newProduct("Manteiga", new BigDecimal("12.00"), new BigDecimal("50.000"), Product.Unidade.UN);
+
+        sale = saleService.addItem(sale, product.getCode(), new BigDecimal("1"));
+        sale = saleService.addItem(sale, product.getCode(), new BigDecimal("4"));
+
+        SaleItem item = sale.getItems().get(0);
+        // RN19: unitPrice permanece o preço do produto no momento da adição
+        assertEquals(0, new BigDecimal("12.00").compareTo(item.getUnitPrice()));
+        assertEquals(0, new BigDecimal("5").compareTo(item.getQuantity()));
+        assertEquals(0, new BigDecimal("60.00").compareTo(item.getTotalPrice()));
     }
 }

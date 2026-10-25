@@ -1,6 +1,7 @@
 package br.com.scopel.pfv.beta.service;
 
 import br.com.scopel.pfv.beta.exception.InvalidPasswordException;
+import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.UserDuplicatedException;
 import br.com.scopel.pfv.beta.exception.UserNotFindException;
 import br.com.scopel.pfv.beta.model.User;
@@ -42,6 +43,21 @@ public class UserService {
             throw new InvalidPasswordException();
         }
         return user;
+    }
+
+    /**
+     * Autoriza uma ação sensível com as credenciais de um gerente (RN08/RF18/RF21).
+     * Reusa a verificação BCrypt de {@link #login} (login inexistente -> UserNotFindException,
+     * senha incorreta -> InvalidPasswordException) e, só então, exige o papel GERENTE.
+     * O operador logado NÃO é trocado: este método apenas devolve o gerente que autorizou.
+     * Nenhuma mensagem de exceção carrega a senha informada.
+     */
+    public User authenticateManager(String managerLogin, String rawPassword) {
+        User authenticatedUser = login(managerLogin, rawPassword);
+        if (authenticatedUser.getRole() != User.Role.GERENTE) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+        return authenticatedUser;
     }
 
     public User modificationRole(String login, User.Role role) {

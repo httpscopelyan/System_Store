@@ -5,7 +5,7 @@
 > agora**, sem precisar da conversa original. Companheiro de `CLAUDE.md`,
 > `TASK.md`, `REVISION.md`, `FIXES.md`.
 >
-> Última atualização do documento: 2026-10-17.
+> Última atualização do documento: 2026-10-20.
 
 ---
 
@@ -192,13 +192,15 @@ A V7 também faz `ALTER sale.status TYPE VARCHAR(20)` para caber `EM_PAGAMENTO`.
 |---|---|---|---|
 | id | Long | BIGINT PK | |
 | sale | Sale (`@ManyToOne`, `@JoinColumn sale_id`) | BIGINT NOT NULL | venda paga |
-| method | enum `PaymentMethod` {DINHEIRO, CARTAO, PIX} | STRING | F1 só processa DINHEIRO |
+| method | enum `PaymentMethod` {DINHEIRO, CARTAO, PIX} | STRING | DINHEIRO/CARTAO/PIX processados (2026-10-20) |
+| cardType | enum `CardType` {DEBITO, CREDITO} (nullable) | VARCHAR(20) | só em pagamento CARTAO (migration V28) |
 | amountReceived | BigDecimal | NUMERIC(10,2) | valor recebido |
 | change | BigDecimal | NUMERIC(10,2) | troco (HALF_UP); só DINHEIRO |
 | createdAt | LocalDateTime | | |
 
 > Migrations do Flyway: **V1** Product, **V2** User, **V3** CashRegister,
-> **V4** CashMovement, **V5** Sale, **V6** SaleItem, **V7** Payment (+ `ALTER sale.status`).
+> **V4** CashMovement, **V5** Sale, **V6** SaleItem, **V7** Payment (+ `ALTER sale.status`),
+> …, **V28** `payment.card_type` (fluxo de cartão — ADR 0013).
 
 ---
 
@@ -386,6 +388,30 @@ Status por módulo:
   addItem fora de ABERTA). Suíte total 36 testes verde (JDK 26); Segurança aprovou.
   A **UI** (`pagamento.fxml` + `PaymentController`, total/troco grandes) **não tem
   teste automatizado** — validar com `mvn javafx:run`. Ver `REVISION.md`.
+- **Fluxo de pagamento guiado + cartão/PIX (2026-10-20, REVISÕES2)** — a tela única
+  deu lugar a um fluxo guiado: seleção 1-Dinheiro / 2-Cartão / 3-PIX em
+  `pagamento.fxml`, com páginas próprias (`pagamento_dinheiro`, `pagamento_cartao`
+  → `pagamento_espera`, `pagamento_pix`; novas `Page`). Service ganhou
+  `payCard(Sale, CardType)` e `payPix(Sale)` (`@Transactional`, só de EM_PAGAMENTO,
+  gravam `Payment` + baixam estoque); enum `CardType {DEBITO, CREDITO}`,
+  `Payment.cardType`, migration V28. Hardware: porta `CardPaymentGateway` +
+  `MockCardPaymentGateway` (@Primary) simulando a Mercado Pago Point (aprova
+  ~2500 ms; `pdv.card.mock.approve-after-millis`); a implementação real (Orders API
+  + polling) fica na F4 (ADR 0013). PIX = copia-e-cola + confirmação manual.
+  **Testes:** unitários puros verdes para `MockCardPaymentGateway` e
+  `buildCashCloseReceipt`; `SaleCardPixHistoryTests` (@SpringBootTest, 8 casos)
+  escrito/compilando, pendente de rodar com Docker + JDK 26.
+- **Prévia do cupom, venda finalizada, fechamento impresso e histórico
+  (2026-10-20)** — prévia só-leitura do cupom na tela de venda
+  (`ReceiptService.buildSaleReceipt`) com "NÃO É DOCUMENTO FISCAL" (RNF15); tela
+  **Venda finalizada** (`venda_finalizada.fxml`) confirmando total/forma/troco;
+  **impressão do fechamento** (`buildCashCloseReceipt`/`printCashCloseReceipt`;
+  `CaixaController.onClose` imprime ao fechar sem derrubar o fechamento em caso de
+  falha — RNF06; `onPrintFechamento` reimprime) — ressalva: ainda sem quebra por
+  forma de pagamento/sangrias; **histórico de vendas** (`historico_vendas.fxml`)
+  via `SaleService.history()`. **Bug corrigido:** itens da venda anterior não
+  persistem mais na nova venda (o `SaleController` singleton passou a limpar
+  `rows`/estado no `initialize()`).
 - **UI básica** — telas de login, caixa (abrir/fechar na mesma tela) e venda
   (bipar/finalizar). Após abrir o caixa, navega para a venda. O **login agora
   recupera o caixa aberto do operador** (`findOpenByOperator`) e o repõe na
@@ -462,6 +488,15 @@ venda → bipar → somar → finalizar → baixa de estoque.
 - **Ambiente de teste exige JDK 24+ e Postgres de pé:** rodar `mvn test` precisa de
   **JDK 24+ (o dev usa JDK 26)** por causa da JavaFX 26 e do container `db_scopel`
   no ar. Com JDK 21 o contexto Spring nem sobe.
+- **Segurança ALTA (pré-existente) — senha do banco em texto puro:** `spring.
+  datasource.password` em texto no `application.properties` e o `.env` foi rastreado
+  no Git (commit 98d4de8). Pendências: `git rm --cached .env`, trocar a senha por
+  `${DB_PASSWORD}` e **rotacionar** a senha do Postgres (está no histórico). O
+  `.gitignore` já ignora `.env`. Ver REVISION.md.
+- **Testes @SpringBootTest de REVISÕES2 não rodados:** `SaleCardPixHistoryTests`
+  (8 casos) compila mas ainda não foi executado contra Docker + JDK 26 (pendente de
+  `mvn test` completo). Os unitários puros (mock de cartão, cupom de fechamento)
+  já estão verdes.
 
 ---
 
@@ -476,13 +511,18 @@ venda → bipar → somar → finalizar → baixa de estoque.
    (2026-10-17) — `main_layout` + `Navigator`/`Page`, 5 páginas padronizadas sem
    `prefSize`, cabeçalho `.page-header`, rotas corrigidas (ADR 0012). Falta a
    validação visual (`mvn javafx:run`) e o refino de CSS "de mercado" das telas.
-4. Tela de **pagamento** (forma de pagamento + troco) — **feita para DINHEIRO**
-   (2026-10-17): service `goToPayment`/`calculateChange`/`pay` testado + tela
-   `pagamento.fxml`. Faltam CARTAO/PIX, pagamento múltiplo (RN18) e impressão
-   (fases seguintes); UI a validar via `mvn javafx:run`.
-5. **Impressão** de cupom + **abertura da gaveta** (escpos-coffee).
+4. Tela de **pagamento** — **fluxo guiado Dinheiro/Cartão/PIX** entregue
+   (2026-10-20): `pay`/`payCard`/`payPix` no service, páginas por forma, prévia do
+   cupom, tela de venda finalizada e histórico de vendas. Cartão/PIX usam
+   `MockCardPaymentGateway` (ADR 0013). Faltam: pagamento múltiplo (RN18),
+   integração real da maquininha (F4), tratamento de pagamento negado na UI,
+   validação visual via `mvn javafx:run` e rodar os testes @SpringBootTest.
+5. **Impressão** de cupom de **venda** + **abertura da gaveta** (escpos-coffee).
+   Fechamento de caixa já imprime (`ReceiptService`); enriquecer com quebra por
+   forma de pagamento/sangrias (exige resumo no service).
 6. **Fiscal**: NFC-e / CF-e SAT (fase 3).
-7. **Pagamento integrado** Mercado Pago Point via API + polling (fase 4).
+7. **Pagamento integrado** Mercado Pago Point via API + polling (fase 4) —
+   substituir o mock por adaptador real de `CardPaymentGateway` (ADR 0013).
 8. Telas de gestão: cadastro/consulta de produtos completo, cadastro de usuários,
    relatórios.
 
@@ -504,6 +544,12 @@ venda → bipar → somar → finalizar → baixa de estoque.
   entre VENDA_ABERTA e FINALIZADA. Transições protegidas no service: `goToPayment`
   (ABERTA + itens → EM_PAGAMENTO), `pay` (EM_PAGAMENTO → FINALIZADA) e guarda no
   `addItem` (só em ABERTA), cada uma recusando a ação fora do estado com exceção.
+  Atualizada em 2026-10-22 (3ª leva): acrescentada a transição EM_PAGAMENTO → ABERTA
+  (`SaleService.reopenForEditing`) para o operador voltar e editar a venda antes de
+  pagar (ex.: item esquecido). Guard recusa ABERTA/FINALIZADA/CANCELADA com
+  `IllegalSaleStateException`; sem `@Transactional` porque EM_PAGAMENTO não grava
+  `Payment` (pagamento atômico em pay/payCard/payPix), logo não há Payment órfão ao
+  reverter. UI: `PaymentController.onVoltar`.
 - **0011 — Persistência de pagamento como entidade `Payment`:** o pagamento é
   modelado como entidade própria (tabela `payment`), não como campos soltos na
   `Sale`. **Opção A** adotada em F1: **um `Payment` por venda** (DINHEIRO), com
@@ -528,6 +574,52 @@ venda → bipar → somar → finalizar → baixa de estoque.
     Produtos), páginas sem `prefWidth/prefHeight` e cabeçalho `.page-header`
     padronizado. **Não** altera schema nem service — mudança só de UI. Validação
     visual pendente (`mvn javafx:run`).
+- **0013 — Fluxo de pagamento guiado + porta `CardPaymentGateway` com mock
+  (2026-10-20):**
+  - **Contexto:** a tela única de pagamento (dinheiro) não escala para cartão/PIX,
+    que têm passos próprios (tipo de cartão, espera da maquininha, copia-e-cola do
+    PIX). A integração real da Mercado Pago Point (Orders API `POST /v1/orders` +
+    polling, exige Access Token + device id em modo PDV — ADR 0007) é pesada,
+    depende de credenciais/hardware e está planejada só para a F4; mas o dev quer
+    desenvolver e validar o **fluxo de UI + regra de negócio** agora, sem depender
+    da maquininha física.
+  - **Decisão:** (1) **Fluxo guiado** por forma — seleção 1-Dinheiro / 2-Cartão /
+    3-PIX em `pagamento.fxml`, cada uma com sua página (`pagamento_dinheiro`,
+    `pagamento_cartao` → `pagamento_espera`, `pagamento_pix`). No service,
+    `pay`/`payCard(Sale, CardType)`/`payPix(Sale)` — `@Transactional`, só a partir
+    de `EM_PAGAMENTO`, gravam `Payment` e baixam estoque (RN09/RN10). (2) **Porta de
+    saída** `hardware/CardPaymentGateway` (`createCharge`/`getStatus`/`cancel`,
+    modelo assíncrono por polling) com adaptador `MockCardPaymentGateway`
+    (`@Primary`) que simula a aprovação (~2500 ms, config
+    `pdv.card.mock.approve-after-millis`). A regra de negócio fica no service; o
+    adaptador físico não toca em regra (RNF13). (3) Modelo: enum `CardType
+    {DEBITO, CREDITO}`, `Payment.cardType` e migration **V28**
+    (`ALTER payment ADD COLUMN card_type VARCHAR(20)`).
+  - **Consequências:** parte da F4 é antecipada só com **mock** — o fluxo e a regra
+    ficam prontos e testáveis sem a maquininha. A implementação **real** da Mercado
+    Pago (Orders API + polling, credenciais + device id) entra depois **sem mexer
+    nos services**: basta um novo bean implementando `CardPaymentGateway` que
+    substitua o `@Primary`. PIX fica em **copia-e-cola + confirmação manual** (sem
+    conciliação automática) e `cancel` (RF31) já existe no mock, faltando o fio na
+    UI. Testes unitários puros cobrem o mock e `buildCashCloseReceipt`;
+    `SaleCardPixHistoryTests` (@SpringBootTest, 8 casos) está escrito/compilando,
+    pendente de rodar com Docker + JDK 26.
+- **0014 — Venda ABERTA é rascunho operacional não-fiscal (interpretação do RN09)
+  (2026-10-22):**
+  - **Status:** Aceito — 2026-10-22.
+  - **Contexto:** `SaleService.openSale` persiste a venda ABERTA imediatamente (não é
+    só memória), o que gerava tensão aparente com RN09 ("venda gravada após
+    pagamento") e causava vendas ABERTA órfãs. A 2ª leva passou a reaproveitar a venda
+    ABERTA/EM_PAGAMENTO via `resumeOrOpenSale` em vez de abrir nova a cada navegação.
+  - **Decisão:** ABERTA (e EM_PAGAMENTO) = rascunho operacional NÃO-FISCAL, persistido
+    só para dar durabilidade ao carrinho em andamento (restauração ao voltar à tela;
+    recuperação de caixa aberto). "Gravada" em RN09 = FINALIZADA (estoque baixado +
+    `Payment`; no futuro, NFC-e emitida). CANCELADA = registro preservado de venda não
+    concretizada (RN17). Leituras de faturamento filtram por FINALIZADA (como
+    `history()` já faz); ABERTA nunca entra em números fiscais.
+  - **Consequências:** (a) legitima `openSale`/`resumeOrOpenSale` persistir ABERTA sem
+    ferir RN09; (b) exige higiene do passivo órfão (#G-orfas); (c) orienta o fiscal
+    (F3): gatilho de emissão é a finalização, não a abertura.
 
 ---
 
