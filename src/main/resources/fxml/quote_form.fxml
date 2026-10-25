@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.QuoteController"
+            stylesheets="@../css/styles.css" styleClass="inicio-root">
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Orçamentos" styleClass="page-header-title"/>
+            <Label text="Monte e converta em venda" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="14">
+            <padding><Insets top="18" right="28" bottom="18" left="28"/></padding>
+
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Label text="Cliente (ID, opcional):"/>
+                <TextField fx:id="customerIdField" styleClass="text-input"/>
+                <Label text="Validade:"/>
+                <DatePicker fx:id="validUntilField"/>
+                <Button text="Abrir orçamento" onAction="#onOpen" styleClass="success-button"/>
+                <Label fx:id="statusLabel" text="Nenhum orçamento aberto"/>
+            </HBox>
+
+            <VBox styleClass="form-card" spacing="10">
+                <Label text="Adicionar item" styleClass="form-section-title"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <TextField fx:id="codeField" promptText="Código do produto" styleClass="text-input" HBox.hgrow="ALWAYS"/>
+                    <TextField fx:id="qtyField" promptText="Qtd" styleClass="text-input"/>
+                    <Button text="Adicionar" onAction="#onAddItem"/>
+                </HBox>
+            </VBox>
+
+            <TableView fx:id="table" prefHeight="260">
+                <columns>
+                    <TableColumn fx:id="colProduct" text="Produto" prefWidth="300"/>
+                    <TableColumn fx:id="colQty" text="Qtd" prefWidth="90"/>
+                    <TableColumn fx:id="colPrice" text="Preço" prefWidth="90"/>
+                    <TableColumn fx:id="colTotal" text="Total" prefWidth="100"/>
+                </columns>
+            </TableView>
+
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Label fx:id="totalLabel" styleClass="form-section-title" text="Total: R$ 0,00"/>
+                <Button text="Converter em venda" onAction="#onConvert" styleClass="success-button"/>
+            </HBox>
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+</BorderPane>

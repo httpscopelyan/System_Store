@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.VendaFinalizadaController"
+            stylesheets="@../css/styles.css"
+            styleClass="sale-root"
+            onKeyPressed="#onKey">
+
+    <center>
+        <VBox spacing="26" alignment="CENTER">
+            <padding>
+                <Insets top="40" right="40" bottom="40" left="40"/>
+            </padding>
+
+            <VBox styleClass="finalized-panel" spacing="6" alignment="CENTER" maxWidth="Infinity">
+                <Label text="✓ VENDA FINALIZADA" styleClass="finalized-title"/>
+            </VBox>
+
+            <VBox spacing="4" alignment="CENTER">
+                <Label text="TOTAL PAGO" styleClass="finalized-caption"/>
+                <Label fx:id="totalLabel" text="R$ 0,00" styleClass="finalized-value"/>
+            </VBox>
+
+            <VBox spacing="4" alignment="CENTER">
+                <Label text="FORMA DE PAGAMENTO" styleClass="finalized-caption"/>
+                <Label fx:id="methodLabel" text="-" styleClass="finalized-value"/>
+            </VBox>
+
+            <VBox spacing="4" alignment="CENTER">
+                <Label fx:id="changeCaption" text="TROCO" styleClass="finalized-caption"/>
+                <Label fx:id="changeLabel" text="R$ 0,00" styleClass="finalized-value"/>
+            </VBox>
+
+            <HBox spacing="18" alignment="CENTER">
+                <Button fx:id="novaVendaButton" text="Nova venda (Enter)" onAction="#onNovaVenda"
+                        styleClass="finalize-button"/>
+                <Button text="Início" onAction="#onInicio" styleClass="secondary-button"/>
+            </HBox>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox styleClass="sale-footer" spacing="8" alignment="CENTER_LEFT">
+            <Label text="Enter" styleClass="key-hint"/>
+            <Label text="Nova venda"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

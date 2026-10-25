@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.EditProductController"
+            stylesheets="@../css/styles.css"
+            styleClass="inicio-root">
+
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Produtos — Alterar" styleClass="page-header-title"/>
+            <Label text="Edição das informações do produto" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="18">
+            <padding>
+                <Insets top="22" right="28" bottom="22" left="28"/>
+            </padding>
+
+            <VBox styleClass="form-card" spacing="14" maxWidth="Infinity">
+                <Label text="Dados do produto" styleClass="form-section-title"/>
+
+                <HBox spacing="16">
+                    <VBox spacing="6">
+                        <Label text="Código (não editável)" styleClass="form-label"/>
+                        <TextField fx:id="codeField" editable="false" disable="true"
+                                   styleClass="text-input"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Estoque atual" styleClass="form-label"/>
+                        <Label fx:id="stockLabel" text="-" styleClass="form-label"/>
+                        <Label text="(altere pela Entrada/Ajuste de estoque)" styleClass="form-label"/>
+                    </VBox>
+                </HBox>
+
+                <VBox spacing="6">
+                    <Label text="Nome do produto" styleClass="form-label"/>
+                    <TextField fx:id="descriptionField" promptText="Descrição"
+                               styleClass="text-input" maxWidth="Infinity"/>
+                </VBox>
+
+                <HBox spacing="16" alignment="BOTTOM_LEFT">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Unidade" styleClass="form-label"/>
+                        <ComboBox fx:id="unitBox" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Categoria" styleClass="form-label"/>
+                        <TextField fx:id="categoryField" promptText="Ex: Bebidas"
+                                   styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Estoque mínimo" styleClass="form-label"/>
+                        <TextField fx:id="minStockField" promptText="Ex: 5"
+                                   styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+
+                <Label text="Formação de preço — preencha custo + margem (calcula o preço) ou digite o preço direto"
+                       styleClass="form-label"/>
+                <HBox spacing="16">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Custo" styleClass="form-label"/>
+                        <TextField fx:id="costField" promptText="Ex: 6.50"
+                                   styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Margem (%)" styleClass="form-label"/>
+                        <TextField fx:id="margemField" promptText="Ex: 30"
+                                   styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Preço de venda" styleClass="form-label"/>
+                        <TextField fx:id="priceField" promptText="Ex: 9.90"
+                                   styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="16" alignment="CENTER_LEFT">
+                    <Label text="Lucro:" styleClass="form-label"/>
+                    <Label fx:id="lucroLabel" text="-" styleClass="form-section-title"/>
+                    <CheckBox fx:id="activeBox" text="Ativo">
+                        <padding>
+                            <Insets top="8" bottom="8"/>
+                        </padding>
+                    </CheckBox>
+                </HBox>
+            </VBox>
+
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button onAction="#onSave" text="Salvar" styleClass="success-button"/>
+                <Button onAction="#onCancel" text="Cancelar" styleClass="danger-button"/>
+            </HBox>
+
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+
+</BorderPane>

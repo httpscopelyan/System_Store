@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.ReportViewController"
+            stylesheets="@../css/styles.css" styleClass="inicio-root">
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Relatórios" styleClass="page-header-title"/>
+            <Label text="Resumo do movimento por período" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="14">
+            <padding><Insets top="18" right="28" bottom="18" left="28"/></padding>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Label text="De:"/>
+                <DatePicker fx:id="startField"/>
+                <Label text="Até:"/>
+                <DatePicker fx:id="endField"/>
+                <Button text="Gerar" onAction="#onGenerate" styleClass="success-button"/>
+            </HBox>
+            <Label fx:id="summaryLabel" styleClass="form-section-title" wrapText="true"/>
+            <TextArea fx:id="resultArea" editable="false" prefHeight="380" styleClass="text-input"/>
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+</BorderPane>

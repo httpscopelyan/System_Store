@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.ConfigFormController"
+            stylesheets="@../css/styles.css" styleClass="inicio-root">
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Configurações (ADM)" styleClass="page-header-title"/>
+            <Label text="Parâmetros do sistema e PIX" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="inicio-root">
+            <VBox spacing="18">
+                <padding><Insets top="22" right="28" bottom="22" left="28"/></padding>
+
+                <VBox styleClass="form-card" spacing="12" maxWidth="Infinity">
+                    <Label text="Operação" styleClass="form-section-title"/>
+                    <CheckBox fx:id="repeatItemBox" text="Pode repetir item na venda"/>
+                    <CheckBox fx:id="negativeStockBox" text="Vender com estoque negativo"/>
+                    <CheckBox fx:id="allowCreditBox" text="Permitir venda a prazo (crediário)"/>
+                    <VBox spacing="6">
+                        <Label text="Limite de desconto sem gerente (%)" styleClass="form-label"/>
+                        <TextField fx:id="discountLimitField" styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Nome da loja (cupom)" styleClass="form-label"/>
+                        <TextField fx:id="storeNameField" styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                </VBox>
+
+                <VBox styleClass="form-card" spacing="12" maxWidth="Infinity">
+                    <Label text="PIX" styleClass="form-section-title"/>
+                    <VBox spacing="6">
+                        <Label text="Chave PIX" styleClass="form-label"/>
+                        <TextField fx:id="pixKeyField" styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <HBox spacing="16">
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="Nome do recebedor" styleClass="form-label"/>
+                            <TextField fx:id="pixNameField" styleClass="text-input" maxWidth="Infinity"/>
+                        </VBox>
+                        <VBox spacing="6" HBox.hgrow="ALWAYS">
+                            <Label text="Cidade" styleClass="form-label"/>
+                            <TextField fx:id="pixCityField" styleClass="text-input" maxWidth="Infinity"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <VBox styleClass="form-card" spacing="12" maxWidth="Infinity">
+                    <Label text="Aparência (Tema)" styleClass="form-section-title"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label text="Tema:" styleClass="form-label"/>
+                        <ComboBox fx:id="themeBox"/>
+                        <Label text="classic / sky / turquoise / silver / dark / navy" styleClass="form-label"/>
+                    </HBox>
+                    <CheckBox fx:id="fullscreenBox" text="Tela cheia (sem bordas) — ESC sai"/>
+                </VBox>
+
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Button onAction="#onSave" text="Salvar configurações" styleClass="success-button"/>
+                </HBox>
+                <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

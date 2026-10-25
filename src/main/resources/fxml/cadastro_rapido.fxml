@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.QuickProductController"
+      stylesheets="@../css/styles.css"
+      styleClass="login-card" spacing="16" maxWidth="420" prefWidth="420">
+
+    <padding>
+        <Insets top="22" right="24" bottom="22" left="24"/>
+    </padding>
+
+    <Label text="Cadastro rápido de produto" styleClass="login-card-title"/>
+    <Label text="Código não encontrado. Informe nome e preço para cadastrar e depois bipe novamente."
+           wrapText="true" styleClass="form-label"/>
+
+    <VBox spacing="6">
+        <Label text="Código (código de barras)" styleClass="form-label"/>
+        <TextField fx:id="codeField" editable="false" styleClass="text-input" maxWidth="Infinity"/>
+    </VBox>
+
+    <VBox spacing="6">
+        <Label text="Nome" styleClass="form-label"/>
+        <TextField fx:id="descriptionField" promptText="Nome do produto"
+                   styleClass="text-input" maxWidth="Infinity"/>
+    </VBox>
+
+    <VBox spacing="6">
+        <Label text="Preço (R$)" styleClass="form-label"/>
+        <TextField fx:id="priceField" promptText="0,00" onAction="#onConfirm"
+                   styleClass="text-input" maxWidth="Infinity"/>
+    </VBox>
+
+    <VBox spacing="6">
+        <Label text="Unidade" styleClass="form-label"/>
+        <ComboBox fx:id="unitBox" maxWidth="Infinity"/>
+    </VBox>
+
+    <Label fx:id="errorLabel" styleClass="form-message" wrapText="true"
+           style="-fx-text-fill: #c62828;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cancelar (Esc)" onAction="#onCancel" styleClass="secondary-button"/>
+        <Button text="Salvar (Enter)" onAction="#onConfirm"
+                styleClass="primary-button" defaultButton="true"/>
+    </HBox>
+
+</VBox>

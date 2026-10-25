@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.PriceCheckController"
+            stylesheets="@../css/styles.css"
+            styleClass="sale-root">
+
+    <!-- Cabeçalho azul-marinho padrão das páginas -->
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Consulta de Preço — Mercado Scopel" styleClass="page-header-title"/>
+            <Label text="Consulta rápida (F1) — não registra venda" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="16">
+            <padding>
+                <Insets top="18" right="24" bottom="18" left="24"/>
+            </padding>
+
+            <!-- Aviso inequívoco: esta tela não vende -->
+            <Label text="SÓ CONSULTA — NÃO É VENDA" styleClass="price-check-warning" maxWidth="Infinity"/>
+
+            <!-- Busca por código (foco inicial) -->
+            <VBox spacing="6">
+                <Label text="Código de barras" styleClass="code-label"/>
+                <TextField fx:id="codeField" promptText="Bipe ou digite o código e Enter"
+                           onAction="#onSearch" styleClass="code-field"/>
+            </VBox>
+
+            <!-- Busca opcional por nome (RF05) -->
+            <VBox spacing="6">
+                <Label text="Buscar por nome (opcional)" styleClass="code-label"/>
+                <TextField fx:id="nameField" promptText="Parte do nome do produto e Enter"
+                           onAction="#onSearch" styleClass="text-input"/>
+            </VBox>
+
+            <!-- Resultado em destaque -->
+            <VBox styleClass="price-check-result" spacing="6" maxWidth="Infinity" VBox.vgrow="ALWAYS">
+                <Label fx:id="descriptionLabel" text="—" styleClass="price-check-description"
+                       wrapText="true" maxWidth="Infinity"/>
+                <Label fx:id="priceLabel" text="R$ 0,00" styleClass="price-check-price"/>
+                <Label fx:id="unitLabel" text="" styleClass="price-check-unit"/>
+            </VBox>
+
+            <Label fx:id="statusLabel" styleClass="sale-status"/>
+
+            <Button text="Voltar (Esc)" onAction="#onBack" styleClass="secondary-button"/>
+        </VBox>
+    </center>
+
+</BorderPane>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.PagamentoEsperaController"
+            stylesheets="@../css/styles.css"
+            styleClass="sale-root"
+            onKeyPressed="#onKey">
+
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Pagamento em Cartão — Mercado Scopel" styleClass="page-header-title"/>
+            <Label text="Confirmação manual" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="24" alignment="CENTER">
+            <padding>
+                <Insets top="40" right="40" bottom="40" left="40"/>
+            </padding>
+
+            <Label text="Passe o cartão na maquininha e confirme a aprovação" styleClass="finalized-caption"/>
+
+            <VBox styleClass="total-panel" spacing="4" maxWidth="Infinity">
+                <Label text="TOTAL" styleClass="total-caption"/>
+                <Label fx:id="totalLabel" text="R$ 0,00" styleClass="total-value"/>
+            </VBox>
+
+            <HBox spacing="10" alignment="CENTER">
+                <Label text="Tipo:" styleClass="finalized-caption"/>
+                <Label fx:id="typeLabel" text="-" styleClass="finalized-caption"/>
+            </HBox>
+
+            <Label fx:id="statusLabel" styleClass="sale-status"/>
+
+            <HBox spacing="12" alignment="CENTER">
+                <Button text="Confirmar (ENTER)" onAction="#onConfirm" styleClass="primary-button" defaultButton="true"/>
+                <Button text="Cancelar (ESC)" onAction="#onCancel" styleClass="danger-button"/>
+            </HBox>
+        </VBox>
+    </center>
+
+</BorderPane>

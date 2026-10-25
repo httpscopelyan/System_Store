@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.PriceTableController"
+            stylesheets="@../css/styles.css" styleClass="inicio-root">
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Tabelas de Preço" styleClass="page-header-title"/>
+            <Label text="Ex.: Varejo, Atacado" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="14">
+            <padding><Insets top="18" right="28" bottom="18" left="28"/></padding>
+
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <TextField fx:id="tableNameField" promptText="Nova tabela" styleClass="text-input"/>
+                <Button text="Criar tabela" onAction="#onCreateTable"/>
+                <Label text="Tabela:"/>
+                <ComboBox fx:id="tableBox"/>
+                <Button text="Carregar" onAction="#onLoad"/>
+            </HBox>
+
+            <VBox styleClass="form-card" spacing="10">
+                <Label text="Definir preço do produto na tabela" styleClass="form-section-title"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <TextField fx:id="productCodeField" promptText="Código do produto" styleClass="text-input" HBox.hgrow="ALWAYS"/>
+                    <TextField fx:id="priceField" promptText="Preço" styleClass="text-input"/>
+                    <Button text="Definir" onAction="#onSetPrice" styleClass="success-button"/>
+                </HBox>
+            </VBox>
+
+            <TableView fx:id="table" prefHeight="300">
+                <columns>
+                    <TableColumn fx:id="colProduct" text="Produto" prefWidth="320"/>
+                    <TableColumn fx:id="colPrice" text="Preço" prefWidth="120"/>
+                </columns>
+            </TableView>
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+</BorderPane>

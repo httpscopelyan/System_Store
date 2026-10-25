@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.PriceAdjustController"
+            stylesheets="@../css/styles.css" styleClass="inicio-root">
+    <top>
+        <VBox styleClass="page-header">
+            <Label text="Preços — Ajuste em massa" styleClass="page-header-title"/>
+            <Label text="Reajusta o preço de venda por percentual" styleClass="page-header-subtitle"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="18">
+            <padding><Insets top="22" right="28" bottom="22" left="28"/></padding>
+            <VBox styleClass="form-card" spacing="14" maxWidth="Infinity">
+                <HBox spacing="16">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Percentual (%)" styleClass="form-label"/>
+                        <TextField fx:id="percentField" promptText="Ex: 10 ou -5" styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Categoria (vazio = todos)" styleClass="form-label"/>
+                        <TextField fx:id="categoryField" styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+                <Label text="+10 aumenta 10%, -5 reduz 5%. Não altera vendas passadas (preço congelado)."
+                       styleClass="form-label" wrapText="true"/>
+            </VBox>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button onAction="#onApply" text="Aplicar ajuste" styleClass="success-button"/>
+            </HBox>
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+</BorderPane>

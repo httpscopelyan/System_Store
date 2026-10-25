@@ -1,0 +1,39 @@
+/* Tema SKY — azul claro, liso (família VCL Styles do PDV Prático). Override. */
+
+.top-bar { -fx-background-color: linear-gradient(to bottom, #5a9bd4, #3e7ab0); }
+
+.menu-item:hover { -fx-background-color: #e1eef8; -fx-text-fill: #2a5a86; }
+
+.page-header, .sale-header, .panel-header {
+    -fx-background-color: linear-gradient(to right, #3e7ab0, #5a9bd4);
+}
+.page-header-subtitle, .sale-header-subtitle, .panel-header-subtitle { -fx-text-fill: #e3eef8; }
+
+.code-field { -fx-text-fill: #2a5a86; -fx-border-color: #4a90d9; }
+.code-field:focused { -fx-border-color: #3e7ab0; -fx-effect: dropshadow(gaussian, rgba(62,122,176,0.35), 8, 0, 0, 0); }
+
+.items-table .column-header-background { -fx-background-color: #3e7ab0; }
+.items-table .table-row-cell:selected { -fx-background-color: #cfe2f3; -fx-text-fill: #1e4568; }
+
+.total-panel { -fx-background-color: linear-gradient(to right, #3e7ab0, #5a9bd4); }
+.total-caption { -fx-text-fill: #e3eef8; }
+
+.sale-status { -fx-text-fill: #2a5a86; }
+.sale-footer { -fx-background-color: #3e7ab0; }
+.sale-footer .label { -fx-text-fill: #e3eef8; }
+.key-hint { -fx-background-color: #4a90d9; }
+
+.login-root { -fx-background-color: linear-gradient(to bottom, #6aa6d8, #3e7ab0); }
+.login-brand-subtitle { -fx-text-fill: #e3eef8; }
+.login-card-title { -fx-text-fill: #2a5a86; }
+
+.brand-title { -fx-text-fill: #2a5a86; }
+.form-section-title { -fx-text-fill: #2a5a86; }
+.form-message { -fx-text-fill: #2a5a86; }
+
+.primary-button { -fx-background-color: #3e7ab0; }
+.primary-button:hover { -fx-background-color: #2a5a86; }
+.secondary-button { -fx-text-fill: #2a5a86; -fx-border-color: #4a90d9; }
+.secondary-button:hover { -fx-background-color: #e1eef8; }
+
+.brand-bar { -fx-background-color: #3e7ab0; }

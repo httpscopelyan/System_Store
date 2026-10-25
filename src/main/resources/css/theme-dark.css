@@ -1,0 +1,62 @@
+/* Tema DARK (Cyan Night) — fundo escuro, texto claro, acentos ciano. Override. */
+
+.app-shell, .inicio-root, .sale-root { -fx-background-color: #1b242b; }
+
+.side-menu { -fx-background-color: #263038; -fx-border-color: transparent #3a4650 transparent transparent; }
+.menu-group { -fx-text-fill: #9fb0ba; }
+.menu-item { -fx-text-fill: #dde6ec; }
+.menu-item:hover { -fx-background-color: #2f3b44; -fx-text-fill: #14a2ad; }
+
+.center-area { -fx-background-color: #263038; }
+
+.status-bar { -fx-background-color: #202a31; -fx-border-color: #3a4650 transparent transparent transparent; }
+.status-bar .label { -fx-text-fill: #9fb0ba; }
+
+.top-bar { -fx-background-color: linear-gradient(to bottom, #0e7c86, #0a5a61); }
+
+.page-header, .sale-header, .panel-header {
+    -fx-background-color: linear-gradient(to right, #0a5a61, #0e7c86);
+}
+.page-header-subtitle, .sale-header-subtitle, .panel-header-subtitle { -fx-text-fill: #bfe6ea; }
+
+.code-field { -fx-background-color: #263038; -fx-text-fill: #dde6ec; -fx-border-color: #14a2ad; }
+.code-field:focused { -fx-border-color: #14a2ad; }
+
+.items-table { -fx-background-color: #263038; -fx-border-color: #3a4650; }
+.items-table .column-header-background { -fx-background-color: #0e7c86; }
+.items-table .table-cell { -fx-text-fill: #dde6ec; }
+.items-table .table-row-cell { -fx-background-color: #263038; }
+.items-table .table-row-cell:odd { -fx-background-color: #2f3b44; }
+.items-table .table-row-cell:selected { -fx-background-color: #15424a; -fx-text-fill: #cdeef1; }
+
+.total-panel { -fx-background-color: linear-gradient(to right, #0a5a61, #0e7c86); }
+.total-caption { -fx-text-fill: #bfe6ea; }
+
+.sale-status { -fx-text-fill: #14a2ad; }
+.sale-footer { -fx-background-color: #0a5a61; }
+.sale-footer .label { -fx-text-fill: #bfe6ea; }
+.key-hint { -fx-background-color: #14a2ad; }
+
+.login-root { -fx-background-color: linear-gradient(to bottom, #0e7c86, #11202a); }
+.login-card { -fx-background-color: #263038; }
+.login-card-title { -fx-text-fill: #dde6ec; }
+.login-brand-subtitle { -fx-text-fill: #bfe6ea; }
+
+.brand-title { -fx-text-fill: #dde6ec; }
+.brand-subtitle { -fx-text-fill: #9fb0ba; }
+
+.form-card { -fx-background-color: #263038; -fx-border-color: #3a4650; }
+.form-card .label { -fx-text-fill: #dde6ec; }
+.form-section-title { -fx-text-fill: #14a2ad; }
+.form-label { -fx-text-fill: #9fb0ba; }
+.form-message { -fx-text-fill: #14a2ad; }
+
+.text-input { -fx-background-color: #263038; -fx-text-fill: #dde6ec; -fx-border-color: #3a4650; }
+.text-input:focused { -fx-border-color: #14a2ad; }
+
+.primary-button { -fx-background-color: #0e7c86; }
+.primary-button:hover { -fx-background-color: #0a5a61; }
+.secondary-button { -fx-background-color: #263038; -fx-text-fill: #dde6ec; -fx-border-color: #14a2ad; }
+.secondary-button:hover { -fx-background-color: #2f3b44; }
+
+.brand-bar { -fx-background-color: #0a5a61; }
