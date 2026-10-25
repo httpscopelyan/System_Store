@@ -49,3 +49,5 @@ ANALISE-*.md
 ### Python test cache ###
 __pycache__/
 *.pyc
+
+backup/

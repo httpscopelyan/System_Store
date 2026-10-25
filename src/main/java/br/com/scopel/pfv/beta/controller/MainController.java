@@ -5,11 +5,16 @@ import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.User;
+import br.com.scopel.pfv.beta.service.UpdateService;
+import br.com.scopel.pfv.beta.update.UpdateInfo;
+import javafx.application.Platform;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -35,8 +40,10 @@ public class MainController {
 
     private final Navigator navigator;
     private final UserSession userSession;
+    private final UpdateService updateService;
 
     @FXML private BorderPane root;
+    @FXML private Button updateButton;
     @FXML private Button configButton;
     @FXML private Label dateTimeLabel;
     @FXML private Label userLabel;
@@ -48,9 +55,10 @@ public class MainController {
     // Limpa a dica discreta da barra de status depois de alguns segundos.
     private Timeline hintClear;
 
-    public MainController(Navigator navigator, UserSession userSession) {
+    public MainController(Navigator navigator, UserSession userSession, UpdateService updateService) {
         this.navigator = navigator;
         this.userSession = userSession;
+        this.updateService = updateService;
     }
 
     @FXML
@@ -73,6 +81,95 @@ public class MainController {
 
         startClock();
         setupShortcuts();
+        setupUpdateNotice();
+    }
+
+    // ---- Atualização remota -------------------------------------------------
+
+    private void setupUpdateNotice() {
+        updateService.addListener(info -> Platform.runLater(() -> showUpdateAvailable(info)));
+        UpdateInfo pending = updateService.getLatestUpdate();
+        if (pending != null) {
+            showUpdateAvailable(pending);
+        }
+        // Resultado de uma tentativa anterior (ex.: rollback) — mostrado uma única vez.
+        Platform.runLater(() -> updateService.consumeLastResult()
+                .filter(r -> !r.isSuccess())
+                .ifPresent(r -> {
+                    Alert alert = new Alert("ROLLED_BACK".equals(r.status())
+                            ? Alert.AlertType.WARNING : Alert.AlertType.ERROR);
+                    alert.setTitle("Atualização");
+                    alert.setHeaderText("A atualização para a versão " + r.targetVersion() + " não foi concluída");
+                    alert.setContentText(("ROLLED_BACK".equals(r.status())
+                            ? "A versão anterior foi restaurada e o sistema segue funcionando normalmente.\n\n"
+                            : "") + r.message());
+                    alert.show();
+                }));
+    }
+
+    private void showUpdateAvailable(UpdateInfo info) {
+        updateButton.setText("⬆ Atualizar e reiniciar (v" + info.version() + ")");
+        updateButton.setDisable(false);
+        updateButton.setVisible(true);
+        updateButton.setManaged(true);
+    }
+
+    /** Baixa, valida e reinicia o PDV na versão nova (o atualizador externo faz a troca). */
+    @FXML
+    public void onUpdateAndRestart() {
+        UpdateInfo info = updateService.getLatestUpdate();
+        if (info == null || updateService.isUpdateInProgress()) {
+            return;
+        }
+        if (hasSaleInProgress()) {
+            showHint("Finalize ou cancele a venda antes de atualizar");
+            return;
+        }
+        ButtonType go = new ButtonType("Atualizar e reiniciar", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "O PDV será fechado e reaberto automaticamente na versão " + info.version() + ".\n"
+                        + "Seus dados e configurações são preservados.\n\n"
+                        + (info.changelog().isBlank() ? "" : "Novidades: " + info.changelog()),
+                go, ButtonType.CANCEL);
+        confirm.setTitle("Atualização disponível");
+        confirm.setHeaderText("Versão " + updateService.getCurrentVersion() + " → " + info.version());
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != go) {
+            return;
+        }
+
+        updateButton.setDisable(true);
+        updateButton.setText("Baixando e verificando atualização...");
+        Thread worker = new Thread(() -> {
+            try {
+                updateService.applyUpdateAndRestart(this::shutdownApplication);
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    showUpdateAvailable(info);
+                    Alert error = new Alert(Alert.AlertType.ERROR);
+                    error.setTitle("Atualização");
+                    error.setHeaderText("Não foi possível atualizar agora");
+                    error.setContentText(e.getMessage() + "\n\nO sistema continua na versão atual.");
+                    error.show();
+                });
+            }
+        }, "update-apply");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    /** Encerramento gracioso (fecha o contexto Spring em stop()); garante a saída do processo. */
+    private void shutdownApplication() {
+        Platform.runLater(Platform::exit);
+        Thread fallback = new Thread(() -> {
+            try {
+                Thread.sleep(15_000);
+            } catch (InterruptedException ignored) {
+                return;
+            }
+            System.exit(0);
+        }, "update-exit-fallback");
+        fallback.setDaemon(true);
+        fallback.start();
     }
 
     private void refreshCaixaStatus() {
