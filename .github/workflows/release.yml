@@ -1,0 +1,89 @@
+# =====================================================================
+# GitHub Actions — Build & Release automático do Scopel Store PDV
+# =====================================================================
+# Dispara quando uma tag no formato v*.*.* é pushada (ex: v1.0.0).
+# Faz o build do JAR com Maven e publica como GitHub Release.
+# O app instalado nos clientes consulta essa Release para atualizar.
+# =====================================================================
+
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout do código
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # 2. Configura JDK 21
+      - name: Configura JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. Injeta a versão da tag no pom.xml
+      - name: Define versão a partir da tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+          mvn versions:set -DnewVersion=$VERSION -DgenerateBackupPoms=false
+
+      # 4. Build do JAR (skip tests em release, rode antes)
+      - name: Build com Maven
+        run: mvn clean package -DskipTests -Pproduction
+
+      # 5. Renomeia o JAR para nome padronizado
+      - name: Prepara artefato
+        run: |
+          mkdir -p staging
+          cp target/*.jar staging/scopel-store.jar
+          echo "${{ env.APP_VERSION }}" > staging/VERSION.txt
+
+      # 6. Atualiza version.json na branch main
+      - name: Atualiza version.json
+        run: |
+          cat > version.json <<EOF
+          {
+            "version": "${{ env.APP_VERSION }}",
+            "releaseDate": "$(date -u +%Y-%m-%d)",
+            "minJavaVersion": "21",
+            "changelog": "Release ${{ env.APP_VERSION }}",
+            "mandatory": false,
+            "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/${GITHUB_REF_NAME}/scopel-store.jar"
+          }
+          EOF
+
+      # 7. Cria a Release no GitHub com o JAR anexado
+      - name: Criar Release no GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Scopel Store ${{ env.APP_VERSION }}"
+          body: |
+            ## Scopel Store v${{ env.APP_VERSION }}
+            
+            **Data:** ${{ env.APP_VERSION }}
+            
+            ### Download
+            Baixe o `scopel-store.jar` abaixo e substitua o JAR atual.
+            
+            ### Atualização automática
+            O PDV detectará esta versão automaticamente na próxima inicialização.
+          files: |
+            staging/scopel-store.jar
+            staging/VERSION.txt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

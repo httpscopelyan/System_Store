@@ -36,3 +36,16 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Sistema de Atualização ###
+updates/
+*.jar.tmp
+
+### Agentes IA — não commitar ###
+.claude/
+AUDITORIA-*.md
+ANALISE-*.md
+
+### Python test cache ###
+__pycache__/
+*.pyc
