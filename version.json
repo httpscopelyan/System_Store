@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "releaseDate": "2026-10-25",
+  "minJavaVersion": "21",
+  "changelog": "Versão inicial do PDV Scopel Store",
+  "mandatory": false,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/latest/download/scopel-store.jar"
+}
