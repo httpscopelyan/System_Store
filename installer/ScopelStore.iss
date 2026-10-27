@@ -46,7 +46,11 @@ Name: "{app}"; Permissions: users-modify
 Source: "{#AppSourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
 Source: "{#PgInstaller}"; DestDir: "{tmp}"; DestName: "pg-setup.exe"; Flags: deleteafterinstall; Check: NeedsPostgres
 
+[Tasks]
+Name: "startup"; Description: "Iniciar o Scopel Store junto com o Windows"; GroupDescription: "Opções:"
+
 [Icons]
+Name: "{commonstartup}\Scopel Store"; Filename: "{app}\Scopel Store.exe"; WorkingDir: "{app}"; Tasks: startup
 Name: "{autodesktop}\Scopel Store"; Filename: "{app}\Scopel Store.exe"; WorkingDir: "{app}"
 Name: "{autoprograms}\Scopel Store"; Filename: "{app}\Scopel Store.exe"; WorkingDir: "{app}"
 
