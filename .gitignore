@@ -51,3 +51,6 @@ __pycache__/
 *.pyc
 
 backup/
+
+# Saída do jpackage/instalador (privado)
+dist/

@@ -25,6 +25,16 @@ Dois modos, o mesmo updater:
 
 O updater é um processo separado que troca o arquivo `.jar` depois que o PDV fecha.
 
+### Instalador completo (privado, para a primeira instalação)
+
+`scripts/build-installer.ps1` (Inno Setup 6) gera `ScopelStore-Instalador-X.Y.Z.exe` (~470 MB): instala o
+app em `C:\ScopelStore` (com permissão de escrita para os usuários do Windows), o **PostgreSQL 16 como
+serviço** (se ainda não houver), cria o banco `db_scopel` **vazio**, grava o `.env` e cria o usuário
+inicial (GERENTE) no 1º start (`InitialUserBootstrap`, via `UserService`/BCrypt; apaga a senha do `.env`
+depois). As senhas são digitadas na instalação (ou `/DbPassword= /MasterLogin= /MasterName= /MasterPassword=`).
+**Não publicar este .exe** (leva o instalador do PostgreSQL); a Release pública só tem o JAR de atualização.
+Reinstalar não apaga o banco nem sobrescreve o `.env`. Desinstalar também não remove o banco.
+
 ### Banco de dados (necessário em toda máquina)
 
 O instalador **não** inclui o PostgreSQL. O app lê as credenciais do `.env` (formato `KEY=VALOR`,

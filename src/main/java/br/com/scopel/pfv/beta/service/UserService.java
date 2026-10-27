@@ -35,6 +35,10 @@ public class UserService {
         return repository.save(newUser);
     }
 
+    public boolean hasUsers() {
+        return repository.count() > 0;
+    }
+
     public User login(String login, String rawPassword) {
         User user = repository.findByLogin(login)
                 .orElseThrow(() -> new UserNotFindException());

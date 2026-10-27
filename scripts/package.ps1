@@ -50,7 +50,8 @@ $args = @(
     "--java-options", "--enable-native-access=ALL-UNNAMED",
     # $APPDIR é expandido pelo launcher (aspas simples: o PowerShell não pode expandir). O .env fica
     # na pasta de instalação, ao lado do .exe — independente do diretório atual de quem abriu o app.
-    "--java-options", '-Dspring.config.import=optional:file:$APPDIR/../.env[.properties]'
+    "--java-options", '-Dspring.config.import=optional:file:$APPDIR/../.env[.properties]',
+    "--java-options", '-Dpdv.bootstrap.env-file=$APPDIR/../.env'
 )
 if ($Type -ne "app-image") {
     $args += @("--win-per-user-install", "--win-menu", "--win-shortcut",
