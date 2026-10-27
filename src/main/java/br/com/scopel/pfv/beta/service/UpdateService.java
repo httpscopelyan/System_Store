@@ -260,6 +260,7 @@ public class UpdateService {
             job.setProperty("backupDir", absolute(config.getBackupDir()).toString());
             job.setProperty("workDir", baseDir().toString());
             job.setProperty("java", javaExecutable());
+            launcherPath().ifPresent(l -> job.setProperty("launcher", l.toString()));
             job.setProperty("waitExitSeconds", Integer.toString(config.getWaitExitSeconds()));
             job.setProperty("startTimeoutSeconds", Integer.toString(config.getStartTimeoutSeconds()));
             job.setProperty("keepBackups", Integer.toString(config.getBackupsToKeep()));
@@ -416,14 +417,37 @@ public class UpdateService {
 
     private Path baseDir() {
         String w = config.getWorkDir();
-        return Path.of(w == null || w.isBlank() ? "" : w).toAbsolutePath().normalize();
+        if (w == null || w.isBlank()) {
+            // Instalado via jpackage: estado e .env ficam na pasta de instalação (gravável, por usuário).
+            return launcherPath().map(l -> l.toAbsolutePath().normalize().getParent())
+                    .orElseGet(() -> Path.of("").toAbsolutePath().normalize());
+        }
+        return Path.of(w).toAbsolutePath().normalize();
+    }
+
+    /** .exe do jpackage que inicia o PDV (configurado ou detectado); vazio se rodando por `java -jar`. */
+    private Optional<Path> launcherPath() {
+        String configured = config.getLauncher();
+        String candidate = configured != null && !configured.isBlank()
+                ? configured : System.getProperty("jpackage.app-path", "");
+        if (candidate.isBlank()) {
+            return Optional.empty();
+        }
+        Path path = Path.of(candidate);
+        return Files.isRegularFile(path) ? Optional.of(path) : Optional.empty();
     }
 
     private Path absolute(String path) {
         return baseDir().resolve(path).normalize();
     }
 
-    private static String javaExecutable() {
+    private String javaExecutable() {
+        if (launcherPath().isPresent()) {
+            // jpackage: o processo atual é o .exe do app; o atualizador usa o runtime embutido (sem janela de console).
+            Path bin = Path.of(System.getProperty("java.home"), "bin");
+            Path javaw = bin.resolve("javaw.exe");
+            return (Files.isRegularFile(javaw) ? javaw : bin.resolve("java.exe")).toString();
+        }
         return ProcessHandle.current().info().command()
                 .orElseGet(() -> Path.of(System.getProperty("java.home"), "bin", "java").toString());
     }

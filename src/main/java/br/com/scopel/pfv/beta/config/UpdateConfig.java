@@ -58,6 +58,12 @@ public class UpdateConfig {
     /** Caminho do JAR em execução; vazio = detectar pelo class path (java -jar). */
     private String appJar = "";
 
+    /**
+     * Executável (.exe do jpackage) que reabre o PDV após a troca do JAR; vazio = detectar
+     * pela propriedade jpackage.app-path. Sem launcher, reabre com `java -jar`.
+     */
+    private String launcher = "";
+
     /** Exige https no download (só desligar em testes). */
     private boolean requireHttps = true;
 

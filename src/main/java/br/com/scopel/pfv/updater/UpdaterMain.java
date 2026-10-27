@@ -117,7 +117,10 @@ public final class UpdaterMain {
         Path newJar = Path.of(req(job, "newJar"));
         Path backupDir = Path.of(req(job, "backupDir"));
         Path workDir = Path.of(req(job, "workDir"));
-        String java = req(job, "java");
+        String launcher = job.getProperty("launcher", "");
+        List<String> startCommand = launcher.isBlank()
+                ? List.of(req(job, "java"), "-jar", appJar.toString())
+                : List.of(launcher);
         String expectedSha = req(job, "sha256");
         String oldVersion = job.getProperty("oldVersion", "desconhecida");
         String newVersion = req(job, "newVersion");
@@ -149,7 +152,7 @@ public final class UpdaterMain {
             writeResult(stateDir, "FAILED", newVersion, oldVersion, "Falha antes da instalação: " + e.getMessage());
             // Se o app já fechou, reabre a versão atual para o operador não ficar sem sistema.
             if (!isAlive(appPid)) {
-                relaunch(java, appJar, workDir, stateDir);
+                relaunch(startCommand, workDir, stateDir);
             }
             return 1;
         }
@@ -174,7 +177,7 @@ public final class UpdaterMain {
 
             // 5) Reinicia e verifica.
             Files.deleteIfExists(stateDir.resolve(MARKER_FILE));
-            started = launch(java, appJar, workDir, stateDir);
+            started = launch(startCommand, workDir, stateDir);
             log("Novo processo iniciado (pid " + started.pid() + "); aguardando confirmação...");
             failure = awaitStart(started, stateDir.resolve(MARKER_FILE), newVersion, startTimeout);
             if (failure == null) {
@@ -206,7 +209,7 @@ public final class UpdaterMain {
         }
         // Resultado gravado ANTES de reabrir, para o app restaurado já encontrá-lo.
         writeResult(stateDir, "ROLLED_BACK", newVersion, oldVersion, failure);
-        Process old = relaunch(java, appJar, workDir, stateDir);
+        Process old = relaunch(startCommand, workDir, stateDir);
         if (old == null || !stayAlive(old, rollbackAlive)) {
             writeResult(stateDir, "FAILED", newVersion, oldVersion, failure
                     + " | A versão anterior foi restaurada, mas não iniciou. Abra o PDV manualmente.");
@@ -316,17 +319,17 @@ public final class UpdaterMain {
         moveWithRetry(tmp, appJar);
     }
 
-    private static Process launch(String java, Path appJar, Path workDir, Path stateDir) throws IOException {
-        ProcessBuilder pb = new ProcessBuilder(java, "-jar", appJar.toString())
+    private static Process launch(List<String> command, Path workDir, Path stateDir) throws IOException {
+        ProcessBuilder pb = new ProcessBuilder(command)
                 .directory(workDir.toFile())
                 .redirectErrorStream(true)
                 .redirectOutput(ProcessBuilder.Redirect.appendTo(stateDir.resolve("app.log").toFile()));
         return pb.start();
     }
 
-    private static Process relaunch(String java, Path appJar, Path workDir, Path stateDir) {
+    private static Process relaunch(List<String> command, Path workDir, Path stateDir) {
         try {
-            Process p = launch(java, appJar, workDir, stateDir);
+            Process p = launch(command, workDir, stateDir);
             log("PDV reaberto (pid " + p.pid() + ").");
             return p;
         } catch (IOException e) {

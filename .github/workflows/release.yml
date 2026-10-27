@@ -68,6 +68,20 @@ jobs:
           echo "APP_SHA256=$SHA" >> "$GITHUB_ENV"
           echo "APP_SIZE=$SIZE" >> "$GITHUB_ENV"
 
+      # Instalador para a PRIMEIRA instalação em uma máquina nova (runtime Java embutido, sem admin).
+      # As atualizações seguintes continuam trocando só o JAR (version.json aponta para ele).
+      # O jpackage precisa do WiX 3.x para gerar o .exe.
+      - name: Instala o WiX (necessário ao jpackage)
+        run: |
+          choco install wixtoolset --no-progress -y
+          echo "C:\Program Files (x86)\WiX Toolset v3.14\bin" >> "$GITHUB_PATH"
+
+      - name: Gera o instalador (jpackage)
+        shell: pwsh
+        run: |
+          ./scripts/package.ps1 -Version $env:APP_VERSION -Jar "target/beta-$env:APP_VERSION.jar" -Type exe -OutDir dist
+          Move-Item "dist/Scopel Store-$env:APP_VERSION.exe" "staging/ScopelStore-Setup-$env:APP_VERSION.exe"
+
       - name: Cria a Release com o JAR anexado
         uses: softprops/action-gh-release@v2
         with:
@@ -78,9 +92,11 @@ jobs:
             SHA-256: `${{ env.APP_SHA256 }}`
 
             Os PDVs detectam esta versão sozinhos e oferecem **Atualizar e reiniciar**.
+            Para instalar em uma máquina nova, use `ScopelStore-Setup-${{ env.APP_VERSION }}.exe`.
           files: |
             staging/scopel-store.jar
             staging/scopel-store.jar.sha256
+            staging/ScopelStore-Setup-${{ env.APP_VERSION }}.exe
           draft: false
           prerelease: false
         env:

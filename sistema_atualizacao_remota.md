@@ -5,9 +5,32 @@ confirma que a versão nova subiu e, se não subir, restaura a anterior.
 
 ## Como o PDV é distribuído
 
-JAR executável do Spring Boot (`java -jar scopel-store.jar`), **não** `jpackage`.
-Por isso o updater é um processo separado que troca o arquivo `.jar` depois que o PDV fecha.
-Requer JDK 24+ (JavaFX 26). O updater usa o **mesmo `java`** do PDV em execução.
+Dois modos, o mesmo updater:
+
+1. **Instalado com `jpackage` (máquinas de cliente).** `scripts/package.ps1` gera o app nativo
+   com **runtime Java embutido** (a máquina não precisa de JDK). O instalador (`-Type exe`) é
+   **por usuário** (sem admin) em `%LOCALAPPDATA%\Scopel Store\`. Estrutura:
+   ```
+   Scopel Store.exe        ← launcher; o updater reabre o PDV por ele
+   app\scopel-store.jar    ← único arquivo substituído pela atualização
+   runtime\                ← Java embutido (inclui bin\java.exe: o updater roda nele)
+   .env                    ← credenciais do banco (criado na instalação; preservado)
+   updates\  backup\       ← estado do updater e últimos 3 JARs
+   ```
+   O app detecta o modo pela propriedade `jpackage.app-path` (ou `app.update.launcher`). Estado,
+   `.env`, `updates/` e `backup/` ficam na pasta do `.exe`. A atualização troca só o JAR: se uma
+   versão nova exigir outro Java/JavaFX, é preciso reinstalar pelo instalador.
+2. **JAR avulso (`java -jar scopel-store.jar`).** Requer JDK 24+. O updater usa o mesmo `java`
+   do PDV em execução e reabre com `java -jar`.
+
+O updater é um processo separado que troca o arquivo `.jar` depois que o PDV fecha.
+
+### Banco de dados (necessário em toda máquina)
+
+O instalador **não** inclui o PostgreSQL. O app lê as credenciais do `.env` (formato `KEY=VALOR`,
+sem aspas), via `spring.config.import`; **nada de senha vai dentro do JAR**:
+`DB_PASSWORD` (obrigatória), `DB_USER`, `DB_NAME`, `DB_HOST`, `DB_PORT` (opcionais).
+No app instalado, o `.env` fica ao lado do `.exe`.
 
 Estrutura numa máquina de cliente (diretório de trabalho = onde o PDV é iniciado):
 
@@ -101,8 +124,13 @@ anexa `scopel-store.jar` + `.sha256` e só então publica o `version.json` na `m
 ## Limitações
 
 - Instalações na **1.0.0** (sem updater) precisam ser atualizadas manualmente uma vez.
-- O PDV precisa ser iniciado por `java -jar` (não pela IDE nem `mvn javafx:run`: nesses modos
-  o botão informa "modo desenvolvimento" e não aplica nada).
-- O reinício usa `java -jar scopel-store.jar` no mesmo diretório; opções extras de JVM do
-  atalho original não são repassadas.
+- O PDV precisa ser iniciado pelo app instalado (`Scopel Store.exe`) ou por `java -jar` (não pela
+  IDE nem `mvn javafx:run`: nesses modos o botão informa "modo desenvolvimento" e não aplica nada).
+- Modo JAR avulso: o reinício usa `java -jar scopel-store.jar`; opções extras de JVM do atalho
+  original não são repassadas. No modo instalado, as opções vêm do `app\Scopel Store.cfg`.
+- Gerar o instalador `.exe`/`.msi` exige o **WiX Toolset 3.x** (o workflow instala; localmente use
+  `-Type app-image`, que não precisa de WiX).
+- Testado localmente com `app-image` (instalar, abrir de outra pasta, atualizar 1.0.0 → 1.0.1 com
+  servidor HTTP local). O instalador `.exe` em si e o workflow do GitHub Actions ainda não foram
+  executados.
 - Hoje o relatório de falha é um aviso na tela do operador + `updates/updater.log`.

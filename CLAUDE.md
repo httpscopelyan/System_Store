@@ -34,7 +34,7 @@ somar total → finalizar (baixa estoque)**.
 | Persistência | Spring Data JPA (Hibernate) |
 | Migrations | Flyway (`V__descricao.sql`) |
 | Senhas | BCrypt (spring-security-crypto, **não** o Spring Security web) |
-| .env | spring-dotenv |
+| .env | `spring.config.import=optional:file:./.env[.properties]` (o spring-dotenv 5.1.0 não carrega com Boot 4); `application.properties` usa `${DB_PASSWORD}` etc. |
 | Impressão | escpos-coffee (planejado, não implementado) |
 
 ### Como rodar
