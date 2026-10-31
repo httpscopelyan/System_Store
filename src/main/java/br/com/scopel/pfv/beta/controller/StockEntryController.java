@@ -31,6 +31,12 @@ public class StockEntryController {
 
     @FXML
     public void initialize() {
+        String prefillCode = userSession.consumeStockEntryPrefillCode();
+        if (prefillCode != null) {
+            codeField.setText(prefillCode);
+            Platform.runLater(() -> quantityField.requestFocus());
+            return;
+        }
         Platform.runLater(() -> codeField.requestFocus());
     }
 

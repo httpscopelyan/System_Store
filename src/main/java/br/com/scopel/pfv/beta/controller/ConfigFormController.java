@@ -1,6 +1,7 @@
 package br.com.scopel.pfv.beta.controller;
 
 import br.com.scopel.pfv.beta.config.ThemeManager;
+import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.service.AppSettingService;
 import br.com.scopel.pfv.beta.service.PixService;
 import javafx.collections.FXCollections;
@@ -11,6 +12,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
 
 @Component
 public class ConfigFormController {
@@ -23,6 +26,7 @@ public class ConfigFormController {
     @FXML private CheckBox allowCreditBox;
     @FXML private TextField discountLimitField;
     @FXML private TextField storeNameField;
+    @FXML private TextField defaultMarginField;
     @FXML private TextField pixKeyField;
     @FXML private TextField pixNameField;
     @FXML private TextField pixCityField;
@@ -51,7 +55,8 @@ public class ConfigFormController {
         negativeStockBox.setSelected(settings.getBoolean(AppSettingService.SALE_ALLOW_NEGATIVE_STOCK, false));
         allowCreditBox.setSelected(settings.getBoolean(AppSettingService.CREDIT_ALLOW_CREDIT_SALE, false));
         discountLimitField.setText(settings.getString(AppSettingService.SALE_DISCOUNT_LIMIT_PERCENT, "10"));
-        storeNameField.setText(settings.getString("store.name", "MERCADO"));
+        storeNameField.setText(settings.getString(AppSettingService.STORE_NAME, "MERCADO"));
+        defaultMarginField.setText(settings.getString(AppSettingService.PRICING_DEFAULT_MARGIN_PERCENT, "30"));
         pixKeyField.setText(settings.getString(PixService.PIX_KEY, ""));
         pixNameField.setText(settings.getString(PixService.PIX_MERCHANT_NAME, ""));
         pixCityField.setText(settings.getString(PixService.PIX_MERCHANT_CITY, ""));
@@ -59,19 +64,25 @@ public class ConfigFormController {
 
     @FXML
     public void onSave() {
+        BigDecimal defaultMargin = DecimalInput.parseOrNull(defaultMarginField.getText());
+        if (defaultMargin == null || defaultMargin.signum() < 0) {
+            messageLabel.setText("Margem padrão inválida: informe um número maior ou igual a zero.");
+            return;
+        }
         try {
             settings.set(AppSettingService.SALE_REPEAT_ITEM, String.valueOf(repeatItemBox.isSelected()));
             settings.set(AppSettingService.SALE_ALLOW_NEGATIVE_STOCK, String.valueOf(negativeStockBox.isSelected()));
             settings.set(AppSettingService.CREDIT_ALLOW_CREDIT_SALE, String.valueOf(allowCreditBox.isSelected()));
             settings.set(AppSettingService.SALE_DISCOUNT_LIMIT_PERCENT, discountLimitField.getText().trim());
-            settings.set("store.name", storeNameField.getText().trim());
+            settings.set(AppSettingService.STORE_NAME, storeNameField.getText().trim());
+            settings.set(AppSettingService.PRICING_DEFAULT_MARGIN_PERCENT,
+                    defaultMargin.stripTrailingZeros().toPlainString());
             settings.set(PixService.PIX_KEY, pixKeyField.getText().trim());
             settings.set(PixService.PIX_MERCHANT_NAME, pixNameField.getText().trim());
             settings.set(PixService.PIX_MERCHANT_CITY, pixCityField.getText().trim());
 
             if (themeBox != null && themeBox.getValue() != null) {
                 themeManager.setCurrent(themeBox.getValue());
-                // Aplica na janela atual (efeito completo ao navegar/reabrir).
                 if (messageLabel.getScene() != null) {
                     themeManager.apply(messageLabel.getScene().getRoot());
                 }

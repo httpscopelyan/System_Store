@@ -17,6 +17,17 @@ public class AppSettingService {
     public static final String CREDIT_ALLOW_CREDIT_SALE = "credit.allow_credit_sale";
     public static final String CREDIT_BLOCK_OVERDUE = "credit.block_overdue";
     public static final String PRICING_DEFAULT_MARGIN_PERCENT = "pricing.default_margin_percent";
+    public static final String STORE_NAME = "store.name";
+    public static final String STOCK_MIN_ALERT_MARGIN = "stock.min_alert_margin";
+    public static final String ALERTS_EMAIL_ENABLED = "alerts.email_enabled";
+    public static final String ALERTS_EMAIL_TO = "alerts.email_to";
+    public static final String ALERTS_EMAIL_INTERVAL_MINUTES = "alerts.email_interval_minutes";
+    public static final String ALERTS_SMTP_HOST = "alerts.smtp_host";
+    public static final String ALERTS_SMTP_PORT = "alerts.smtp_port";
+    public static final String ALERTS_SMTP_USER = "alerts.smtp_user";
+    public static final String ALERTS_SMTP_FROM = "alerts.smtp_from";
+    public static final String ALERTS_LAST_SENT_DIGEST = "alerts.last_sent_digest";
+    public static final String ALERTS_LAST_SENT_AT = "alerts.last_sent_at";
 
     private final AppSettingRepository repository;
 

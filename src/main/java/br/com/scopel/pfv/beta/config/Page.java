@@ -9,6 +9,7 @@ public enum Page {
     PRODUTOS("/fxml/create_product.fxml"),
     EDITAR_PRODUTO("/fxml/edit_product.fxml"),
     ESTOQUE("/fxml/estoque.fxml"),
+    LISTA_COMPRAS("/fxml/shopping_list.fxml"),
     CLIENTES("/fxml/customer_form.fxml"),
     FORNECEDORES("/fxml/supplier_form.fxml"),
     ENTRADA_ESTOQUE("/fxml/stock_entry.fxml"),

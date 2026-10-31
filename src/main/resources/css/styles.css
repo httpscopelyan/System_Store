@@ -651,3 +651,16 @@
     -fx-text-fill: #8a9099;
     -fx-font-style: italic;
 }
+
+.table-row-cell.alert-critical {
+    -fx-background-color: #fde2e2;
+}
+
+.table-row-cell.alert-warning {
+    -fx-background-color: #fff3d6;
+}
+
+.table-row-cell.alert-critical:selected,
+.table-row-cell.alert-warning:selected {
+    -fx-background-color: -fx-selection-bar;
+}

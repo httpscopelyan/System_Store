@@ -6,6 +6,7 @@ import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.service.UpdateService;
+import br.com.scopel.pfv.beta.service.alert.StockAlertService;
 import br.com.scopel.pfv.beta.update.UpdateInfo;
 import javafx.application.Platform;
 import javafx.animation.Animation;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class MainController {
@@ -37,11 +39,13 @@ public class MainController {
     private final Navigator navigator;
     private final UserSession userSession;
     private final UpdateService updateService;
+    private final StockAlertService stockAlertService;
 
     @FXML private BorderPane root;
     @FXML private Button updateButton;
     @FXML private Button configButton;
     @FXML private Button backButton;
+    @FXML private Button shoppingListButton;
     @FXML private Label dateTimeLabel;
     @FXML private Label userLabel;
     @FXML private Label roleLabel;
@@ -51,17 +55,21 @@ public class MainController {
 
     private Timeline hintClear;
 
-    public MainController(Navigator navigator, UserSession userSession, UpdateService updateService) {
+    public MainController(Navigator navigator, UserSession userSession, UpdateService updateService,
+                          StockAlertService stockAlertService) {
         this.navigator = navigator;
         this.userSession = userSession;
         this.updateService = updateService;
+        this.stockAlertService = stockAlertService;
     }
 
     @FXML
     public void initialize() {
         navigator.bind(root);
         navigator.addNavigationListener(this::refreshBackButton);
+        navigator.addNavigationListener(this::refreshShoppingListCount);
         refreshBackButton();
+        refreshShoppingListCount();
 
         User user = userSession.getLoggedUser();
         userLabel.setText("Usuário: " + (user != null ? user.getName() : "-"));
@@ -167,6 +175,21 @@ public class MainController {
     @FXML
     public void onBack() {
         navigator.back();
+    }
+
+    @FXML
+    public void onListaCompras() {
+        navigator.navigate(Page.LISTA_COMPRAS);
+    }
+
+    private void refreshShoppingListCount() {
+        if (shoppingListButton == null) {
+            return;
+        }
+        CompletableFuture.supplyAsync(stockAlertService::countLowStockItems)
+                .thenAccept(count -> Platform.runLater(() -> shoppingListButton.setText(
+                        count > 0 ? "🧺\nLista d/ Compras (" + count + ")" : "🧺\nLista d/ Compras")))
+                .exceptionally(failure -> null);
     }
 
     private void refreshBackButton() {

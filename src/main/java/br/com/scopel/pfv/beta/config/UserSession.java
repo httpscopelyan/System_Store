@@ -16,15 +16,12 @@ public class UserSession {
     private CashRegister caixaAtual;
     private Sale vendaAtual;
 
-    // Tipo de cartão escolhido antes da tela de espera da maquininha.
     private CardType cardTypeSelecionado;
 
-    // Dados da última venda finalizada — consumidos pela tela "Venda finalizada".
     private Sale ultimaVenda;
     private PaymentMethod ultimaForma;
     private BigDecimal ultimoTroco;
 
-    // Id do produto selecionado no Estoque para a tela de edição.
     private Long produtoEmEdicaoId;
 
     public CashRegister getCaixaAtual() { return caixaAtual; }
@@ -44,6 +41,18 @@ public class UserSession {
 
     public BigDecimal getUltimoTroco() { return ultimoTroco; }
     public void setUltimoTroco(BigDecimal ultimoTroco) { this.ultimoTroco = ultimoTroco; }
+
+    private String stockEntryPrefillCode;
+
+    public String consumeStockEntryPrefillCode() {
+        String code = stockEntryPrefillCode;
+        stockEntryPrefillCode = null;
+        return code;
+    }
+
+    public void setStockEntryPrefillCode(String stockEntryPrefillCode) {
+        this.stockEntryPrefillCode = stockEntryPrefillCode;
+    }
 
     public Long getProdutoEmEdicaoId() { return produtoEmEdicaoId; }
     public void setProdutoEmEdicaoId(Long produtoEmEdicaoId) { this.produtoEmEdicaoId = produtoEmEdicaoId; }

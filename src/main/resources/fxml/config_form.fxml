@@ -28,6 +28,10 @@
                         <TextField fx:id="discountLimitField" styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
                     <VBox spacing="6">
+                        <Label text="Margem padrão para sugerir o preço de venda (%)" styleClass="form-label"/>
+                        <TextField fx:id="defaultMarginField" promptText="30" styleClass="text-input" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6">
                         <Label text="Nome da loja (cupom)" styleClass="form-label"/>
                         <TextField fx:id="storeNameField" styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
@@ -50,6 +54,8 @@
                         </VBox>
                     </HBox>
                 </VBox>
+
+                <fx:include source="config_alerts.fxml"/>
 
                 <VBox styleClass="form-card" spacing="12" maxWidth="Infinity">
                     <Label text="Aparência (Tema)" styleClass="form-section-title"/>

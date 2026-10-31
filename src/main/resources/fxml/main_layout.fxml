@@ -24,6 +24,7 @@
                 <Button text="📜&#10;Histórico" styleClass="block-button" onAction="#onHistoricoVendas"/>
                 <Button text="💰&#10;Caixa (F4)" styleClass="block-button" onAction="#onCaixa"/>
                 <Button text="📦&#10;Estoque (F3)" styleClass="block-button" onAction="#onEstoque"/>
+                <Button fx:id="shoppingListButton" text="🧺&#10;Lista d/ Compras" styleClass="block-button" onAction="#onListaCompras"/>
                 <Separator orientation="VERTICAL"/>
                 <Button text="🧾&#10;Compras (F5)" styleClass="block-button" onAction="#onCompras"/>
                 <Button text="👥&#10;Clientes (F6)" styleClass="block-button" onAction="#onClientes"/>
