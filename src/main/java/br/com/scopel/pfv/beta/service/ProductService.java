@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,6 +116,26 @@ public class ProductService {
             return repository.findAll();
         }
         return repository.findByDescriptionContainingIgnoreCase(name.trim());
+    }
+
+    public List<Product> filterForStock(String code, String name, boolean belowMinimumOnly,
+                                        boolean withoutCostOnly) {
+        List<Product> base = code != null && !code.isBlank()
+                ? repository.findByCodeIgnoreCase(code.trim()).map(List::of).orElse(List.of())
+                : searchByName(name);
+        return base.stream()
+                .filter(product -> !belowMinimumOnly || isAtOrBelowMinimum(product))
+                .filter(product -> !withoutCostOnly || hasNoCost(product))
+                .sorted(Comparator.comparing(Product::getDescription, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+    }
+
+    private boolean isAtOrBelowMinimum(Product product) {
+        return product.getMinStock().signum() > 0 && product.getQuantity().compareTo(product.getMinStock()) <= 0;
+    }
+
+    private boolean hasNoCost(Product product) {
+        return product.getCostPrice() == null || product.getCostPrice().signum() <= 0;
     }
 
     public Product inactivate(String code) {

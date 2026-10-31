@@ -697,3 +697,14 @@
 .suggestion-list .list-cell {
     -fx-padding: 6 10 6 10;
 }
+
+.table-cell.row-handle {
+    -fx-alignment: CENTER;
+    -fx-text-fill: #6b7683;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.table-cell.row-handle:hover {
+    -fx-background-color: #dbe7f6;
+}

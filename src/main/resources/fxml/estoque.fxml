@@ -21,9 +21,13 @@
             <HBox spacing="10" alignment="CENTER_LEFT" styleClass="group-box">
                 <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
                 <Label text="Código:" styleClass="win-label-bold"/>
-                <TextField fx:id="codeFilter" promptText="Código de barras" styleClass="win-input" prefWidth="160"/>
+                <TextField fx:id="codeFilter" promptText="Código de barras" styleClass="win-input" prefWidth="160"
+                           onAction="#onFilter"/>
                 <Label text="Nome:" styleClass="win-label-bold"/>
-                <TextField fx:id="nameFilter" promptText="Buscar por descrição" styleClass="win-input" HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="nameFilter" promptText="Buscar por descrição" styleClass="win-input"
+                           HBox.hgrow="ALWAYS" onAction="#onFilter"/>
+                <CheckBox fx:id="belowMinimumBox" text="Só abaixo do mínimo" onAction="#onFilter"/>
+                <CheckBox fx:id="withoutCostBox" text="Sem custo" onAction="#onFilter"/>
                 <Button text="Filtrar" onAction="#onFilter" styleClass="win-button-primary"/>
                 <Button text="Limpar" onAction="#onClear" styleClass="win-button"/>
             </HBox>
@@ -33,11 +37,13 @@
     <center>
         <TableView fx:id="table" styleClass="win-grid">
             <columns>
+                <TableColumn fx:id="colHandle" text="" prefWidth="30"/>
                 <TableColumn fx:id="colCode" text="Código" prefWidth="130"/>
-                <TableColumn fx:id="colDesc" text="Nome" prefWidth="260"/>
-                <TableColumn fx:id="colCost" text="Custo" prefWidth="90"/>
-                <TableColumn fx:id="colMarginPercent" text="Lucro (%)" prefWidth="90"/>
-                <TableColumn fx:id="colSuggestedPrice" text="Preço sugerido" prefWidth="90"/>
+                <TableColumn fx:id="colDesc" text="Nome" prefWidth="240"/>
+                <TableColumn fx:id="colCost" text="Custo" prefWidth="80"/>
+                <TableColumn fx:id="colProfit" text="Lucro (R$)" prefWidth="85"/>
+                <TableColumn fx:id="colMarginPercent" text="Lucro (%)" prefWidth="85"/>
+                <TableColumn fx:id="colSuggestedPrice" text="Preço sugerido" prefWidth="110"/>
                 <TableColumn fx:id="colPrice" text="Vr. Venda" prefWidth="90"/>
                 <TableColumn fx:id="colMin" text="Qtd. Mín." prefWidth="80"/>
                 <TableColumn fx:id="colStock" text="Qtd. Atual" prefWidth="80"/>
@@ -55,19 +61,28 @@
                 <Label fx:id="messageLabel" styleClass="sale-status" wrapText="true"/>
             </HBox>
             <HBox styleClass="win-footer" spacing="10" alignment="CENTER_LEFT">
-                <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
+                <padding><Insets top="8" right="12" bottom="4" left="12"/></padding>
                 <Button text="＋ Novo" onAction="#onNew" styleClass="success-button"/>
                 <Button text="✎ Alterar" onAction="#onAlterar" styleClass="win-button"/>
                 <Button text="－ Apagar" onAction="#onApagar" styleClass="danger-button"/>
                 <Separator orientation="VERTICAL"/>
+                <Button fx:id="acceptSuggestionButton" text="✔ Aceitar Sugestão" onAction="#onAcceptSuggestion"
+                        styleClass="win-button"/>
+                <ToggleButton fx:id="marginsToggle" text="Margens" onAction="#onToggleMargins"
+                              styleClass="win-button"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="🔄 ATUALIZAR" onAction="#onRefresh" styleClass="success-button"/>
+            </HBox>
+            <HBox styleClass="win-footer" spacing="10" alignment="CENTER_LEFT">
+                <padding><Insets top="4" right="12" bottom="8" left="12"/></padding>
                 <Button text="➕ Entrada" onAction="#onEntrada" styleClass="win-button"/>
                 <Button text="⚖ Ajuste" onAction="#onAjuste" styleClass="win-button"/>
                 <Button text="📅 Lotes" onAction="#onLotes" styleClass="win-button"/>
                 <Button text="🏷 Etiquetas" onAction="#onEtiquetas" styleClass="win-button"/>
                 <Button text="🖨 Relatórios" onAction="#onRelatorios" styleClass="win-button"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button text="🔄 ATUALIZAR" onAction="#onRefresh" styleClass="success-button"/>
+                <Button text="🧺 Lista d/ Compras" onAction="#onListaCompras" styleClass="win-button"/>
             </HBox>
+            <fx:include source="back_bar.fxml"/>
         </VBox>
     </bottom>
 

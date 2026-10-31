@@ -81,9 +81,13 @@ final class SaleScreenHarness {
     }
 
     void showSaleScreen() throws Exception {
+        showPage("sale");
+    }
+
+    void showPage(String fxmlName) throws Exception {
         onFx(() -> {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/sale.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/" + fxmlName + ".fxml"));
                 loader.setControllerFactory(context::getBean);
                 root = loader.load();
                 scene = new Scene(root, 1200, 800);
