@@ -656,3 +656,18 @@ venda → bipar → somar → finalizar → baixa de estoque.
 - **Preço congelado (RN19):** preço gravado no item no momento da venda.
 - **NFC-e / CF-e SAT:** documentos fiscais eletrônicos do varejo (fase futura).
 - **Polling:** consultar repetidamente o status de um pagamento (em vez de webhook).
+
+### Vocabulário de custo (RF72)
+
+Tudo que na origem é um custo se chama **Custo** na tela e `cost` no código. Margem,
+lucro e preço apenas derivam do custo e não são "custo".
+
+| Conceito | Texto na tela | Identificador Java | Coluna no banco |
+|---|---|---|---|
+| Custo do produto | Custo | `costPrice` | `cost_price` |
+| Custo de uma unidade (entrada/compra) | Custo unitário | `unitCost` | `unit_cost` |
+| Custo da linha inteira | Custo total | `totalCost` | `total_cost` |
+| Custo médio ponderado | Custo médio | `averageCost` | não persistido |
+| Derivados (não são custo) | Margem (%), Lucro (R$), Preço de venda, Preço sugerido | `marginPercent`, `profit`, `price`, `suggestedPrice` | `price` |
+
+Proibido para custo: "Vr. Custo", "Preço de custo", "Valor pago", "Custo unit.".

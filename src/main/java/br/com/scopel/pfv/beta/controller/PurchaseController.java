@@ -82,7 +82,7 @@ public class PurchaseController {
             costField.clear();
             refresh();
         } catch (NumberFormatException e) {
-            messageLabel.setText("Qtd ou custo inválidos");
+            messageLabel.setText("Quantidade ou custo inválidos");
         } catch (Exception e) {
             messageLabel.setText("Produto não encontrado");
         }
