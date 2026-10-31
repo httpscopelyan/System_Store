@@ -15,7 +15,8 @@ public class CashMovement {
 
     public enum Type {
         SANGRIA,
-        SUPRIMENTO
+        SUPRIMENTO,
+        RETIFICACAO
     }
 
     @Id
@@ -35,6 +36,14 @@ public class CashMovement {
 
     @Column(length = 155)
     private String reason;
+
+    @ManyToOne
+    @JoinColumn(name = "corrected_movement_id")
+    private CashMovement correctedMovement;
+
+    @ManyToOne
+    @JoinColumn(name = "authorized_by_id")
+    private User authorizedBy;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

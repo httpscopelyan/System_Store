@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.CashSummaryController"
+      styleClass="group-box" spacing="6" prefWidth="270">
+    <padding><Insets top="10" right="12" bottom="12" left="12"/></padding>
+    <Label text="Resumo do Caixa" styleClass="group-title"/>
+
+    <Label text="Saldo Inicial" styleClass="win-label-bold"/>
+    <TextField fx:id="resSaldoInicial" text="R$ 0,00" editable="false" styleClass="money-field"/>
+
+    <Label text="(+) Totais das Entradas" styleClass="section-plus"/>
+    <Label text="Dinheiro" styleClass="win-label"/>
+    <TextField fx:id="resEntDinheiro" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <Label text="Cheque" styleClass="win-label"/>
+    <TextField fx:id="resEntCheque" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <Label text="Cartão de Crédito" styleClass="win-label"/>
+    <TextField fx:id="resEntCredito" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <Label text="Cartão de Débito" styleClass="win-label"/>
+    <TextField fx:id="resEntDebito" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <Label text="Total (Entradas):" styleClass="win-label-bold"/>
+    <TextField fx:id="resEntTotal" text="R$ 0,00" editable="false" styleClass="money-field"/>
+
+    <Label text="(-) Totais das Saídas" styleClass="section-minus"/>
+    <Label text="Dinheiro" styleClass="win-label"/>
+    <TextField fx:id="resSaiDinheiro" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <Label text="Total (Saídas):" styleClass="win-label-bold"/>
+    <TextField fx:id="resSaiTotal" text="R$ 0,00" editable="false" styleClass="money-field"/>
+
+    <Label text="(=) Saldo Caixa (Em Dinheiro)" styleClass="section-equals"/>
+    <Label text="Saldo Final:" styleClass="win-label-bold"/>
+    <TextField fx:id="resSaldoFinal" text="R$ 0,00" editable="false" styleClass="money-field"/>
+</VBox>

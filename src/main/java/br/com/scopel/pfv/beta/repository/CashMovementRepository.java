@@ -10,4 +10,6 @@ public interface CashMovementRepository extends JpaRepository<CashMovement, Long
 
     List<CashMovement> findByCashRegister(CashRegister cashRegister);
 
+    boolean existsByCorrectedMovement(CashMovement correctedMovement);
+
 }

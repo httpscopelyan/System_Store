@@ -3,6 +3,7 @@ package br.com.scopel.pfv.beta.service;
 import br.com.scopel.pfv.beta.exception.CashRegisterAlreadyOpenException;
 import br.com.scopel.pfv.beta.exception.CashRegisterClosedException;
 import br.com.scopel.pfv.beta.exception.InsufficientCashException;
+import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.RegisterNotFindException;
 import br.com.scopel.pfv.beta.model.CashMovement;
 import br.com.scopel.pfv.beta.model.CashRegister;
@@ -14,9 +15,11 @@ import br.com.scopel.pfv.beta.repository.CashMovementRepository;
 import br.com.scopel.pfv.beta.repository.CashRegisterRepository;
 import br.com.scopel.pfv.beta.repository.PaymentRepository;
 import br.com.scopel.pfv.beta.repository.SaleRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -24,11 +27,12 @@ import java.util.Optional;
 @Service
 public class CashRegisterService {
 
+    private static final int MAX_REASON_LENGTH = 155;
+
     private final CashRegisterRepository registerRepository;
     private final CashMovementRepository movementRepository;
     private final SaleRepository saleRepository;
     private final PaymentRepository paymentRepository;
-
 
     public CashRegisterService(CashRegisterRepository registerRepository,
                                CashMovementRepository movementRepository,
@@ -40,22 +44,18 @@ public class CashRegisterService {
         this.paymentRepository = paymentRepository;
     }
 
-    /** Pagamentos de todas as vendas do caixa (para a movimentação por forma). */
     public List<Payment> payments(CashRegister cashRegister) {
         return paymentRepository.findBySale_CashRegister_Id(cashRegister.getId());
     }
 
-    /** Últimas aberturas do operador (para o painel esquerdo da tela de Caixa). */
     public List<CashRegister> history(User operator) {
         return registerRepository.findTop20ByOperatorOrderByOpenedAtDesc(operator);
     }
 
-    /** Sangrias/suprimentos do caixa. */
     public List<CashMovement> movements(CashRegister cashRegister) {
         return movementRepository.findByCashRegister(cashRegister);
     }
 
-    /** Vendas do caixa (movimentação). */
     public List<Sale> sales(CashRegister cashRegister) {
         return saleRepository.findByCashRegister_IdOrderByCreatedAtAsc(cashRegister.getId());
     }
@@ -76,28 +76,20 @@ public class CashRegisterService {
 
     }
 
-
     public Optional<CashRegister> findOpenByOperator(User operator) {
         return registerRepository.findByOperatorAndStatus(operator, CashRegister.Status.OPEN);
     }
 
-    /**
-     * Saldo em dinheiro esperado no caixa:
-     *   fundo + dinheiro das vendas + suprimentos − sangrias.
-     * (O dinheiro das vendas = pagamentos em DINHEIRO, líquidos do troco.)
-     */
     public BigDecimal currentBalance(CashRegister cashRegister) {
         BigDecimal balance = cashRegister.getOpeningAmount();
 
         for (CashMovement movement : movementRepository.findByCashRegister(cashRegister)) {
-            if (movement.getType() == CashMovement.Type.SUPRIMENTO) {
-                balance = balance.add(movement.getAmount());
-            } else {
-                balance = balance.subtract(movement.getAmount());
+            switch (movement.getType()) {
+                case SUPRIMENTO, RETIFICACAO -> balance = balance.add(movement.getAmount());
+                case SANGRIA -> balance = balance.subtract(movement.getAmount());
             }
         }
 
-        // + dinheiro recebido nas vendas do caixa (líquido do troco)
         for (Payment p : paymentRepository.findBySale_CashRegister_Id(cashRegister.getId())) {
             if (p.getMethod() == PaymentMethod.DINHEIRO) {
                 BigDecimal net = nz(p.getAmountReceived()).subtract(nz(p.getChange()));
@@ -113,6 +105,7 @@ public class CashRegisterService {
     }
 
     public CashMovement supplement(Long cashRegisterId, BigDecimal amount, String reason) {
+        String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);
         CashRegister r = registerRepository.findById(cashRegisterId)
                 .orElseThrow(() -> new RegisterNotFindException("Caixa não registrado!"));
         if (r.getStatus() != CashRegister.Status.OPEN) {
@@ -123,7 +116,7 @@ public class CashRegisterService {
 
         cashMovement.setType(CashMovement.Type.SUPRIMENTO);
         cashMovement.setAmount(amount);
-        cashMovement.setReason(reason);
+        cashMovement.setReason(normalizedReason);
         cashMovement.setCreatedAt(LocalDateTime.now());
 
         cashMovement.setCashRegister(r);
@@ -132,6 +125,7 @@ public class CashRegisterService {
     }
 
     public CashMovement withdrawal(Long cashRegisterId, BigDecimal amount, String reason) {
+        String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);
         CashRegister r = registerRepository.findById(cashRegisterId)
                 .orElseThrow(() -> new RegisterNotFindException("Caixa não registrado!"));
         BigDecimal balance = currentBalance(r);
@@ -148,11 +142,54 @@ public class CashRegisterService {
 
         cashMovement.setType(CashMovement.Type.SANGRIA);
         cashMovement.setAmount(amount);
-        cashMovement.setReason(reason);
+        cashMovement.setReason(normalizedReason);
         cashMovement.setCreatedAt(LocalDateTime.now());
         cashMovement.setCashRegister(r);
 
         return movementRepository.save(cashMovement);
+    }
+
+    @Transactional
+    public CashMovement rectify(Long movementId, BigDecimal correctAmount, String reason, User authorizedBy) {
+        if (authorizedBy == null || authorizedBy.getRole() != User.Role.GERENTE) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+        String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);
+        if (correctAmount == null || correctAmount.signum() < 0) {
+            throw new IllegalArgumentException("O valor corrigido não pode ser negativo.");
+        }
+        CashMovement original = movementRepository.findById(movementId)
+                .orElseThrow(() -> new RegisterNotFindException("Movimentação não encontrada!"));
+        if (original.getType() == CashMovement.Type.RETIFICACAO) {
+            throw new IllegalArgumentException("Uma retificação não pode ser retificada.");
+        }
+        CashRegister register = original.getCashRegister();
+        if (register.getStatus() != CashRegister.Status.OPEN) {
+            throw new CashRegisterClosedException();
+        }
+        if (movementRepository.existsByCorrectedMovement(original)) {
+            throw new IllegalArgumentException("Esta movimentação já foi retificada.");
+        }
+        BigDecimal corrected = correctAmount.setScale(2, RoundingMode.HALF_UP);
+        if (corrected.compareTo(original.getAmount()) == 0) {
+            throw new IllegalArgumentException("O valor corrigido é igual ao original.");
+        }
+        BigDecimal delta = original.getType() == CashMovement.Type.SANGRIA
+                ? original.getAmount().subtract(corrected)
+                : corrected.subtract(original.getAmount());
+        if (currentBalance(register).add(delta).signum() < 0) {
+            throw new InsufficientCashException();
+        }
+
+        CashMovement rectification = new CashMovement();
+        rectification.setType(CashMovement.Type.RETIFICACAO);
+        rectification.setAmount(delta);
+        rectification.setReason(normalizedReason);
+        rectification.setCreatedAt(LocalDateTime.now());
+        rectification.setCashRegister(register);
+        rectification.setCorrectedMovement(original);
+        rectification.setAuthorizedBy(authorizedBy);
+        return movementRepository.save(rectification);
     }
 
     public CashRegister close(Long cashRegisterId, BigDecimal countedAmount) {

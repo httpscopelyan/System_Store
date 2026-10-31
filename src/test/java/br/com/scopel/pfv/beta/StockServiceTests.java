@@ -58,7 +58,7 @@ class StockServiceTests {
     void historyRecordsMovements() {
         Product p = newProduct(new BigDecimal("0.000"));
         stockService.registerEntry(p.getCode(), new BigDecimal("3"), null, "e1", null);
-        stockService.adjust(p.getCode(), new BigDecimal("2"), "a1", null);
+        stockService.adjust(p.getCode(), new BigDecimal("2"), "ajuste 1", null);
 
         List<StockMovement> history = stockService.history(p.getCode());
 

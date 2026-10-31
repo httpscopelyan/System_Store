@@ -1,24 +1,23 @@
 package br.com.scopel.pfv.beta.service;
 
 import br.com.scopel.pfv.beta.hardware.PrinterPort;
+import br.com.scopel.pfv.beta.model.CashMovement;
 import br.com.scopel.pfv.beta.model.CashRegister;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.SaleItem;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-/**
- * Monta e imprime o comprovante não-fiscal da venda (RF42). O texto traz
- * "NÃO É DOCUMENTO FISCAL" (RNF15). A formatação é pura e testável; a saída
- * física vai pela PrinterPort.
- */
 @Service
 public class ReceiptService {
 
     private static final int WIDTH = 40;
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
 
     private final AppSettingService appSettingService;
     private final PrinterPort printer;
@@ -63,12 +62,11 @@ public class ReceiptService {
         printer.print(buildSaleReceipt(sale));
     }
 
-    /**
-     * Monta o comprovante de fechamento de caixa (não-fiscal). Formatação pura
-     * usando apenas os getters de {@link CashRegister}; a saída física vai pela
-     * PrinterPort. Mantém o mesmo estilo de {@link #buildSaleReceipt}.
-     */
     public String buildCashCloseReceipt(CashRegister cr) {
+        return buildCashCloseReceipt(cr, List.of());
+    }
+
+    public String buildCashCloseReceipt(CashRegister cr, List<CashMovement> movements) {
         String store = appSettingService.getString("store.name", "MERCADO");
         StringBuilder sb = new StringBuilder();
         sb.append(center(store)).append('\n');
@@ -89,6 +87,7 @@ public class ReceiptService {
         sb.append(leftRight("Valor contado", money(cr.getClosingAmount()))).append('\n');
         sb.append(leftRight("Diferenca", money(cr.getDifference()))).append('\n');
         sb.append(line()).append('\n');
+        appendMovements(sb, movements);
         sb.append(center("*** NAO E DOCUMENTO FISCAL ***"));
         return sb.toString();
     }
@@ -97,7 +96,24 @@ public class ReceiptService {
         printer.print(buildCashCloseReceipt(cr));
     }
 
-    // ---- helpers de formatação ----
+    public void printCashCloseReceipt(CashRegister cr, List<CashMovement> movements) {
+        printer.print(buildCashCloseReceipt(cr, movements));
+    }
+
+    private void appendMovements(StringBuilder sb, List<CashMovement> movements) {
+        if (movements == null || movements.isEmpty()) {
+            return;
+        }
+        sb.append(center("MOVIMENTOS DO CAIXA")).append('\n');
+        for (CashMovement movement : movements) {
+            String when = movement.getCreatedAt() == null ? "" : " " + TIME.format(movement.getCreatedAt());
+            sb.append(leftRight(movement.getType().name() + when, money(movement.getAmount().setScale(2, RoundingMode.HALF_UP)))).append('\n');
+            if (movement.getReason() != null && !movement.getReason().isBlank()) {
+                sb.append("  ").append(clip(movement.getReason(), WIDTH - 2)).append('\n');
+            }
+        }
+        sb.append(line()).append('\n');
+    }
 
     private String money(BigDecimal value) {
         return "R$ " + (value == null ? "0,00" : value.toPlainString().replace('.', ','));

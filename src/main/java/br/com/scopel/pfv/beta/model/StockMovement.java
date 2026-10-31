@@ -7,10 +7,6 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * Registro de uma movimentação de estoque (entrada, saída ou ajuste).
- * Guarda o estoque resultante para auditoria (RF13 — histórico do produto).
- */
 @Entity
 @Table(name = "stock_movement")
 @Getter
@@ -20,7 +16,8 @@ public class StockMovement {
     public enum Type {
         ENTRADA,
         SAIDA,
-        AJUSTE
+        AJUSTE,
+        RETIFICACAO
     }
 
     @Id
@@ -35,7 +32,6 @@ public class StockMovement {
     @Column(nullable = false, length = 10)
     private Type type;
 
-    // Sempre positivo; o campo type dá o sentido.
     @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal quantity;
 
@@ -54,4 +50,12 @@ public class StockMovement {
 
     @Column(name = "resulting_stock", nullable = false, precision = 10, scale = 3)
     private BigDecimal resultingStock;
+
+    @ManyToOne
+    @JoinColumn(name = "corrected_movement_id")
+    private StockMovement correctedMovement;
+
+    @ManyToOne
+    @JoinColumn(name = "authorized_by_id")
+    private User authorizedBy;
 }

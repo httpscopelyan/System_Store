@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.CashMovementsController"
+      spacing="6" VBox.vgrow="ALWAYS">
+    <TableView fx:id="movTable" VBox.vgrow="ALWAYS" styleClass="win-grid">
+        <columns>
+            <TableColumn fx:id="colMovDate" text="Data/Hora" prefWidth="140"/>
+            <TableColumn fx:id="colMovOp" text="Op." prefWidth="40"/>
+            <TableColumn fx:id="colMovDinheiro" text="Dinheiro" prefWidth="95"/>
+            <TableColumn fx:id="colMovCheque" text="Cheque" prefWidth="85"/>
+            <TableColumn fx:id="colMovCredito" text="Cartão Crédito" prefWidth="110"/>
+            <TableColumn fx:id="colMovDebito" text="Cartão Débito" prefWidth="105"/>
+            <TableColumn fx:id="colMovTotal" text="Total" prefWidth="95"/>
+            <TableColumn fx:id="colMovVenda" text="Venda" prefWidth="70"/>
+            <TableColumn fx:id="colMovHist" text="Histórico" prefWidth="260"/>
+        </columns>
+        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
+
+    <HBox spacing="18" alignment="CENTER_LEFT">
+        <Label text="● Crédito" styleClass="legend-credito"/>
+        <Label text="● Débito" styleClass="legend-debito"/>
+    </HBox>
+</VBox>

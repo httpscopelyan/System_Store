@@ -57,71 +57,36 @@
                 <Label text="F5 - Atualizar" styleClass="win-label-bold"/>
             </HBox>
 
-            <TableView fx:id="movTable" VBox.vgrow="ALWAYS" styleClass="win-grid">
-                <columns>
-                    <TableColumn fx:id="colMovDate" text="Data/Hora" prefWidth="140"/>
-                    <TableColumn fx:id="colMovOp" text="Op." prefWidth="40"/>
-                    <TableColumn fx:id="colMovDinheiro" text="Dinheiro" prefWidth="95"/>
-                    <TableColumn fx:id="colMovCheque" text="Cheque" prefWidth="85"/>
-                    <TableColumn fx:id="colMovCredito" text="Cartão Crédito" prefWidth="110"/>
-                    <TableColumn fx:id="colMovDebito" text="Cartão Débito" prefWidth="105"/>
-                    <TableColumn fx:id="colMovTotal" text="Total" prefWidth="95"/>
-                    <TableColumn fx:id="colMovVenda" text="Venda" prefWidth="70"/>
-                    <TableColumn fx:id="colMovHist" text="Histórico" prefWidth="150"/>
-                </columns>
-            </TableView>
-
-            <HBox spacing="18" alignment="CENTER_LEFT">
-                <Label text="● Crédito" styleClass="legend-credito"/>
-                <Label text="● Débito" styleClass="legend-debito"/>
-            </HBox>
+            <fx:include fx:id="cashMovements" source="cash_movements.fxml"/>
         </VBox>
     </center>
 
     <right>
-        <VBox styleClass="group-box" spacing="6" prefWidth="270">
-            <padding><Insets top="10" right="12" bottom="12" left="12"/></padding>
-            <Label text="Resumo do Caixa" styleClass="group-title"/>
-
-            <Label text="Saldo Inicial" styleClass="win-label-bold"/>
-            <TextField fx:id="resSaldoInicial" text="R$ 0,00" editable="false" styleClass="money-field"/>
-
-            <Label text="(+) Totais das Entradas" styleClass="section-plus"/>
-            <Label text="Dinheiro" styleClass="win-label"/>
-            <TextField fx:id="resEntDinheiro" text="R$ 0,00" editable="false" styleClass="money-field"/>
-            <Label text="Cheque" styleClass="win-label"/>
-            <TextField fx:id="resEntCheque" text="R$ 0,00" editable="false" styleClass="money-field"/>
-            <Label text="Cartão de Crédito" styleClass="win-label"/>
-            <TextField fx:id="resEntCredito" text="R$ 0,00" editable="false" styleClass="money-field"/>
-            <Label text="Cartão de Débito" styleClass="win-label"/>
-            <TextField fx:id="resEntDebito" text="R$ 0,00" editable="false" styleClass="money-field"/>
-            <Label text="Total (Entradas):" styleClass="win-label-bold"/>
-            <TextField fx:id="resEntTotal" text="R$ 0,00" editable="false" styleClass="money-field"/>
-
-            <Label text="(-) Totais das Saídas" styleClass="section-minus"/>
-            <Label text="Dinheiro" styleClass="win-label"/>
-            <TextField fx:id="resSaiDinheiro" text="R$ 0,00" editable="false" styleClass="money-field"/>
-            <Label text="Total (Saídas):" styleClass="win-label-bold"/>
-            <TextField fx:id="resSaiTotal" text="R$ 0,00" editable="false" styleClass="money-field"/>
-
-            <Label text="(=) Saldo Caixa (Em Dinheiro)" styleClass="section-equals"/>
-            <Label text="Saldo Final:" styleClass="win-label-bold"/>
-            <TextField fx:id="resSaldoFinal" text="R$ 0,00" editable="false" styleClass="money-field"/>
-        </VBox>
+        <ScrollPane fitToWidth="true" prefWidth="292" styleClass="group-box"
+                    hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <fx:include fx:id="cashSummary" source="cash_summary.fxml"/>
+        </ScrollPane>
     </right>
 
     <bottom>
-        <FlowPane styleClass="win-footer" hgap="8" vgap="8" alignment="CENTER_LEFT" prefWrapLength="900">
-            <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
-            <TextField fx:id="movementAmountField" promptText="Valor" styleClass="win-input" prefWidth="90"/>
-            <Button text="💲 Suprimento" onAction="#onSupplement" styleClass="win-button"/>
-            <Button text="💲 Sangria (F9)" onAction="#onWithdrawal" styleClass="win-button"/>
-            <TextField fx:id="countedAmountField" promptText="Contado" styleClass="win-input" prefWidth="90"/>
-            <Button text="🔒 Fechar Caixa" onAction="#onClose" styleClass="win-button"/>
-            <Button text="🖨 Imprimir Movimentação (F7)" onAction="#onPrintMovimentacao" styleClass="win-button"/>
-            <Button text="🖨 Imprimir Fechamento (F8)" onAction="#onPrintFechamento" styleClass="win-button"/>
-            <Button text="🔄 Atualizar (F5)" onAction="#onRefresh" styleClass="win-button"/>
-        </FlowPane>
+        <VBox>
+            <Label fx:id="statusLabel" styleClass="sale-status" wrapText="true">
+                <padding><Insets top="4" right="12" bottom="0" left="12"/></padding>
+            </Label>
+            <FlowPane styleClass="win-footer" hgap="8" vgap="8" alignment="CENTER_LEFT" prefWrapLength="900">
+                <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
+                <TextField fx:id="movementAmountField" promptText="Valor" styleClass="win-input" prefWidth="90"/>
+                <ComboBox fx:id="movementReasonBox" editable="true" promptText="Motivo (obrigatório)" prefWidth="190"/>
+                <Button text="💲 Suprimento" onAction="#onSupplement" styleClass="win-button"/>
+                <Button text="💲 Sangria (F9)" onAction="#onWithdrawal" styleClass="win-button"/>
+                <Button text="🧮 Retificar" onAction="#onRectify" styleClass="win-button"/>
+                <TextField fx:id="countedAmountField" promptText="Contado" styleClass="win-input" prefWidth="90"/>
+                <Button text="🔒 Fechar Caixa" onAction="#onClose" styleClass="win-button"/>
+                <Button text="🖨 Imprimir Movimentação (F7)" onAction="#onPrintMovimentacao" styleClass="win-button"/>
+                <Button text="🖨 Imprimir Fechamento (F8)" onAction="#onPrintFechamento" styleClass="win-button"/>
+                <Button text="🔄 Atualizar (F5)" onAction="#onRefresh" styleClass="win-button"/>
+            </FlowPane>
+        </VBox>
     </bottom>
 
 </BorderPane>

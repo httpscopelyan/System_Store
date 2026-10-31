@@ -1,5 +1,6 @@
 package br.com.scopel.pfv.beta.service;
 
+import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.ProductNotfindException;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.StockMovement;
@@ -16,6 +17,8 @@ import java.util.List;
 
 @Service
 public class StockService {
+
+    private static final int MAX_REASON_LENGTH = 120;
 
     private final ProductRepository productRepository;
     private final StockMovementRepository movementRepository;
@@ -46,6 +49,7 @@ public class StockService {
 
     @Transactional
     public Product adjust(String code, BigDecimal newQuantity, String reason, User operator) {
+        String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);
         Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
 
@@ -54,7 +58,33 @@ public class StockService {
         product.setQuantity(target);
         productRepository.save(product);
 
-        record(product, StockMovement.Type.AJUSTE, delta, null, reason, operator, target);
+        record(product, StockMovement.Type.AJUSTE, delta, null, normalizedReason, operator, target);
+        return product;
+    }
+
+    @Transactional
+    public Product rectify(String code, BigDecimal correctQuantity, String reason, User authorizedBy) {
+        if (authorizedBy == null || authorizedBy.getRole() != User.Role.GERENTE) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+        String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);
+        if (correctQuantity == null || correctQuantity.signum() < 0) {
+            throw new IllegalArgumentException("A quantidade corrigida não pode ser negativa.");
+        }
+        Product product = productRepository.findByCodeIgnoreCase(code)
+                .orElseThrow(() -> new ProductNotfindException(code));
+        BigDecimal target = correctQuantity.setScale(3, RoundingMode.HALF_UP);
+        BigDecimal delta = target.subtract(product.getQuantity()).abs();
+        StockMovement lastMovement = movementRepository.findByProduct_IdOrderByCreatedAtDesc(product.getId())
+                .stream().findFirst().orElse(null);
+        product.setQuantity(target);
+        productRepository.save(product);
+
+        StockMovement rectification = record(product, StockMovement.Type.RETIFICACAO, delta, null,
+                normalizedReason, authorizedBy, target);
+        rectification.setCorrectedMovement(lastMovement);
+        rectification.setAuthorizedBy(authorizedBy);
+        movementRepository.save(rectification);
         return product;
     }
 
@@ -64,7 +94,7 @@ public class StockService {
         return movementRepository.findByProduct_IdOrderByCreatedAtDesc(product.getId());
     }
 
-    private void record(Product product, StockMovement.Type type, BigDecimal quantity,
+    private StockMovement record(Product product, StockMovement.Type type, BigDecimal quantity,
                         BigDecimal unitCost, String reason, User operator, BigDecimal resultingStock) {
         StockMovement m = new StockMovement();
         m.setProduct(product);
@@ -75,6 +105,6 @@ public class StockService {
         m.setOperator(operator);
         m.setCreatedAt(LocalDateTime.now());
         m.setResultingStock(resultingStock);
-        movementRepository.save(m);
+        return movementRepository.save(m);
     }
 }
