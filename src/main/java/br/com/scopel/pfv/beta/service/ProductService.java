@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Service
@@ -28,6 +30,32 @@ public class ProductService {
         String normalized = code == null ? "" : code.trim();
         return repository.findByCodeIgnoreCase(normalized)
                 .orElseThrow(() -> new ProductNotfindException(normalized));
+    }
+
+    public List<Product> searchForSale(String term, int limit) {
+        String normalized = term == null ? "" : term.trim();
+        if (normalized.isEmpty() || limit <= 0) {
+            return List.of();
+        }
+        Map<Long, Product> results = new LinkedHashMap<>();
+        repository.findByCodeIgnoreCase(normalized).filter(Product::getActive)
+                .ifPresent(exact -> results.put(exact.getId(), exact));
+        if (normalized.chars().allMatch(Character::isDigit)) {
+            addAll(results, repository.findTop20ByActiveTrueAndCodeStartingWithIgnoreCaseOrderByCode(normalized));
+        } else {
+            addAll(results, repository.findTop20ByActiveTrueAndCodeStartingWithIgnoreCaseOrderByCode(normalized));
+            addAll(results, repository
+                    .findTop20ByActiveTrueAndDescriptionStartingWithIgnoreCaseOrderByDescription(normalized));
+            addAll(results, repository
+                    .findTop20ByActiveTrueAndDescriptionContainingIgnoreCaseOrderByDescription(normalized));
+        }
+        return results.values().stream().limit(limit).toList();
+    }
+
+    private void addAll(Map<Long, Product> results, List<Product> products) {
+        for (Product product : products) {
+            results.putIfAbsent(product.getId(), product);
+        }
     }
 
     public Product findById(Long id) {

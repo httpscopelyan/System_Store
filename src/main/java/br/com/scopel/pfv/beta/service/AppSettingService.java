@@ -18,6 +18,8 @@ public class AppSettingService {
     public static final String CREDIT_BLOCK_OVERDUE = "credit.block_overdue";
     public static final String PRICING_DEFAULT_MARGIN_PERCENT = "pricing.default_margin_percent";
     public static final String STORE_NAME = "store.name";
+    public static final String SALE_ASK_QUANTITY_AFTER_SCAN = "sale.ask_quantity_after_scan";
+    public static final String SALE_MAX_QUANTITY_PER_ITEM = "sale.max_quantity_per_item";
     public static final String STOCK_MIN_ALERT_MARGIN = "stock.min_alert_margin";
     public static final String ALERTS_EMAIL_ENABLED = "alerts.email_enabled";
     public static final String ALERTS_EMAIL_TO = "alerts.email_to";

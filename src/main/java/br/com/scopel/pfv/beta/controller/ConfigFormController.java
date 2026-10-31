@@ -24,6 +24,8 @@ public class ConfigFormController {
     @FXML private CheckBox repeatItemBox;
     @FXML private CheckBox negativeStockBox;
     @FXML private CheckBox allowCreditBox;
+    @FXML private CheckBox askQuantityBox;
+    @FXML private TextField maxQuantityField;
     @FXML private TextField discountLimitField;
     @FXML private TextField storeNameField;
     @FXML private TextField defaultMarginField;
@@ -54,6 +56,8 @@ public class ConfigFormController {
         repeatItemBox.setSelected(settings.getBoolean(AppSettingService.SALE_REPEAT_ITEM, true));
         negativeStockBox.setSelected(settings.getBoolean(AppSettingService.SALE_ALLOW_NEGATIVE_STOCK, false));
         allowCreditBox.setSelected(settings.getBoolean(AppSettingService.CREDIT_ALLOW_CREDIT_SALE, false));
+        askQuantityBox.setSelected(settings.getBoolean(AppSettingService.SALE_ASK_QUANTITY_AFTER_SCAN, true));
+        maxQuantityField.setText(settings.getString(AppSettingService.SALE_MAX_QUANTITY_PER_ITEM, "999"));
         discountLimitField.setText(settings.getString(AppSettingService.SALE_DISCOUNT_LIMIT_PERCENT, "10"));
         storeNameField.setText(settings.getString(AppSettingService.STORE_NAME, "MERCADO"));
         defaultMarginField.setText(settings.getString(AppSettingService.PRICING_DEFAULT_MARGIN_PERCENT, "30"));
@@ -69,9 +73,17 @@ public class ConfigFormController {
             messageLabel.setText("Margem padrão inválida: informe um número maior ou igual a zero.");
             return;
         }
+        BigDecimal maxQuantity = DecimalInput.parseOrNull(maxQuantityField.getText());
+        if (maxQuantity == null || maxQuantity.signum() <= 0) {
+            messageLabel.setText("Quantidade máxima inválida: informe um número maior que zero.");
+            return;
+        }
         try {
             settings.set(AppSettingService.SALE_REPEAT_ITEM, String.valueOf(repeatItemBox.isSelected()));
             settings.set(AppSettingService.SALE_ALLOW_NEGATIVE_STOCK, String.valueOf(negativeStockBox.isSelected()));
+            settings.set(AppSettingService.SALE_ASK_QUANTITY_AFTER_SCAN, String.valueOf(askQuantityBox.isSelected()));
+            settings.set(AppSettingService.SALE_MAX_QUANTITY_PER_ITEM,
+                    maxQuantity.stripTrailingZeros().toPlainString());
             settings.set(AppSettingService.CREDIT_ALLOW_CREDIT_SALE, String.valueOf(allowCreditBox.isSelected()));
             settings.set(AppSettingService.SALE_DISCOUNT_LIMIT_PERCENT, discountLimitField.getText().trim());
             settings.set(AppSettingService.STORE_NAME, storeNameField.getText().trim());

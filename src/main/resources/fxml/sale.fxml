@@ -22,11 +22,20 @@
                 <Insets top="18" right="24" bottom="18" left="24"/>
             </padding>
 
-            <VBox spacing="6">
-                <Label text="Código de barras" styleClass="code-label"/>
-                <TextField fx:id="codeField" promptText="Bipe ou digite o código"
-                           onAction="#onAddItem" styleClass="code-field"/>
-            </VBox>
+            <HBox spacing="0" alignment="BOTTOM_LEFT">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Código ou nome do produto" styleClass="code-label"/>
+                    <TextField fx:id="codeField" promptText="Bipe, digite o código ou o nome"
+                               onAction="#onAddItem" styleClass="code-field, code-field-left"
+                               maxWidth="Infinity"/>
+                </VBox>
+                <VBox spacing="6" prefWidth="230" minWidth="230">
+                    <Label fx:id="quantityLabel" text="Qtd" styleClass="code-label"/>
+                    <TextField fx:id="quantityField" promptText="Qtd" onAction="#onQuantityEntered"
+                               styleClass="code-field, code-field-right"/>
+                </VBox>
+            </HBox>
+            <Label fx:id="quantityPreviewLabel" styleClass="quantity-preview" maxWidth="Infinity"/>
 
             <VBox fx:id="lastItemDisplay" styleClass="last-item-display"
                   focusTraversable="false" maxWidth="Infinity">

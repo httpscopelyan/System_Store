@@ -17,8 +17,8 @@ final class FxTestSupport {
             Platform.startup(() -> {
             });
         } catch (IllegalStateException toolkitAlreadyStarted) {
-            Platform.setImplicitExit(false);
         }
+        Platform.setImplicitExit(false);
     }
 
     static void runOnFx(Runnable action) throws InterruptedException, ExecutionException, TimeoutException {
@@ -31,6 +31,18 @@ final class FxTestSupport {
                 done.completeExceptionally(failure);
             }
         });
-        done.get(30, TimeUnit.SECONDS);
+        try {
+            done.get(20, TimeUnit.SECONDS);
+        } catch (TimeoutException blocked) {
+            Thread.getAllStackTraces().forEach((thread, stack) -> {
+                if (thread.getName().contains("JavaFX Application Thread")) {
+                    System.err.println("FX THREAD BLOCKED AT:");
+                    for (StackTraceElement frame : stack) {
+                        System.err.println("    at " + frame);
+                    }
+                }
+            });
+            throw blocked;
+        }
     }
 }

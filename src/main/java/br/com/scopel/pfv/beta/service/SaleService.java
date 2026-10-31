@@ -24,6 +24,7 @@ import java.util.List;
 public class SaleService {
 
     private static final BigDecimal HUNDRED = new BigDecimal("100");
+    private static final BigDecimal DEFAULT_MAX_QUANTITY_PER_ITEM = new BigDecimal("999");
 
     private final SaleRepository saleRepository;
     private final ProductRepository productRepository;
@@ -53,14 +54,6 @@ public class SaleService {
         return saleRepository.save(sale);
     }
 
-    /**
-     * Decide entre restaurar a venda em andamento ou abrir uma nova. Reusa a
-     * {@code sessionSale} (inclusive ABERTA sem itens) SOMENTE quando ela pertence
-     * a ESTE operador e a ESTE caixa (comparação por id) e está ABERTA ou
-     * EM_PAGAMENTO. Nos demais casos (nula, de outro operador/caixa, FINALIZADA ou
-     * CANCELADA) abre uma venda nova. Garante o invariante de nunca abrir venda nova
-     * havendo uma ABERTA/EM_PAGAMENTO do próprio dono, evitando vendas órfãs.
-     */
     public Sale resumeOrOpenSale(User operator, CashRegister cashRegister, Sale sessionSale) {
         if (canResume(operator, cashRegister, sessionSale)) {
             return sessionSale;
@@ -99,9 +92,6 @@ public class SaleService {
 
         Product product = productService.findCode(productCode);
 
-        // RN05: valida/normaliza a quantidade ANTES de somar ou criar o item,
-        // para que a soma de um item existente (RN07) nunca aceite uma fração
-        // proibida por entrar como parcela.
         BigDecimal normalizedQuantity = validateQuantity(product, quantity);
 
         SaleItem existing = findItem(sale, product.getId());
@@ -124,14 +114,12 @@ public class SaleService {
         return saleRepository.save(sale);
     }
 
-    /** Vincula um cliente à venda (tele-entrega / venda a prazo). */
     public Sale setCustomer(Sale sale, Customer customer) {
         requireNotClosed(sale);
         sale.setCustomer(customer);
         return saleRepository.save(sale);
     }
 
-    /** Desconto em um item (RF19). Acima do limite percentual exige gerente (RN08). */
     public Sale applyItemDiscount(Sale sale, String productCode, BigDecimal discount, User authorizedBy) {
         if (sale.getStatus() != Sale.Status.ABERTA) {
             throw new IllegalSaleStateException();
@@ -159,7 +147,6 @@ public class SaleService {
         return saleRepository.save(sale);
     }
 
-    /** Desconto no total da venda (RF20). Acima do limite percentual exige gerente (RN08). */
     public Sale applySaleDiscount(Sale sale, BigDecimal discount, User authorizedBy) {
         if (sale.getStatus() != Sale.Status.ABERTA && sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
             throw new IllegalSaleStateException();
@@ -180,7 +167,6 @@ public class SaleService {
         return saleRepository.save(sale);
     }
 
-    /** Acréscimo no total da venda (RF19 — acréscimo). */
     public Sale applySurcharge(Sale sale, BigDecimal surcharge) {
         if (sale.getStatus() != Sale.Status.ABERTA && sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
             throw new IllegalSaleStateException();
@@ -192,7 +178,6 @@ public class SaleService {
         return saleRepository.save(sale);
     }
 
-    /** Remove um item da venda (RF18) — exige autorização de gerente. */
     public Sale cancelItem(Sale sale, String productCode, User authorizedBy) {
         if (sale.getStatus() != Sale.Status.ABERTA) {
             throw new IllegalSaleStateException();
@@ -205,13 +190,12 @@ public class SaleService {
             throw new SaleItemNotFoundException(productCode);
         }
 
-        sale.getItems().remove(item);          // orphanRemoval apaga o item
+        sale.getItems().remove(item);
         sale.setAuthorizedBy(authorizedBy);
         sale.setTotal(calculateTotal(sale));
         return saleRepository.save(sale);
     }
 
-    /** Cancela a venda (RF21) — exige gerente e mantém o registro (RN17). */
     public Sale cancelSale(Sale sale, String reason, User authorizedBy) {
         if (sale.getStatus() == Sale.Status.FINALIZADA || sale.getStatus() == Sale.Status.CANCELADA) {
             throw new IllegalSaleStateException();
@@ -222,7 +206,7 @@ public class SaleService {
         sale.setCancelReason(reason);
         sale.setCanceledAt(LocalDateTime.now());
         sale.setAuthorizedBy(authorizedBy);
-        return saleRepository.save(sale);     // RN17: registro preservado
+        return saleRepository.save(sale);
     }
 
     private Sale finalizeSale(Sale sale) {
@@ -232,12 +216,6 @@ public class SaleService {
         return saleRepository.save(sale);
     }
 
-    /**
-     * Reabre para edição uma venda que está EM_PAGAMENTO, voltando-a para ABERTA
-     * (RN21: nova transição EM_PAGAMENTO → ABERTA). Seguro porque EM_PAGAMENTO não
-     * grava Payment — o pagamento é atômico (pay/payCard/payPix) — logo não há
-     * Payment órfão ao reverter. Uma tabela só, sem {@code @Transactional}.
-     */
     public Sale reopenForEditing(Sale sale) {
         if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
             throw new IllegalSaleStateException();
@@ -286,11 +264,6 @@ public class SaleService {
         return finalizeSale(sale);
     }
 
-    /**
-     * Pagamento em cartão (débito/crédito). Chamado SÓ após aprovação da
-     * maquininha — o resultado (aprovado/negado) é responsabilidade da UI/gateway.
-     * Cartão não gera troco: change = 0 e amountReceived = total.
-     */
     @Transactional
     public Sale payCard(Sale sale, CardType cardType) {
         if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
@@ -309,9 +282,6 @@ public class SaleService {
         return finalizeSale(sale);
     }
 
-    /**
-     * Pagamento via PIX. Não gera troco: change = 0 e amountReceived = total.
-     */
     @Transactional
     public Sale payPix(Sale sale) {
         if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
@@ -329,17 +299,10 @@ public class SaleService {
         return finalizeSale(sale);
     }
 
-    /** Histórico de vendas finalizadas, mais recentes primeiro (REVISÕES2 item 4). */
     public List<Sale> history() {
         return saleRepository.findByStatusOrderByCreatedAtDesc(Sale.Status.FINALIZADA);
     }
 
-    /**
-     * Pagamento múltiplo / dividido (RN18): soma das formas ≥ total; só o
-     * dinheiro gera troco, e o troco não pode exceder o dinheiro recebido.
-     * Diferente de {@link #pay}, aceita CARTAO/PIX como recebidos (confirmação
-     * manual; a integração com maquininha/PSP é fase posterior).
-     */
     @Transactional
     public Sale payMixed(Sale sale, List<PaymentInput> inputs) {
         if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
@@ -392,11 +355,6 @@ public class SaleService {
         return finalizeSale(sale);
     }
 
-    /**
-     * Fecha a venda a prazo / crediário: registra o tender PRAZO e finaliza
-     * (baixa estoque). Os títulos a receber são gerados pelo ReceivableService,
-     * orquestrado por CreditSaleService — por isso este método não valida limite.
-     */
     @Transactional
     public Sale finalizeOnCredit(Sale sale) {
         if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
@@ -426,7 +384,7 @@ public class SaleService {
                 .subtract(nz(sale.getDiscount()))
                 .add(nz(sale.getSurcharge()));
         if (total.compareTo(BigDecimal.ZERO) < 0) {
-            total = BigDecimal.ZERO;               // RN04: total nunca negativo
+            total = BigDecimal.ZERO;
         }
         return total.setScale(2, RoundingMode.HALF_UP);
     }
@@ -448,16 +406,29 @@ public class SaleService {
         return net.setScale(2, RoundingMode.HALF_UP);
     }
 
-    /**
-     * Valida a quantidade/peso de um item (RN05) e devolve o valor normalizado.
-     * Produto por unidade (UN): precisa ser inteiro e maior que zero. Produto por
-     * peso (KG): maior que zero, com no máximo 3 casas decimais, normalizado em 3
-     * casas (HALF_UP). Esta regra vive no service de propósito (ADR 0010/RN21): a
-     * UI pode validar antes, mas o service é o portão final.
-     */
+    public boolean asksQuantityAfterScan() {
+        return appSettingService.getBoolean(AppSettingService.SALE_ASK_QUANTITY_AFTER_SCAN, true);
+    }
+
+    public BigDecimal maxQuantityPerItem() {
+        BigDecimal configured = appSettingService.getBigDecimal(
+                AppSettingService.SALE_MAX_QUANTITY_PER_ITEM, DEFAULT_MAX_QUANTITY_PER_ITEM);
+        return configured.signum() <= 0 ? DEFAULT_MAX_QUANTITY_PER_ITEM : configured;
+    }
+
+    public BigDecimal previewLineTotal(BigDecimal unitPrice, BigDecimal quantity) {
+        if (unitPrice == null || quantity == null || quantity.signum() <= 0) {
+            return BigDecimal.ZERO.setScale(2);
+        }
+        return unitPrice.multiply(quantity).setScale(2, RoundingMode.HALF_UP);
+    }
+
     private BigDecimal validateQuantity(Product product, BigDecimal quantity) {
         if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidQuantityException("Quantidade deve ser maior que zero");
+        }
+        if (quantity.compareTo(maxQuantityPerItem()) > 0) {
+            throw new InvalidQuantityException("Quantidade acima do limite — confirme");
         }
 
         if (product.getUnit() == Product.Unidade.UN) {

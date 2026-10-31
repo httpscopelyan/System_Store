@@ -17,6 +17,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByDescriptionContainingIgnoreCase(String description);
 
+    List<Product> findTop20ByActiveTrueAndCodeStartingWithIgnoreCaseOrderByCode(String prefix);
+
+    List<Product> findTop20ByActiveTrueAndDescriptionStartingWithIgnoreCaseOrderByDescription(String prefix);
+
+    List<Product> findTop20ByActiveTrueAndDescriptionContainingIgnoreCaseOrderByDescription(String fragment);
+
     @Query("select p from Product p where p.active = true and p.minStock > 0 "
             + "and p.quantity <= p.minStock + :margin order by p.description")
     List<Product> findLowStock(@Param("margin") BigDecimal margin);
