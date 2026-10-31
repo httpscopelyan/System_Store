@@ -27,10 +27,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-/**
- * Controller da casca persistente (main_layout). Monta a barra de ícones,
- * o menu lateral e a barra de status; só orquestra a navegação via Navigator.
- */
 @Component
 public class MainController {
 
@@ -45,6 +41,7 @@ public class MainController {
     @FXML private BorderPane root;
     @FXML private Button updateButton;
     @FXML private Button configButton;
+    @FXML private Button backButton;
     @FXML private Label dateTimeLabel;
     @FXML private Label userLabel;
     @FXML private Label roleLabel;
@@ -52,7 +49,6 @@ public class MainController {
     @FXML private Label terminalLabel;
     @FXML private Label hintLabel;
 
-    // Limpa a dica discreta da barra de status depois de alguns segundos.
     private Timeline hintClear;
 
     public MainController(Navigator navigator, UserSession userSession, UpdateService updateService) {
@@ -64,6 +60,8 @@ public class MainController {
     @FXML
     public void initialize() {
         navigator.bind(root);
+        navigator.addNavigationListener(this::refreshBackButton);
+        refreshBackButton();
 
         User user = userSession.getLoggedUser();
         userLabel.setText("Usuário: " + (user != null ? user.getName() : "-"));
@@ -72,7 +70,6 @@ public class MainController {
 
         refreshCaixaStatus();
 
-        // Config (ADM) só para GERENTE.
         boolean gerente = user != null && user.getRole() == User.Role.GERENTE;
         if (configButton != null) {
             configButton.setVisible(gerente);
@@ -84,15 +81,12 @@ public class MainController {
         setupUpdateNotice();
     }
 
-    // ---- Atualização remota -------------------------------------------------
-
     private void setupUpdateNotice() {
         updateService.addListener(info -> Platform.runLater(() -> showUpdateAvailable(info)));
         UpdateInfo pending = updateService.getLatestUpdate();
         if (pending != null) {
             showUpdateAvailable(pending);
         }
-        // Resultado de uma tentativa anterior (ex.: rollback) — mostrado uma única vez.
         Platform.runLater(() -> updateService.consumeLastResult()
                 .filter(r -> !r.isSuccess())
                 .ifPresent(r -> {
@@ -114,7 +108,6 @@ public class MainController {
         updateButton.setManaged(true);
     }
 
-    /** Baixa, valida e reinicia o PDV na versão nova (o atualizador externo faz a troca). */
     @FXML
     public void onUpdateAndRestart() {
         UpdateInfo info = updateService.getLatestUpdate();
@@ -157,7 +150,6 @@ public class MainController {
         worker.start();
     }
 
-    /** Encerramento gracioso (fecha o contexto Spring em stop()); garante a saída do processo. */
     private void shutdownApplication() {
         Platform.runLater(Platform::exit);
         Thread fallback = new Thread(() -> {
@@ -170,6 +162,17 @@ public class MainController {
         }, "update-exit-fallback");
         fallback.setDaemon(true);
         fallback.start();
+    }
+
+    @FXML
+    public void onBack() {
+        navigator.back();
+    }
+
+    private void refreshBackButton() {
+        if (backButton != null) {
+            backButton.setDisable(!navigator.canGoBack());
+        }
     }
 
     private void refreshCaixaStatus() {
@@ -186,8 +189,6 @@ public class MainController {
     }
 
     private void setupShortcuts() {
-        // A scene ainda não existe no initialize(); registra os atalhos uma vez,
-        // quando o shell entra numa cena.
         root.sceneProperty().addListener((obs, oldScene, scene) -> {
             if (scene == null) return;
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F1), this::onConsultaPreco);
@@ -201,13 +202,6 @@ public class MainController {
         });
     }
 
-    /**
-     * F1 — Consulta de preço rápida (RF07). RN21: NÃO interrompe uma venda em
-     * andamento. Considera-se "em andamento" uma venda com itens lançados OU já
-     * em pagamento; uma venda inexistente ou apenas aberta e vazia pode ser
-     * deixada para consultar o preço. Quando bloqueado, só mostra uma dica
-     * discreta e ignora — nada é navegado nem alterado.
-     */
     @FXML
     public void onConsultaPreco() {
         if (hasSaleInProgress()) {
@@ -242,8 +236,6 @@ public class MainController {
     @FXML
     public void onVender() {
         refreshCaixaStatus();
-        // Vender sempre abre a tela de Venda; se não houver caixa aberto, a própria
-        // tela avisa (RN14), em vez de redirecionar o operador para o Caixa.
         navigator.navigate(Page.VENDA);
     }
 

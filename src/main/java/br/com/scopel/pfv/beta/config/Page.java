@@ -1,9 +1,5 @@
 package br.com.scopel.pfv.beta.config;
 
-/**
- * Páginas que vivem no centro do shell (main_layout). Login não entra aqui:
- * ele é a raiz da Scene antes do shell existir.
- */
 public enum Page {
 
     INICIO("/fxml/inicio.fxml"),

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.BackBarController"
+      styleClass="back-bar" alignment="CENTER_LEFT">
+    <padding>
+        <Insets top="8" right="14" bottom="8" left="14"/>
+    </padding>
+    <Button fx:id="backButton" text="◀ Voltar (Esc)" onAction="#onBack" styleClass="back-button"/>
+</HBox>

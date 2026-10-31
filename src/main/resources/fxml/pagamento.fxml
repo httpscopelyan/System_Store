@@ -18,20 +18,17 @@
     </top>
 
     <center>
-        <!-- Rola em telas baixas (1366x768) sem roubar o foco do teclado 1/2/3. -->
         <ScrollPane fitToWidth="true" focusTraversable="false">
             <VBox spacing="18" alignment="TOP_CENTER">
                 <padding>
                     <Insets top="24" right="40" bottom="24" left="40"/>
                 </padding>
 
-                <!-- TOTAL grande -->
                 <VBox styleClass="total-panel" spacing="4" maxWidth="Infinity">
                     <Label text="TOTAL A PAGAR" styleClass="total-caption"/>
                     <Label fx:id="totalLabel" text="R$ 0,00" styleClass="total-value"/>
                 </VBox>
 
-                <!-- Formas de pagamento -->
                 <Button fx:id="dinheiroOption" text="1  —  DINHEIRO" onAction="#onDinheiro"
                         styleClass="pay-option" maxWidth="Infinity"/>
                 <Button text="2  —  CARTÃO" onAction="#onCartao"

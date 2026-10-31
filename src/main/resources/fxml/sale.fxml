@@ -9,7 +9,6 @@
             stylesheets="@../css/styles.css"
             styleClass="sale-root">
 
-    <!-- Cabeçalho azul-marinho -->
     <top>
         <VBox styleClass="page-header">
             <Label text="Venda — Mercado Scopel" styleClass="page-header-title"/>
@@ -17,28 +16,24 @@
         </VBox>
     </top>
 
-    <!-- Área central: código, tabela de itens e feedback -->
     <center>
         <VBox spacing="14">
             <padding>
                 <Insets top="18" right="24" bottom="18" left="24"/>
             </padding>
 
-            <!-- Campo de código de barras grande, mantém o foco (RNF03) -->
             <VBox spacing="6">
                 <Label text="Código de barras" styleClass="code-label"/>
                 <TextField fx:id="codeField" promptText="Bipe ou digite o código"
                            onAction="#onAddItem" styleClass="code-field"/>
             </VBox>
 
-            <!-- Faixa azul fina do último item lançado — só o nome; não rouba foco (RNF03) -->
             <VBox fx:id="lastItemDisplay" styleClass="last-item-display"
                   focusTraversable="false" maxWidth="Infinity">
                 <Label fx:id="lastItemLabel" text="—" styleClass="last-item-name"
                        focusTraversable="false" wrapText="true" maxWidth="Infinity"/>
             </VBox>
 
-            <!-- Tabela de itens -->
             <TableView fx:id="itemsTable" styleClass="items-table" VBox.vgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="descriptionCol" prefWidth="520.0" text="Descrição"/>
@@ -53,7 +48,6 @@
 
             <Label fx:id="statusLabel" styleClass="sale-status"/>
 
-            <!-- Venda+ : desconto, cliente, cancelamentos -->
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <TextField fx:id="discountField" promptText="Desconto R$ (F5)"/>
                 <Button text="Aplicar desconto" onAction="#onApplyDiscount"/>
@@ -69,7 +63,6 @@
         </VBox>
     </center>
 
-    <!-- Painel lateral: TOTAL enorme + finalizar (RNF04) + prévia do cupom -->
     <right>
         <VBox spacing="16" alignment="TOP_CENTER" prefWidth="380.0">
             <padding>
@@ -84,7 +77,6 @@
             <Button text="Finalizar Venda (F10)" onAction="#onFinalize"
                     styleClass="finalize-button" maxWidth="Infinity"/>
 
-            <!-- Item 1: prévia do cupom (igual ao que será impresso) -->
             <VBox spacing="6" maxWidth="Infinity" VBox.vgrow="ALWAYS">
                 <Label text="Prévia do cupom — NÃO É DOCUMENTO FISCAL" styleClass="form-section-title"/>
                 <TextArea fx:id="receiptPreview" editable="false" focusTraversable="false"
@@ -94,7 +86,6 @@
         </VBox>
     </right>
 
-    <!-- Rodapé só-visual com dicas de teclado -->
     <bottom>
         <HBox styleClass="sale-footer" spacing="8" alignment="CENTER_LEFT">
             <Label text="F10" styleClass="key-hint"/>

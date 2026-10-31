@@ -68,4 +68,8 @@
             </VBox>
         </ScrollPane>
     </center>
+    <bottom>
+        <fx:include source="back_bar.fxml"/>
+    </bottom>
+
 </BorderPane>

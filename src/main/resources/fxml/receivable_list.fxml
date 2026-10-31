@@ -51,4 +51,8 @@
             <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
         </VBox>
     </center>
+    <bottom>
+        <fx:include source="back_bar.fxml"/>
+    </bottom>
+
 </BorderPane>

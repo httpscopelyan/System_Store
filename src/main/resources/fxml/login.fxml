@@ -12,13 +12,11 @@
 
     <VBox alignment="CENTER" spacing="26" maxWidth="420">
 
-        <!-- Marca -->
         <VBox alignment="CENTER" spacing="4">
             <Label text="Mercado Scopel" styleClass="login-brand"/>
             <Label text="PDV — Ponto de Venda" styleClass="login-brand-subtitle"/>
         </VBox>
 
-        <!-- Cartão central de acesso -->
         <VBox styleClass="login-card" spacing="16" maxWidth="Infinity">
             <Label text="Acesso ao sistema" styleClass="login-card-title"/>
 

@@ -1,25 +1,9 @@
-/* Identidade visual — Mercado Scopel (PDV) — azul-marinho */
 
-/* ============================================================
-   Paleta
-   Azul-marinho escuro  #15325F  (barras/painéis de operar)
-   Azul-marinho médio   #1E4C8A
-   Azul destaque        #2E6CB5
-   Fundo gestão         #F4F6F9
-   Painel branco        #FFFFFF
-   Texto sobre azul     #FFFFFF / secundário #CBD9EC
-   Texto sobre claro    #22303F / secundário #6B7683
-   Sucesso              #2E7D32
-   Perigo               #C62828
-   ============================================================ */
-
-/* ---------- Casca persistente (shell janela única) ---------- */
 
 .app-shell {
     -fx-background-color: #f4f6f9;
 }
 
-/* Faixa de marca acima da toolbar de módulos */
 .brand-bar {
     -fx-background-color: #15325f;
     -fx-padding: 6 14 6 14;
@@ -31,13 +15,10 @@
     -fx-font-weight: bold;
 }
 
-/* ---------- Tela inicial (gestão) ---------- */
-
 .inicio-root {
     -fx-background-color: #f4f6f9;
 }
 
-/* Barra superior de ícones */
 .top-bar {
     -fx-background-color: linear-gradient(to bottom, #1e4c8a, #15325f);
     -fx-padding: 6 10 6 10;
@@ -58,7 +39,6 @@
     -fx-background-color: rgba(255, 255, 255, 0.18);
 }
 
-/* Botões em bloco (ícone em cima, rótulo embaixo) para a toolbar de módulos */
 .block-button {
     -fx-background-color: linear-gradient(to bottom, #ffffff, #eef2f7);
     -fx-border-color: #c3ccd6;
@@ -79,7 +59,6 @@
     -fx-border-color: #3a8de0;
 }
 
-/* Menu lateral esquerdo */
 .side-menu {
     -fx-background-color: white;
     -fx-border-color: transparent #d9dee5 transparent transparent;
@@ -115,7 +94,6 @@
     -fx-cursor: default;
 }
 
-/* Área central */
 .center-area {
     -fx-background-color: white;
 }
@@ -146,7 +124,6 @@
     -fx-text-fill: #c62828;
 }
 
-/* Barra de status inferior */
 .status-bar {
     -fx-background-color: #e9edf2;
     -fx-border-color: #d9dee5 transparent transparent transparent;
@@ -159,17 +136,10 @@
     -fx-text-fill: #44515e;
 }
 
-/* ============================================================
-   Tela de venda (operacional — azul-marinho)
-   ============================================================ */
-
 .sale-root {
     -fx-background-color: #f4f6f9;
 }
 
-/* Cabeçalho azul-marinho padronizado das páginas (.page-header) — faixa FINA.
-   Fundo sólido e padding compacto (~32-36px de altura). .sale-header e
-   .panel-header são aliases que apontam para as mesmas regras. */
 .page-header,
 .sale-header,
 .panel-header {
@@ -194,7 +164,6 @@
     -fx-text-fill: #cbd9ec;
 }
 
-/* Campo de código de barras em destaque */
 .code-label {
     -fx-font-size: 14px;
     -fx-font-weight: bold;
@@ -219,7 +188,6 @@
     -fx-effect: dropshadow(gaussian, rgba(21, 50, 95, 0.35), 8, 0, 0, 0);
 }
 
-/* Tabela de itens */
 .items-table {
     -fx-background-color: white;
     -fx-border-color: #d9dee5;
@@ -255,7 +223,6 @@
     -fx-text-fill: #15325f;
 }
 
-/* Painel de total enorme (RNF04 — legível a 1 m) */
 .total-panel {
     -fx-background-color: linear-gradient(to right, #15325f, #1e4c8a);
     -fx-background-radius: 8;
@@ -274,8 +241,6 @@
     -fx-text-fill: white;
 }
 
-/* Faixa azul fina do último item lançado — mostra SÓ o nome do produto
-   bipado/pesquisado (preço segue na tabela e na Consulta de preço). */
 .last-item-display {
     -fx-background-color: #1e4c8a;
     -fx-background-radius: 6;
@@ -288,7 +253,6 @@
     -fx-text-fill: white;
 }
 
-/* ---------- Consulta de preço (F1) — só leitura ---------- */
 .price-check-warning {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
@@ -327,13 +291,11 @@
     -fx-text-fill: #6b7683;
 }
 
-/* Dica discreta na barra de status do shell */
 .status-hint {
     -fx-text-fill: #8a4b00;
     -fx-font-weight: bold;
 }
 
-/* Botão finalizar proeminente */
 .finalize-button {
     -fx-background-color: #2e7d32;
     -fx-text-fill: white;
@@ -348,14 +310,12 @@
     -fx-background-color: #1f5f24;
 }
 
-/* Feedback de status da venda/caixa — avisos nítidos */
 .sale-status {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-text-fill: #0a3d7a;
 }
 
-/* Prévia do cupom (não-fiscal) — texto monoespaçado do tíquete */
 .receipt-preview {
     -fx-font-family: "Consolas", "Monospaced", monospace;
     -fx-font-size: 12px;
@@ -371,7 +331,6 @@
     -fx-background-color: #fffdf5;
 }
 
-/* Painel grande de confirmação (tela "Venda finalizada") */
 .finalized-panel {
     -fx-background-color: linear-gradient(to bottom, #2e7d32, #1f5f24);
     -fx-background-radius: 10;
@@ -396,7 +355,6 @@
     -fx-text-fill: #15325f;
 }
 
-/* Blocos grandes de escolha de forma de pagamento (operação sem mouse) */
 .pay-option {
     -fx-background-color: linear-gradient(to bottom, #1e4c8a, #15325f);
     -fx-text-fill: white;
@@ -430,7 +388,6 @@
     -fx-background-color: #e7eefa;
 }
 
-/* Rodapé com dicas de teclado (só visual) */
 .sale-footer {
     -fx-background-color: #15325f;
     -fx-padding: 8 24 8 24;
@@ -449,10 +406,6 @@
     -fx-background-radius: 4;
     -fx-padding: 2 8 2 8;
 }
-
-/* ============================================================
-   Tela de login
-   ============================================================ */
 
 .login-root {
     -fx-background-color: linear-gradient(to bottom, #1e4c8a, #15325f);
@@ -482,13 +435,6 @@
     -fx-text-fill: #15325f;
 }
 
-/* ============================================================
-   Formulários / telas de gestão (caixa, produtos)
-   ============================================================ */
-
-/* (Cabeçalho .panel-header consolidado em .page-header, mais acima.) */
-
-/* Cartão de seção claro */
 .form-card {
     -fx-background-color: white;
     -fx-background-radius: 8;
@@ -527,7 +473,6 @@
     -fx-effect: dropshadow(gaussian, rgba(46, 108, 181, 0.3), 6, 0, 0, 0);
 }
 
-/* Botões reaproveitáveis */
 .primary-button {
     -fx-background-color: #2e6cb5;
     -fx-text-fill: white;
@@ -587,14 +532,12 @@
     -fx-background-color: #a31d1d;
 }
 
-/* Mensagem de feedback em formulário — avisos nítidos */
 .form-message {
     -fx-font-size: 15px;
     -fx-font-weight: bold;
     -fx-text-fill: #0a3d7a;
 }
 
-/* Aviso destacado (quando há texto) — use em status de ações sensíveis */
 .notice {
     -fx-font-size: 15px;
     -fx-font-weight: bold;
@@ -605,10 +548,6 @@
     -fx-background-radius: 4;
     -fx-padding: 8 12 8 12;
 }
-
-/* ============================================================
-   Look clássico Windows (tela de Caixa — igual à referência)
-   ============================================================ */
 
 .win-root { -fx-background-color: #f0f0f0; }
 
@@ -681,7 +620,6 @@
 
 .win-footer { -fx-background-color: #ece9d8; -fx-border-color: #a6a6a6 transparent transparent transparent; -fx-border-width: 1 0 0 0; }
 
-/* Grid estilo clássico */
 .win-grid { -fx-background-color: white; -fx-border-color: #7f9db9; -fx-font-size: 12px; }
 .win-grid .column-header-background { -fx-background-color: linear-gradient(to bottom, #3a8de0, #0a6cc4); }
 .win-grid .column-header,
@@ -690,11 +628,21 @@
 .win-grid .table-row-cell:selected { -fx-background-color: #b8d6f0; -fx-text-fill: black; }
 .win-grid .table-row-cell:selected .table-cell { -fx-text-fill: black; }
 
-/* Aviso de atualização disponível (barra de status) */
 .update-button {
     -fx-background-color: #f9a825;
     -fx-text-fill: #212121;
     -fx-font-weight: bold;
     -fx-padding: 3 12 3 12;
+    -fx-cursor: hand;
+}
+
+.back-bar {
+    -fx-border-color: #cfd4dc transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.back-button {
+    -fx-font-weight: bold;
+    -fx-padding: 6 16 6 16;
     -fx-cursor: hand;
 }

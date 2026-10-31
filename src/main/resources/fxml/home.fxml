@@ -14,7 +14,6 @@
                 <padding><Insets top="5" right="12" bottom="5" left="12"/></padding>
                 <Label text="SCOPEL STORE" styleClass="win-titlebar-text"/>
             </HBox>
-            <!-- Blocos no topo (nada centralizado) -->
             <HBox styleClass="top-bar" spacing="10" alignment="CENTER_LEFT">
                 <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
                 <Button text="🛒&#10;PDV" styleClass="block-button" onAction="#onPdv"/>

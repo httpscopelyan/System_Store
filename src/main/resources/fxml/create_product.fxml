@@ -9,7 +9,6 @@
             stylesheets="@../css/styles.css"
             styleClass="inicio-root">
 
-    <!-- Cabeçalho azul-marinho -->
     <top>
         <VBox styleClass="page-header">
             <Label text="Produtos — Cadastro" styleClass="page-header-title"/>
@@ -79,7 +78,6 @@
                 </HBox>
             </VBox>
 
-            <!-- Ações -->
             <HBox spacing="12" alignment="CENTER_LEFT">
                 <Button onAction="#onSave" text="Salvar" styleClass="success-button"/>
             </HBox>
@@ -87,5 +85,9 @@
             <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
         </VBox>
     </center>
+
+    <bottom>
+        <fx:include source="back_bar.fxml"/>
+    </bottom>
 
 </BorderPane>

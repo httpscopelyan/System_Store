@@ -15,7 +15,6 @@
         </HBox>
     </top>
 
-    <!-- Painel esquerdo: Status do Caixa (rolável; o botão Abrir nunca é cortado) -->
     <left>
         <ScrollPane fitToWidth="true" prefWidth="312" styleClass="group-box"
                     hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
@@ -49,7 +48,6 @@
         </ScrollPane>
     </left>
 
-    <!-- Centro: Movimentação -->
     <center>
         <VBox spacing="6" styleClass="group-box">
             <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
@@ -80,7 +78,6 @@
         </VBox>
     </center>
 
-    <!-- Painel direito: Resumo do Caixa -->
     <right>
         <VBox styleClass="group-box" spacing="6" prefWidth="270">
             <padding><Insets top="10" right="12" bottom="12" left="12"/></padding>
@@ -113,7 +110,6 @@
         </VBox>
     </right>
 
-    <!-- Rodapé: ações — FlowPane quebra para a próxima linha, nada fica oculto -->
     <bottom>
         <FlowPane styleClass="win-footer" hgap="8" vgap="8" alignment="CENTER_LEFT" prefWrapLength="900">
             <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
