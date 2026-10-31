@@ -25,6 +25,10 @@
                     <CheckBox fx:id="allowCreditBox" text="Permitir venda a prazo (crediário)"/>
                     <CheckBox fx:id="askQuantityBox" text="Perguntar a quantidade depois de bipar o produto"/>
                     <VBox spacing="6">
+                        <Label text="Custo do produto ao dar entrada no estoque" styleClass="form-label"/>
+                        <ComboBox fx:id="costModeBox" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6">
                         <Label text="Quantidade máxima por item na venda" styleClass="form-label"/>
                         <TextField fx:id="maxQuantityField" promptText="999" styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>

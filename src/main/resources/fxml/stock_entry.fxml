@@ -28,9 +28,10 @@
                     </VBox>
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
                         <Label text="Custo unitário (opcional)" styleClass="form-label"/>
-                        <TextField fx:id="unitCostField" promptText="Ex: 4.50" styleClass="text-input" maxWidth="Infinity"/>
+                        <TextField fx:id="unitCostField" promptText="Ex: 4,50" styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
                 </HBox>
+                <Label fx:id="costPreviewLabel" styleClass="form-section-title" wrapText="true"/>
                 <VBox spacing="6">
                     <Label text="Motivo / Observação" styleClass="form-label"/>
                     <TextField fx:id="reasonField" promptText="Ex: Nota 123" styleClass="text-input" maxWidth="Infinity"/>

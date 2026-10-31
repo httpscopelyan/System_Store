@@ -4,6 +4,7 @@ import br.com.scopel.pfv.beta.config.ThemeManager;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.service.AppSettingService;
 import br.com.scopel.pfv.beta.service.PixService;
+import br.com.scopel.pfv.beta.service.StockCostMode;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -11,6 +12,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -25,6 +27,7 @@ public class ConfigFormController {
     @FXML private CheckBox negativeStockBox;
     @FXML private CheckBox allowCreditBox;
     @FXML private CheckBox askQuantityBox;
+    @FXML private ComboBox<StockCostMode> costModeBox;
     @FXML private TextField maxQuantityField;
     @FXML private TextField discountLimitField;
     @FXML private TextField storeNameField;
@@ -56,6 +59,19 @@ public class ConfigFormController {
         repeatItemBox.setSelected(settings.getBoolean(AppSettingService.SALE_REPEAT_ITEM, true));
         negativeStockBox.setSelected(settings.getBoolean(AppSettingService.SALE_ALLOW_NEGATIVE_STOCK, false));
         allowCreditBox.setSelected(settings.getBoolean(AppSettingService.CREDIT_ALLOW_CREDIT_SALE, false));
+        costModeBox.setItems(FXCollections.observableArrayList(StockCostMode.values()));
+        costModeBox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(StockCostMode mode) {
+                return mode == null ? "" : mode.label();
+            }
+
+            @Override
+            public StockCostMode fromString(String text) {
+                return null;
+            }
+        });
+        costModeBox.setValue(StockCostMode.fromSetting(settings.getString(AppSettingService.STOCK_COST_MODE, null)));
         askQuantityBox.setSelected(settings.getBoolean(AppSettingService.SALE_ASK_QUANTITY_AFTER_SCAN, true));
         maxQuantityField.setText(settings.getString(AppSettingService.SALE_MAX_QUANTITY_PER_ITEM, "999"));
         discountLimitField.setText(settings.getString(AppSettingService.SALE_DISCOUNT_LIMIT_PERCENT, "10"));
@@ -81,6 +97,8 @@ public class ConfigFormController {
         try {
             settings.set(AppSettingService.SALE_REPEAT_ITEM, String.valueOf(repeatItemBox.isSelected()));
             settings.set(AppSettingService.SALE_ALLOW_NEGATIVE_STOCK, String.valueOf(negativeStockBox.isSelected()));
+            settings.set(AppSettingService.STOCK_COST_MODE, (costModeBox.getValue() == null
+                    ? StockCostMode.ULTIMO : costModeBox.getValue()).name());
             settings.set(AppSettingService.SALE_ASK_QUANTITY_AFTER_SCAN, String.valueOf(askQuantityBox.isSelected()));
             settings.set(AppSettingService.SALE_MAX_QUANTITY_PER_ITEM,
                     maxQuantity.stripTrailingZeros().toPlainString());

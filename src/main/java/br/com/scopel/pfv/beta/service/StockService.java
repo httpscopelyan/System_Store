@@ -22,11 +22,39 @@ public class StockService {
 
     private final ProductRepository productRepository;
     private final StockMovementRepository movementRepository;
+    private final AppSettingService appSettingService;
 
     public StockService(ProductRepository productRepository,
-                        StockMovementRepository movementRepository) {
+                        StockMovementRepository movementRepository,
+                        AppSettingService appSettingService) {
         this.productRepository = productRepository;
         this.movementRepository = movementRepository;
+        this.appSettingService = appSettingService;
+    }
+
+    public record CostPreview(BigDecimal currentCost, BigDecimal newCost, StockCostMode mode) {
+    }
+
+    public StockCostMode costMode() {
+        return StockCostMode.fromSetting(appSettingService.getString(AppSettingService.STOCK_COST_MODE, null));
+    }
+
+    public CostPreview previewEntryCost(String code, BigDecimal quantity, BigDecimal unitCost) {
+        Product product = productRepository.findByCodeIgnoreCase(code == null ? "" : code.trim())
+                .orElseThrow(() -> new ProductNotfindException(code));
+        return new CostPreview(product.getCostPrice(), costAfterEntry(product, quantity, unitCost), costMode());
+    }
+
+    private BigDecimal costAfterEntry(Product product, BigDecimal quantity, BigDecimal unitCost) {
+        if (unitCost == null) {
+            return product.getCostPrice();
+        }
+        BigDecimal entryCost = unitCost.setScale(2, RoundingMode.HALF_UP);
+        if (costMode() == StockCostMode.MEDIA_PONDERADA && quantity != null) {
+            return CostAveraging.weightedAverageCost(product.getQuantity(), product.getCostPrice(),
+                    quantity.setScale(3, RoundingMode.HALF_UP), entryCost);
+        }
+        return entryCost;
     }
 
     @Transactional
@@ -36,10 +64,11 @@ public class StockService {
                 .orElseThrow(() -> new ProductNotfindException(code));
 
         BigDecimal qty = quantity.setScale(3, RoundingMode.HALF_UP);
+        BigDecimal newCost = costAfterEntry(product, qty, unitCost);
         BigDecimal newStock = product.getQuantity().add(qty);
         product.setQuantity(newStock);
         if (unitCost != null) {
-            product.setCostPrice(unitCost.setScale(2, RoundingMode.HALF_UP));
+            product.setCostPrice(newCost);
         }
         productRepository.save(product);
 
