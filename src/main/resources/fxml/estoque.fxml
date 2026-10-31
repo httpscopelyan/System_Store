@@ -28,6 +28,7 @@
                            HBox.hgrow="ALWAYS" onAction="#onFilter"/>
                 <CheckBox fx:id="belowMinimumBox" text="Só abaixo do mínimo" onAction="#onFilter"/>
                 <CheckBox fx:id="withoutCostBox" text="Sem custo" onAction="#onFilter"/>
+                <CheckBox fx:id="inactiveOnlyBox" text="Só inativos" onAction="#onFilter"/>
                 <Button text="Filtrar" onAction="#onFilter" styleClass="win-button-primary"/>
                 <Button text="Limpar" onAction="#onClear" styleClass="win-button"/>
             </HBox>

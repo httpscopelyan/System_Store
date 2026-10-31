@@ -9,8 +9,12 @@ public final class BulkEditConfirmation {
     }
 
     public static boolean ask(String message) {
+        return ask("Edição em lote", message);
+    }
+
+    public static boolean ask(String header, String message) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.OK, ButtonType.CANCEL);
-        alert.setHeaderText("Edição em lote");
+        alert.setHeaderText(header);
         return alert.showAndWait().filter(ButtonType.OK::equals).isPresent();
     }
 }

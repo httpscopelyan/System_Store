@@ -1,6 +1,7 @@
 package br.com.scopel.pfv.beta;
 
 import br.com.scopel.pfv.beta.model.Product;
+import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,5 +79,26 @@ class ProductFilterForStockTests {
         create(token, "b", "3.00", "1", "5");
         create(token, "c", "0.00", "9", "5");
         assertEquals(List.of(token + "a"), codes(productService.filterForStock("", token, true, true)));
+    }
+
+    @Test
+    void inactiveProductsAreHiddenByDefaultAndListedByTheInactiveFilter_RF76() {
+        String token = token();
+        create(token, "ativo", "1.00", "10", "0");
+        Product inactive = create(token, "inativo", "1.00", "10", "0");
+        inactive.setActive(false);
+        assertEquals(List.of(token + "ativo"), codes(productService.filterForStock("", token, false, false)));
+        assertEquals(List.of(token + "inativo"), codes(productService.filterForStock("", token, false, false, true)));
+    }
+
+    @Test
+    void inactivatingAProductMovesItToTheInactiveList_RF76() {
+        String token = token();
+        create(token, "x", "1.00", "10", "0");
+        User manager = new User();
+        manager.setRole(User.Role.GERENTE);
+        productService.inactivate(token + "x", manager);
+        assertTrue(productService.filterForStock("", token, false, false).isEmpty());
+        assertEquals(List.of(token + "x"), codes(productService.filterForStock("", token, false, false, true)));
     }
 }

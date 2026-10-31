@@ -1,8 +1,10 @@
 package br.com.scopel.pfv.beta.service;
 
+import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.ProductNotfindException;
 import br.com.scopel.pfv.beta.exception.RegisterProductDuplicateException;
 import br.com.scopel.pfv.beta.model.Product;
+import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -120,10 +122,16 @@ public class ProductService {
 
     public List<Product> filterForStock(String code, String name, boolean belowMinimumOnly,
                                         boolean withoutCostOnly) {
+        return filterForStock(code, name, belowMinimumOnly, withoutCostOnly, false);
+    }
+
+    public List<Product> filterForStock(String code, String name, boolean belowMinimumOnly,
+                                        boolean withoutCostOnly, boolean inactiveOnly) {
         List<Product> base = code != null && !code.isBlank()
                 ? repository.findByCodeIgnoreCase(code.trim()).map(List::of).orElse(List.of())
                 : searchByName(name);
         return base.stream()
+                .filter(product -> inactiveOnly != Boolean.TRUE.equals(product.getActive()))
                 .filter(product -> !belowMinimumOnly || isAtOrBelowMinimum(product))
                 .filter(product -> !withoutCostOnly || hasNoCost(product))
                 .sorted(Comparator.comparing(Product::getDescription, String.CASE_INSENSITIVE_ORDER))
@@ -138,7 +146,10 @@ public class ProductService {
         return product.getCostPrice() == null || product.getCostPrice().signum() <= 0;
     }
 
-    public Product inactivate(String code) {
+    public Product inactivate(String code, User actor) {
+        if (actor == null || actor.getRole() != User.Role.GERENTE) {
+            throw new ManagerAuthorizationRequiredException();
+        }
         Product product = findCode(code);
         product.setActive(false);
         return repository.save(product);

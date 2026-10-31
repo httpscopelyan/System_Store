@@ -45,11 +45,13 @@ public class EstoqueController {
     private ProductSelection selection;
     private ProductTablePresenter presenter;
     private BulkCellEditor bulkCellEditor;
+    private ManagerAuthorizedAction managerAction;
 
     @FXML private TextField codeFilter;
     @FXML private TextField nameFilter;
     @FXML private CheckBox belowMinimumBox;
     @FXML private CheckBox withoutCostBox;
+    @FXML private CheckBox inactiveOnlyBox;
     @FXML private TableView<Product> table;
     @FXML private TableColumn<Product, String> colHandle;
     @FXML private TableColumn<Product, String> colCode;
@@ -86,9 +88,8 @@ public class EstoqueController {
                 new ProductTablePresenter.Columns(colHandle, colCode, colDesc, colCost, colProfit,
                         colMarginPercent, colSuggestedPrice, colPrice, colMin, colStock),
                 pricingSuggestionService, selection, manager, this::onCellEdited);
-        bulkCellEditor = new BulkCellEditor(bulkEditService, selection,
-                new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window),
-                BulkEditConfirmation::ask);
+        managerAction = new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window);
+        bulkCellEditor = new BulkCellEditor(bulkEditService, selection, managerAction, BulkEditConfirmation::ask);
         marginsToggle.setVisible(manager);
         marginsToggle.setManaged(manager);
         marginsToggle.setSelected(manager);
@@ -111,6 +112,7 @@ public class EstoqueController {
         nameFilter.clear();
         belowMinimumBox.setSelected(false);
         withoutCostBox.setSelected(false);
+        inactiveOnlyBox.setSelected(false);
         reload();
         codeFilter.requestFocus();
     }
@@ -133,12 +135,14 @@ public class EstoqueController {
     @FXML
     public void onApagar() {
         Product selected = singleSelectedProduct("inativar");
-        if (selected == null) {
+        boolean confirmed = selected != null && BulkEditConfirmation.ask("Apagar produto",
+                "Apagar \"" + selected.getDescription() + "\"? Ele sai da venda; o histórico é mantido.");
+        if (!confirmed) {
             return;
         }
-        productService.inactivate(selected.getCode());
+        Product deleted = managerAction.apply(actor -> productService.inactivate(selected.getCode(), actor));
         reload();
-        messageLabel.setText("Produto " + selected.getCode() + " inativado.");
+        messageLabel.setText(deleted == null ? "Exclusão não autorizada." : "Produto apagado (inativo).");
     }
 
     @FXML
@@ -159,7 +163,8 @@ public class EstoqueController {
 
     private void reload() {
         List<Product> products = productService.filterForStock(codeFilter.getText(), nameFilter.getText(),
-                belowMinimumBox.isSelected(), withoutCostBox.isSelected());
+                belowMinimumBox.isSelected(), withoutCostBox.isSelected(),
+                inactiveOnlyBox.isSelected());
         presenter.show(products);
         messageLabel.setText(products.size() + " produto(s)");
     }
@@ -181,12 +186,9 @@ public class EstoqueController {
 
     private Product singleSelectedProduct(String verb) {
         int rows = selection.rowCount();
-        if (rows == 0) {
-            messageLabel.setText("Selecione um produto para " + verb + ".");
-            return null;
-        }
-        if (rows > 1) {
-            messageLabel.setText("Selecione apenas um produto para " + verb + ".");
+        if (rows != 1) {
+            messageLabel.setText((rows == 0 ? "Selecione um produto para " : "Selecione apenas um produto para ")
+                    + verb + ".");
             return null;
         }
         return selection.firstProduct();
