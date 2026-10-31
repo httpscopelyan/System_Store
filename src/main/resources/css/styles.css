@@ -708,3 +708,21 @@
 .table-cell.row-handle:hover {
     -fx-background-color: #dbe7f6;
 }
+
+.price-check-price-column {
+    -fx-alignment: CENTER-RIGHT;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15325f;
+}
+
+.price-check-stock-column {
+    -fx-alignment: CENTER-RIGHT;
+}
+
+.price-check-price-column .table-cell,
+.table-cell.price-check-price-column {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15325f;
+}

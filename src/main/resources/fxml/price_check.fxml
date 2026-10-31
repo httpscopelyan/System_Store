@@ -24,24 +24,30 @@
 
             <Label text="SÓ CONSULTA — NÃO É VENDA" styleClass="price-check-warning" maxWidth="Infinity"/>
 
-            <VBox spacing="6">
-                <Label text="Código de barras" styleClass="code-label"/>
-                <TextField fx:id="codeField" promptText="Bipe ou digite o código e Enter"
-                           onAction="#onSearch" styleClass="code-field"/>
-            </VBox>
+            <HBox spacing="16">
+                <VBox spacing="6" prefWidth="320">
+                    <Label text="Código de barras" styleClass="code-label"/>
+                    <TextField fx:id="codeField" promptText="Bipe ou digite o código"
+                               styleClass="code-field"/>
+                </VBox>
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Nome do produto" styleClass="code-label"/>
+                    <TextField fx:id="nameField" promptText="Ex: red, monster, pão..."
+                               styleClass="code-field" maxWidth="Infinity"/>
+                </VBox>
+            </HBox>
 
-            <VBox spacing="6">
-                <Label text="Buscar por nome (opcional)" styleClass="code-label"/>
-                <TextField fx:id="nameField" promptText="Parte do nome do produto e Enter"
-                           onAction="#onSearch" styleClass="text-input"/>
-            </VBox>
-
-            <VBox styleClass="price-check-result" spacing="6" maxWidth="Infinity" VBox.vgrow="ALWAYS">
-                <Label fx:id="descriptionLabel" text="—" styleClass="price-check-description"
-                       wrapText="true" maxWidth="Infinity"/>
-                <Label fx:id="priceLabel" text="R$ 0,00" styleClass="price-check-price"/>
-                <Label fx:id="unitLabel" text="" styleClass="price-check-unit"/>
-            </VBox>
+            <TableView fx:id="resultsTable" styleClass="items-table" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colCode" text="Código" prefWidth="170"/>
+                    <TableColumn fx:id="colName" text="Nome" prefWidth="520"/>
+                    <TableColumn fx:id="colPrice" text="Preço" prefWidth="220"/>
+                    <TableColumn fx:id="colStock" text="Quantidade" prefWidth="170"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                </columnResizePolicy>
+            </TableView>
 
             <Label fx:id="statusLabel" styleClass="sale-status"/>
 
