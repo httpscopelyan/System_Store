@@ -63,7 +63,6 @@ class StockServiceTests {
         List<StockMovement> history = stockService.history(p.getCode());
 
         assertEquals(2, history.size());
-        // mais recente primeiro => o ajuste
         assertEquals(StockMovement.Type.AJUSTE, history.get(0).getType());
     }
 }

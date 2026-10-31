@@ -621,6 +621,33 @@ venda → bipar → somar → finalizar → baixa de estoque.
     ferir RN09; (b) exige higiene do passivo órfão (#G-orfas); (c) orienta o fiscal
     (F3): gatilho de emissão é a finalização, não a abertura.
 
+- **0015 — Lucro fica dentro do Estoque, sem página separada (2026-10-31):**
+  - **Status:** Aceito.
+  - **Contexto:** a grade de Estoque já mostrava Custo, Lucro (%), preço sugerido e Vr. Venda; uma página
+    "Lucros" duplicaria o caminho de edição dos mesmos campos e a superfície de autorização.
+  - **Decisão:** a grade de Estoque é a tela de lucro (código, nome, custo, lucro R$, lucro %, valor de
+    venda), editável por célula e em lote. Custo e lucro aparecem só para GERENTE (botão Margens).
+  - **Consequências:** `ProductBulkEditService` exige gerente para preço, custo e margem; a quantidade atual
+    nunca é editável na grade (só Entrada/Ajuste/Retificação auditados).
+- **0016 — Código sem comentários e limites de tamanho de arquivo (2026-10-31):**
+  - **Status:** Aceito.
+  - **Decisão:** nenhum comentário em `.java`, `.fxml`, `.css` nem em migrations novas; a intenção vem dos
+    nomes. Rastreabilidade RF/RN fica no `MAPA-REQUISITOS.md` e nos nomes dos testes. Limite de 400 linhas por
+    `.java` e 200 por controller; responsabilidades extras vão para `controller/support/`, `service/alert/`,
+    `service/cash/` e `notification/`. Migrations já aplicadas (V1–V28) não mudam.
+- **0017 — Porta de notificação de avisos de estoque; senha SMTP só no .env (2026-10-31):**
+  - **Status:** Aceito.
+  - **Decisão:** `AlertNotifier` (porta) com `SmtpAlertNotifier` e `LoggingAlertNotifier`, escolhidos em tempo
+    de execução por `AlertNotifierSelector` conforme as configurações. A senha vem de `SMTP_PASSWORD` no
+    `.env` e nunca vai para o banco, o Git ou o JAR. Falha de envio nunca derruba o app (RN23).
+- **0018 — Retificação é movimento compensatório (2026-10-31):**
+  - **Status:** Aceito.
+  - **Decisão:** corrigir um erro nunca edita nem apaga o registro original. Cria-se um movimento
+    `RETIFICACAO` que referencia o original, com motivo obrigatório e gerente autorizador (migration V31).
+    No caixa o valor é o delta assinado, de modo que o saldo reflete o valor corrigido.
+  - **Consequências:** o resumo do caixa passou para `CashSummaryService` (testável) e trata a retificação
+    na mesma coluna do movimento corrigido.
+
 ---
 
 ## 15. Convenções e como trabalhar no projeto

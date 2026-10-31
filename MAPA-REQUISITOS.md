@@ -9,7 +9,7 @@
 > - `ESPECIFICACAO-PROJETO.md` descreve o **estado atual** e usa uma numeração
 >   própria (RF01–RF20); quando relevante, a coluna "Notas" aponta o equivalente.
 >
-> Última atualização: 2026-10-22.
+> Última atualização: 2026-10-31.
 
 ## Legenda de status
 - ✅ **Feito** — implementado e (quando dito) testado.
@@ -131,6 +131,35 @@
 
 ---
 
+### Plano de 2026-10-31 (estoque mínimo, venda, lote, caixa)
+
+Implementado conforme `TASKs/IMPLEMENTATION-PLAN.md`. Status ✅* = código + testes (inclusive de tela
+com JavaFX real); falta a validação manual do dev com `mvn javafx:run`.
+
+| ID | Requisito | Status | Fase | Notas |
+|---|---|---|---|---|
+| RF54 | Página "Lista d/ Compras" com itens perto do estoque mínimo | ✅* | F1 | `StockAlertService`, `shopping_list.fxml`; contador no menu |
+| RF55 | Aviso dos itens a repor por e-mail | ✅* | F1 | `StockAlertScheduler` + `AlertNotifier`; senha SMTP só no `.env` (`SMTP_PASSWORD`); envio real depende de SMTP válido |
+| RF56 | Configurar margem de aviso, e-mails, intervalo e SMTP em Configurações | ✅* | F1 | `config_alerts.fxml` |
+| RF57 | Campo de quantidade ao lado do bipe (Enter leva à quantidade) | ✅* | F1 | `SaleScanFlow`; configurável (`sale.ask_quantity_after_scan`) |
+| RF58 | Bipe aceita nome ou código parcial (busca) | ✅* | F1 | `ProductService.searchForSale` |
+| RF59 | Lista de sugestões navegável por setas, Tab e mouse | ✅* | F1 | `ProductSuggestionPopup` |
+| RF60 | Produto em KG: campo vira peso e mostra o valor | ✅* | F1 | prévia `0,750 kg x R$ 39,90 = R$ 29,93` |
+| RF61 | Edição em lote por célula no Estoque (Shift/Ctrl+clique) | ✅* | F1 | `ProductBulkEditService`, `BulkCellEditor` |
+| RF62 | Selecionar o produto inteiro pela alça da linha | ✅* | F1 | `ProductSelection.selectWholeRow` |
+| RF63 | "Aceitar Sugestão" para Vr. Venda | ✅* | F1 | habilita só com seleção na coluna Vr. Venda |
+| RF64 | Lucro (R$ e %) e custo visíveis só para gerente no Estoque | ✅* | F1 | ADR 0015 (lucro dentro do Estoque) |
+| RF65 | Preço de venda sugerido automaticamente (estilo placeholder) | ✅* | F1 | `PricingSuggestionService`, `SuggestedPriceBinding` |
+| RF66 | Estoque mínimo e categoria no cadastro de produto | ✅* | F1 | `ProductService.create` |
+| RF67 | Motivo obrigatório em sangria e suprimento | ✅* | F1 | `MovementReason` (3+ caracteres) |
+| RF68 | Retificação de erro de caixa e de estoque (auditada) | ✅* | F1 | ADR 0018; migration V31 |
+| RF69 | Botão Voltar em todas as páginas de redirecionamento | ✅* | F1 | `NavigationHistory`, `back_bar.fxml` |
+| RF70 | Código de produto alfanumérico (texto ou número) | ✅* | F1 | migration V29; sem diferenciar maiúsculas |
+| RF71 | Custo da entrada: último custo ou custo médio | ✅* | F1 | `StockCostMode`, `CostAveraging` |
+| RF72 | Vocabulário único de custo (tela, código e docs) | ✅ | F1 | glossário em `ESPECIFICACAO-PROJETO.md` |
+| RF73 | Venda: campos de desconto, cliente e cancelamento acessíveis | ✅* | F1 | `SaleFocusGuard`; a causa original não foi reproduzida em teste |
+| RF74 | Filtros do Estoque: só abaixo do mínimo e sem custo | ✅* | F1 | `ProductService.filterForStock` |
+
 ## Regras de Negócio (RN)
 | RN | Descrição | Status |
 |---|---|---|
@@ -155,6 +184,15 @@
 | RN19 | Preço congelado no item | ✅ (inviolável; preservado no G2 — `validateQuantity` só normaliza a quantidade, `unitPrice` segue copiado do produto no 1º lançamento; a barra "último item" G3 mostra `unitPrice` congelado, nada recalculado na UI) |
 | RN20 | CPF do consumidor antes de finalizar (entra no XML) | ⬜ |
 | RN21 | Máquina de estados: ação fora do estado é recusada pelo service | 🟡 (reforçado 2026-10-17 com estado `EM_PAGAMENTO`: `goToPayment` só de ABERTA+itens, `pay` só de EM_PAGAMENTO, `addItem` só em ABERTA — testado. **G3 (2026-10-22):** Consulta de preço (F1) respeita RN21 na UI — `MainController.hasSaleInProgress()` bloqueia a consulta com venda em itens/EM_PAGAMENTO; `SaleController` sincroniza `userSession.setVendaAtual(...)` em todas as transições para o guard ler o estado real. **2ª leva "venda pendente" (2026-10-22):** `SaleService.resumeOrOpenSale`/`canResume`/`sameEntity` reaproveita a venda ABERTA/EM_PAGAMENTO do mesmo operador e caixa (demais casos → `openSale` nova) e `SaleController.initialize` restaura tabela/TOTAL/barra do último item e roteia EM_PAGAMENTO ao pagamento, preservando o guard RN14 — **implementada e aprovada (PRONTA F1), validação manual na tela pendente** (`mvn javafx:run` JDK 26); QA 162 testes verdes (`ResumeOrOpenSaleTests`, 11 bordas). Demais estados a completar) **3ª leva (2026-10-22):** nova transição EM_PAGAMENTO → ABERTA via `SaleService.reopenForEditing` (reabrir venda para edição); guards recusam ABERTA/FINALIZADA/CANCELADA; sem Payment órfão. `PaymentController.onVoltar` chama a reabertura. Testada em `ReopenAndQuickProductTests` (172 verdes). Validação manual na tela pendente. |
+| RN22 | Aviso de estoque: item ativo com mínimo > 0 e estoque <= mínimo + margem (CRÍTICO se <= mínimo) | ✅* |
+| RN23 | Aviso por e-mail nunca derruba o app e não repete corpo idêntico dentro do intervalo | ✅* |
+| RN24 | Quantidade por item limitada (`sale.max_quantity_per_item`, padrão 999) | ✅* |
+| RN25 | Escolher na lista de sugestões nunca adiciona sem confirmar a quantidade | ✅* |
+| RN26 | Edição em lote: quantidade atual nunca editável; preço, custo e margem exigem gerente | ✅* |
+| RN27 | Preço sugerido nunca sobrescreve o preço digitado pelo usuário | ✅* |
+| RN28 | Motivo (3+ caracteres) obrigatório em sangria, suprimento e ajuste de estoque | ✅* |
+| RN29 | Retificação é movimento compensatório com gerente e motivo; o original nunca é alterado | ✅* |
+| RN30 | Voltar usa histórico de 10 páginas e nunca reentra em telas de pagamento | ✅* |
 
 ---
 
@@ -177,6 +215,8 @@
 | RNF14 | Backup diário automático do banco | rotina/script | ⬜ |
 | RNF15 | Comprovante não fiscal diz "NÃO É DOCUMENTO FISCAL" | revisão legal | 🟡 prévia do cupom na tela de venda exibe o aviso "NÃO É DOCUMENTO FISCAL"; Consulta de preço avisa "SÓ CONSULTA — NÃO É VENDA" (G3); reforçar na impressão térmica (F2) |
 | RNF16 | XMLs das NFC-e guardados ≥ 5 anos | armazenamento fiscal | ⬜ (F3) |
+| RNF17 | Consultas de alerta de estoque feitas no SQL | revisão de código | ✅ (`ProductRepository.findLowStock`) |
+| RNF18 | Nenhum `.java` acima de 400 linhas e controllers até 200 | contagem de linhas | 🟡 (arquivos novos e tocados cumprem; `UpdateService`, `UpdaterMain` e `SaleServiceTests` seguem acima) |
 
 ---
 

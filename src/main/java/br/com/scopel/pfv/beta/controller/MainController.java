@@ -3,19 +3,19 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
+import br.com.scopel.pfv.beta.controller.support.UpdateNotice;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.service.UpdateService;
 import br.com.scopel.pfv.beta.service.alert.StockAlertService;
-import br.com.scopel.pfv.beta.update.UpdateInfo;
 import javafx.application.Platform;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -54,6 +54,7 @@ public class MainController {
     @FXML private Label hintLabel;
 
     private Timeline hintClear;
+    private UpdateNotice updateNotice;
 
     public MainController(Navigator navigator, UserSession userSession, UpdateService updateService,
                           StockAlertService stockAlertService) {
@@ -86,100 +87,24 @@ public class MainController {
 
         startClock();
         setupShortcuts();
-        setupUpdateNotice();
-    }
-
-    private void setupUpdateNotice() {
-        updateService.addListener(info -> Platform.runLater(() -> showUpdateAvailable(info)));
-        UpdateInfo pending = updateService.getLatestUpdate();
-        if (pending != null) {
-            showUpdateAvailable(pending);
-        }
-        Platform.runLater(() -> updateService.consumeLastResult()
-                .filter(r -> !r.isSuccess())
-                .ifPresent(r -> {
-                    Alert alert = new Alert("ROLLED_BACK".equals(r.status())
-                            ? Alert.AlertType.WARNING : Alert.AlertType.ERROR);
-                    alert.setTitle("Atualização");
-                    alert.setHeaderText("A atualização para a versão " + r.targetVersion() + " não foi concluída");
-                    alert.setContentText(("ROLLED_BACK".equals(r.status())
-                            ? "A versão anterior foi restaurada e o sistema segue funcionando normalmente.\n\n"
-                            : "") + r.message());
-                    alert.show();
-                }));
-    }
-
-    private void showUpdateAvailable(UpdateInfo info) {
-        updateButton.setText("⬆ Atualizar e reiniciar (v" + info.version() + ")");
-        updateButton.setDisable(false);
-        updateButton.setVisible(true);
-        updateButton.setManaged(true);
+        updateNotice = new UpdateNotice(updateService, updateButton, this::hasSaleInProgress, this::showHint);
+        updateNotice.setup();
     }
 
     @FXML
     public void onUpdateAndRestart() {
-        UpdateInfo info = updateService.getLatestUpdate();
-        if (info == null || updateService.isUpdateInProgress()) {
-            return;
-        }
-        if (hasSaleInProgress()) {
-            showHint("Finalize ou cancele a venda antes de atualizar");
-            return;
-        }
-        ButtonType go = new ButtonType("Atualizar e reiniciar", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                "O PDV será fechado e reaberto automaticamente na versão " + info.version() + ".\n"
-                        + "Seus dados e configurações são preservados.\n\n"
-                        + (info.changelog().isBlank() ? "" : "Novidades: " + info.changelog()),
-                go, ButtonType.CANCEL);
-        confirm.setTitle("Atualização disponível");
-        confirm.setHeaderText("Versão " + updateService.getCurrentVersion() + " → " + info.version());
-        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != go) {
-            return;
-        }
-
-        updateButton.setDisable(true);
-        updateButton.setText("Baixando e verificando atualização...");
-        Thread worker = new Thread(() -> {
-            try {
-                updateService.applyUpdateAndRestart(this::shutdownApplication);
-            } catch (Exception e) {
-                Platform.runLater(() -> {
-                    showUpdateAvailable(info);
-                    Alert error = new Alert(Alert.AlertType.ERROR);
-                    error.setTitle("Atualização");
-                    error.setHeaderText("Não foi possível atualizar agora");
-                    error.setContentText(e.getMessage() + "\n\nO sistema continua na versão atual.");
-                    error.show();
-                });
-            }
-        }, "update-apply");
-        worker.setDaemon(true);
-        worker.start();
+        updateNotice.updateAndRestart();
     }
 
-    private void shutdownApplication() {
-        Platform.runLater(Platform::exit);
-        Thread fallback = new Thread(() -> {
-            try {
-                Thread.sleep(15_000);
-            } catch (InterruptedException ignored) {
-                return;
-            }
-            System.exit(0);
-        }, "update-exit-fallback");
-        fallback.setDaemon(true);
-        fallback.start();
+    @FXML
+    public void onNavigate(ActionEvent event) {
+        Page page = Page.valueOf((String) ((Node) event.getSource()).getUserData());
+        navigator.navigate(page);
     }
 
     @FXML
     public void onBack() {
         navigator.back();
-    }
-
-    @FXML
-    public void onListaCompras() {
-        navigator.navigate(Page.LISTA_COMPRAS);
     }
 
     private void refreshShoppingListCount() {
@@ -216,12 +141,12 @@ public class MainController {
             if (scene == null) return;
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F1), this::onConsultaPreco);
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F2), this::onVender);
-            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F3), this::onEstoque);
-            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F4), this::onCaixa);
-            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F5), this::onCompras);
-            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F6), this::onClientes);
-            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F7), this::onFornecedores);
-            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F8), this::onRelatorios);
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F3), () -> navigator.navigate(Page.ESTOQUE));
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F4), () -> navigator.navigate(Page.CAIXA));
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F5), () -> navigator.navigate(Page.COMPRAS));
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F6), () -> navigator.navigate(Page.CLIENTES));
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F7), () -> navigator.navigate(Page.FORNECEDORES));
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F8), () -> navigator.navigate(Page.RELATORIOS));
         });
     }
 
@@ -262,93 +187,4 @@ public class MainController {
         navigator.navigate(Page.VENDA);
     }
 
-    @FXML
-    public void onCaixa() {
-        navigator.navigate(Page.CAIXA);
-    }
-
-    @FXML
-    public void onProdutos() {
-        navigator.navigate(Page.PRODUTOS);
-    }
-
-    @FXML
-    public void onEstoque() {
-        navigator.navigate(Page.ESTOQUE);
-    }
-
-    @FXML
-    public void onClientes() {
-        navigator.navigate(Page.CLIENTES);
-    }
-
-    @FXML
-    public void onFornecedores() {
-        navigator.navigate(Page.FORNECEDORES);
-    }
-
-    @FXML
-    public void onEntradaEstoque() {
-        navigator.navigate(Page.ENTRADA_ESTOQUE);
-    }
-
-    @FXML
-    public void onAjusteEstoque() {
-        navigator.navigate(Page.AJUSTE_ESTOQUE);
-    }
-
-    @FXML
-    public void onLotes() {
-        navigator.navigate(Page.LOTES);
-    }
-
-    @FXML
-    public void onEtiquetas() {
-        navigator.navigate(Page.ETIQUETAS);
-    }
-
-    @FXML
-    public void onAjustePrecos() {
-        navigator.navigate(Page.AJUSTE_PRECOS);
-    }
-
-    @FXML
-    public void onConfig() {
-        navigator.navigate(Page.CONFIG);
-    }
-
-    @FXML
-    public void onCompras() {
-        navigator.navigate(Page.COMPRAS);
-    }
-
-    @FXML
-    public void onOrcamento() {
-        navigator.navigate(Page.ORCAMENTO);
-    }
-
-    @FXML
-    public void onContasReceber() {
-        navigator.navigate(Page.CONTAS_RECEBER);
-    }
-
-    @FXML
-    public void onContasPagar() {
-        navigator.navigate(Page.CONTAS_PAGAR);
-    }
-
-    @FXML
-    public void onTabelasPreco() {
-        navigator.navigate(Page.TABELAS_PRECO);
-    }
-
-    @FXML
-    public void onRelatorios() {
-        navigator.navigate(Page.RELATORIOS);
-    }
-
-    @FXML
-    public void onHistoricoVendas() {
-        navigator.navigate(Page.HISTORICO_VENDAS);
-    }
 }

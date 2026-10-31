@@ -27,7 +27,7 @@ somar total → finalizar (baixa estoque)**.
 | Camada | Tecnologia |
 |---|---|
 | Linguagem | Java 21 (máquina dev roda JDK 26) |
-| Framework | Spring Boot 3 (contexto, injeção, Data JPA) |
+| Framework | Spring Boot 4.1 (contexto, injeção, Data JPA) |
 | UI | JavaFX 26.0.2 (FXML + Scene Builder) |
 | Build | Maven |
 | Banco | PostgreSQL 16 em Docker (container `db_scopel`) |
@@ -106,6 +106,17 @@ direto com repository.
 9. **Flyway é a fonte do schema**, Hibernate em `ddl-auto=validate`. Migration
    aplicada não se edita nem renomeia — mudança = nova migration. (ADR 0005)
 
+10. **Sem comentários no código** (`.java`, `.fxml`, `.css`, migrations novas): a intenção vem dos nomes.
+    Rastreabilidade RF/RN fica no `MAPA-REQUISITOS.md` e nos nomes dos testes. (ADR 0016)
+11. **Tamanho de arquivo:** `.java` até 400 linhas e controller até 200; o excesso vai para
+    `controller/support/`, `service/alert/`, `service/cash/`, `notification/`.
+12. **Voltar:** toda página alcançada por redirecionamento inclui `back_bar.fxml` (Esc volta); o
+    `Navigator` guarda um histórico de 10 páginas e nunca reentra em telas de pagamento.
+13. **Vocabulário de custo:** tudo que na origem é custo se chama "Custo" na tela e `cost` no código
+    (glossário em `ESPECIFICACAO-PROJETO.md`).
+14. **Retificação nunca apaga:** corrigir erro cria movimento `RETIFICACAO` com gerente e motivo (ADR 0018).
+15. **Senha do SMTP** vive só no `.env` (`SMTP_PASSWORD`), nunca no banco (ADR 0017).
+
 ---
 
 ## 5. Regras de negócio
@@ -157,6 +168,12 @@ direto com repository.
   Windows/JDK 25 (`release.yml`). Detalhes e limites: `sistema_atualizacao_remota.md`.
   Testes: `SemVerAndManifestTests`, `UpdaterLifecycleTests`, `UpdateServiceLifecycleTests`
   (sem Spring/banco, processos reais).
+- **Plano de 2026-10-31 (`TASKs/IMPLEMENTATION-PLAN.md`)**: Lista d/ Compras com aviso de estoque
+  mínimo por e-mail (`service/alert/`, `notification/`); venda com campo de quantidade, busca por nome/código
+  parcial e KG (`controller/support/Sale*`); Estoque com edição em lote por célula, Aceitar Sugestão e lucro só
+  para gerente; motivo obrigatório e retificação de caixa e estoque (`service/cash/`); botão Voltar global;
+  código de produto alfanumérico; modo de custo da entrada (último/médio). Migrations V29–V32. Validação
+  manual do dev pendente (testes de tela com JavaFX real já cobrem os fluxos).
 - UI básica: login, caixa (abrir/fechar), venda (bipar/finalizar). Navegação
   caixa→venda após abrir.
 
@@ -202,6 +219,7 @@ entender cada linha. Respostas **concisas e objetivas**.
 - **REVISION.md** — melhorias e correções da última task; normalmente concertos
   mais longos.
 - **FIXES.md** — concertos mais curtos e pontuais.
+- **GUIA-DE-USO.md** — como usar as novidades (avisos por e-mail, venda, lote, caixa).
 
 Fluxo sugerido: dev escreve em TASK.md → IA executa → o que sobrar/quebrar vai
 para REVISION.md (longo) ou FIXES.md (curto) na próxima rodada.

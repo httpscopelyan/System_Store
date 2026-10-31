@@ -1,0 +1,5 @@
+#!/bin/sh
+if grep -qiE '^co-authored-by:|generated with' "$1"; then
+  echo "Commit recusado: a mensagem nao pode ter Co-Authored-By nem 'Generated with'." >&2
+  exit 1
+fi

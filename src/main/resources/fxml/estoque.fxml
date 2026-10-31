@@ -62,7 +62,7 @@
             </HBox>
             <HBox styleClass="win-footer" spacing="10" alignment="CENTER_LEFT">
                 <padding><Insets top="8" right="12" bottom="4" left="12"/></padding>
-                <Button text="＋ Novo" onAction="#onNew" styleClass="success-button"/>
+                <Button text="＋ Novo" onAction="#onNavigate" userData="PRODUTOS" styleClass="success-button"/>
                 <Button text="✎ Alterar" onAction="#onAlterar" styleClass="win-button"/>
                 <Button text="－ Apagar" onAction="#onApagar" styleClass="danger-button"/>
                 <Separator orientation="VERTICAL"/>
@@ -71,16 +71,16 @@
                 <ToggleButton fx:id="marginsToggle" text="Margens" onAction="#onToggleMargins"
                               styleClass="win-button"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="🔄 ATUALIZAR" onAction="#onRefresh" styleClass="success-button"/>
+                <Button text="🔄 ATUALIZAR" onAction="#onFilter" styleClass="success-button"/>
             </HBox>
             <HBox styleClass="win-footer" spacing="10" alignment="CENTER_LEFT">
                 <padding><Insets top="4" right="12" bottom="8" left="12"/></padding>
-                <Button text="➕ Entrada" onAction="#onEntrada" styleClass="win-button"/>
-                <Button text="⚖ Ajuste" onAction="#onAjuste" styleClass="win-button"/>
-                <Button text="📅 Lotes" onAction="#onLotes" styleClass="win-button"/>
-                <Button text="🏷 Etiquetas" onAction="#onEtiquetas" styleClass="win-button"/>
-                <Button text="🖨 Relatórios" onAction="#onRelatorios" styleClass="win-button"/>
-                <Button text="🧺 Lista d/ Compras" onAction="#onListaCompras" styleClass="win-button"/>
+                <Button text="➕ Entrada" onAction="#onNavigate" userData="ENTRADA_ESTOQUE" styleClass="win-button"/>
+                <Button text="⚖ Ajuste" onAction="#onNavigate" userData="AJUSTE_ESTOQUE" styleClass="win-button"/>
+                <Button text="📅 Lotes" onAction="#onNavigate" userData="LOTES" styleClass="win-button"/>
+                <Button text="🏷 Etiquetas" onAction="#onNavigate" userData="ETIQUETAS" styleClass="win-button"/>
+                <Button text="🖨 Relatórios" onAction="#onNavigate" userData="RELATORIOS" styleClass="win-button"/>
+                <Button text="🧺 Lista d/ Compras" onAction="#onNavigate" userData="LISTA_COMPRAS" styleClass="win-button"/>
             </HBox>
             <fx:include source="back_bar.fxml"/>
         </VBox>

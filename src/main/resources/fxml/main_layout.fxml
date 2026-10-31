@@ -21,22 +21,22 @@
                 <Separator orientation="VERTICAL"/>
                 <Button text="🏷&#10;Preço (F1)" styleClass="block-button" onAction="#onConsultaPreco"/>
                 <Button text="🛒&#10;Nova Venda (F2)" styleClass="block-button" onAction="#onVender"/>
-                <Button text="📜&#10;Histórico" styleClass="block-button" onAction="#onHistoricoVendas"/>
-                <Button text="💰&#10;Caixa (F4)" styleClass="block-button" onAction="#onCaixa"/>
-                <Button text="📦&#10;Estoque (F3)" styleClass="block-button" onAction="#onEstoque"/>
-                <Button fx:id="shoppingListButton" text="🧺&#10;Lista d/ Compras" styleClass="block-button" onAction="#onListaCompras"/>
+                <Button text="📜&#10;Histórico" styleClass="block-button" onAction="#onNavigate" userData="HISTORICO_VENDAS"/>
+                <Button text="💰&#10;Caixa (F4)" styleClass="block-button" onAction="#onNavigate" userData="CAIXA"/>
+                <Button text="📦&#10;Estoque (F3)" styleClass="block-button" onAction="#onNavigate" userData="ESTOQUE"/>
+                <Button fx:id="shoppingListButton" text="🧺&#10;Lista d/ Compras" styleClass="block-button" onAction="#onNavigate" userData="LISTA_COMPRAS"/>
                 <Separator orientation="VERTICAL"/>
-                <Button text="🧾&#10;Compras (F5)" styleClass="block-button" onAction="#onCompras"/>
-                <Button text="👥&#10;Clientes (F6)" styleClass="block-button" onAction="#onClientes"/>
-                <Button text="🚚&#10;Fornecedores (F7)" styleClass="block-button" onAction="#onFornecedores"/>
-                <Button text="📝&#10;Orçamentos" styleClass="block-button" onAction="#onOrcamento"/>
+                <Button text="🧾&#10;Compras (F5)" styleClass="block-button" onAction="#onNavigate" userData="COMPRAS"/>
+                <Button text="👥&#10;Clientes (F6)" styleClass="block-button" onAction="#onNavigate" userData="CLIENTES"/>
+                <Button text="🚚&#10;Fornecedores (F7)" styleClass="block-button" onAction="#onNavigate" userData="FORNECEDORES"/>
+                <Button text="📝&#10;Orçamentos" styleClass="block-button" onAction="#onNavigate" userData="ORCAMENTO"/>
                 <Separator orientation="VERTICAL"/>
-                <Button text="＄&#10;A Receber" styleClass="block-button" onAction="#onContasReceber"/>
-                <Button text="＄&#10;A Pagar" styleClass="block-button" onAction="#onContasPagar"/>
-                <Button text="🏷&#10;Preços" styleClass="block-button" onAction="#onTabelasPreco"/>
+                <Button text="＄&#10;A Receber" styleClass="block-button" onAction="#onNavigate" userData="CONTAS_RECEBER"/>
+                <Button text="＄&#10;A Pagar" styleClass="block-button" onAction="#onNavigate" userData="CONTAS_PAGAR"/>
+                <Button text="🏷&#10;Preços" styleClass="block-button" onAction="#onNavigate" userData="TABELAS_PRECO"/>
                 <Separator orientation="VERTICAL"/>
-                <Button text="📊&#10;Relatórios (F8)" styleClass="block-button" onAction="#onRelatorios"/>
-                <Button fx:id="configButton" text="⚙&#10;Config" styleClass="block-button" onAction="#onConfig"/>
+                <Button text="📊&#10;Relatórios (F8)" styleClass="block-button" onAction="#onNavigate" userData="RELATORIOS"/>
+                <Button fx:id="configButton" text="⚙&#10;Config" styleClass="block-button" onAction="#onNavigate" userData="CONFIG"/>
             </ToolBar>
         </VBox>
     </top>

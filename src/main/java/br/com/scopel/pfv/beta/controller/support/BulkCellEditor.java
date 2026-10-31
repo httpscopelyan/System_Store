@@ -57,6 +57,23 @@ public final class BulkCellEditor {
         }
     }
 
+    public Outcome acceptSuggestion(List<Long> ids, TableColumn<Product, ?> column) {
+        if (ids.isEmpty()) {
+            return new Outcome(false, "Selecione células da coluna Vr. Venda.", ids, column);
+        }
+        try {
+            BulkResult result = managerAction.apply(actor -> bulkEditService.applySuggestedPrice(ids, actor));
+            if (result == null) {
+                return new Outcome(false, "Alteração não autorizada.", ids, column);
+            }
+            String skipped = result.skipped() > 0 ? " (" + result.skipped() + " sem custo)" : "";
+            return new Outcome(true, "Sugestão aplicada em " + result.changed() + " de " + ids.size() + skipped,
+                    ids, column);
+        } catch (IllegalArgumentException invalidValue) {
+            return new Outcome(false, invalidValue.getMessage(), ids, column);
+        }
+    }
+
     private List<Long> targetIds(CellEdit edit) {
         if (edit.column() == EditableColumn.NAME) {
             return List.of(edit.product().getId());

@@ -1,16 +1,11 @@
 package br.com.scopel.pfv.beta.service;
 
-import br.com.scopel.pfv.beta.exception.ChangeNotAvailableException;
 import br.com.scopel.pfv.beta.exception.IllegalSaleStateException;
-import br.com.scopel.pfv.beta.exception.InsufficientPaymentException;
 import br.com.scopel.pfv.beta.exception.InvalidDiscountException;
 import br.com.scopel.pfv.beta.exception.InvalidQuantityException;
 import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
-import br.com.scopel.pfv.beta.exception.PaymentMethodNotAvailableException;
 import br.com.scopel.pfv.beta.exception.SaleItemNotFoundException;
 import br.com.scopel.pfv.beta.model.*;
-import br.com.scopel.pfv.beta.repository.PaymentRepository;
-import br.com.scopel.pfv.beta.repository.ProductRepository;
 import br.com.scopel.pfv.beta.repository.SaleRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -27,18 +22,15 @@ public class SaleService {
     private static final BigDecimal DEFAULT_MAX_QUANTITY_PER_ITEM = new BigDecimal("999");
 
     private final SaleRepository saleRepository;
-    private final ProductRepository productRepository;
     private final ProductService productService;
-    private final PaymentRepository paymentRepository;
+    private final SalePaymentService salePaymentService;
     private final AppSettingService appSettingService;
 
     public SaleService(SaleRepository saleRepository, ProductService productService,
-                       ProductRepository productRepository, PaymentRepository paymentRepository,
-                       AppSettingService appSettingService) {
+                       SalePaymentService salePaymentService, AppSettingService appSettingService) {
         this.saleRepository = saleRepository;
-        this.productRepository = productRepository;
         this.productService = productService;
-        this.paymentRepository = paymentRepository;
+        this.salePaymentService = salePaymentService;
         this.appSettingService = appSettingService;
     }
 
@@ -209,13 +201,6 @@ public class SaleService {
         return saleRepository.save(sale);
     }
 
-    private Sale finalizeSale(Sale sale) {
-        decreaseStock(sale);
-
-        sale.setStatus(Sale.Status.FINALIZADA);
-        return saleRepository.save(sale);
-    }
-
     public Sale reopenForEditing(Sale sale) {
         if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
             throw new IllegalSaleStateException();
@@ -234,149 +219,36 @@ public class SaleService {
     }
 
     public BigDecimal calculateChange(BigDecimal total, BigDecimal amountReceived) {
-        return amountReceived.subtract(total).setScale(2, RoundingMode.HALF_UP);
+        return salePaymentService.calculateChange(total, amountReceived);
     }
 
     @Transactional
     public Sale pay(Sale sale, PaymentMethod method, BigDecimal amountReceived) {
-        if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
-            throw new IllegalSaleStateException();
-        }
-
-        if (method != PaymentMethod.DINHEIRO) {
-            throw new PaymentMethodNotAvailableException();
-        }
-
-        if (amountReceived.compareTo(sale.getTotal()) < 0) {
-            throw new InsufficientPaymentException();
-        }
-
-        BigDecimal change = calculateChange(sale.getTotal(), amountReceived);
-
-        Payment payment = new Payment();
-        payment.setSale(sale);
-        payment.setMethod(method);
-        payment.setAmountReceived(amountReceived);
-        payment.setChange(change);
-        payment.setCreatedAt(LocalDateTime.now());
-        paymentRepository.save(payment);
-
-        return finalizeSale(sale);
+        return salePaymentService.pay(sale, method, amountReceived);
     }
 
     @Transactional
     public Sale payCard(Sale sale, CardType cardType) {
-        if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
-            throw new IllegalSaleStateException();
-        }
-
-        Payment payment = new Payment();
-        payment.setSale(sale);
-        payment.setMethod(PaymentMethod.CARTAO);
-        payment.setCardType(cardType);
-        payment.setAmountReceived(sale.getTotal());
-        payment.setChange(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
-        payment.setCreatedAt(LocalDateTime.now());
-        paymentRepository.save(payment);
-
-        return finalizeSale(sale);
+        return salePaymentService.payCard(sale, cardType);
     }
 
     @Transactional
     public Sale payPix(Sale sale) {
-        if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
-            throw new IllegalSaleStateException();
-        }
-
-        Payment payment = new Payment();
-        payment.setSale(sale);
-        payment.setMethod(PaymentMethod.PIX);
-        payment.setAmountReceived(sale.getTotal());
-        payment.setChange(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
-        payment.setCreatedAt(LocalDateTime.now());
-        paymentRepository.save(payment);
-
-        return finalizeSale(sale);
-    }
-
-    public List<Sale> history() {
-        return saleRepository.findByStatusOrderByCreatedAtDesc(Sale.Status.FINALIZADA);
+        return salePaymentService.payPix(sale);
     }
 
     @Transactional
     public Sale payMixed(Sale sale, List<PaymentInput> inputs) {
-        if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
-            throw new IllegalSaleStateException();
-        }
-        if (inputs == null || inputs.isEmpty()) {
-            throw new InsufficientPaymentException();
-        }
-
-        BigDecimal sum = BigDecimal.ZERO;
-        BigDecimal cash = BigDecimal.ZERO;
-        for (PaymentInput in : inputs) {
-            if (in.method() == null || in.amount() == null
-                    || in.amount().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new InvalidDiscountException("valor de pagamento inválido");
-            }
-            BigDecimal amount = in.amount().setScale(2, RoundingMode.HALF_UP);
-            sum = sum.add(amount);
-            if (in.method() == PaymentMethod.DINHEIRO) {
-                cash = cash.add(amount);
-            }
-        }
-
-        if (sum.compareTo(sale.getTotal()) < 0) {
-            throw new InsufficientPaymentException();
-        }
-        BigDecimal change = sum.subtract(sale.getTotal()).setScale(2, RoundingMode.HALF_UP);
-        if (change.compareTo(BigDecimal.ZERO) > 0 && cash.compareTo(change) < 0) {
-            throw new ChangeNotAvailableException();
-        }
-
-        boolean changeAssigned = false;
-        for (PaymentInput in : inputs) {
-            Payment payment = new Payment();
-            payment.setSale(sale);
-            payment.setMethod(in.method());
-            payment.setAmountReceived(in.amount().setScale(2, RoundingMode.HALF_UP));
-
-            BigDecimal thisChange = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
-            if (!changeAssigned && in.method() == PaymentMethod.DINHEIRO
-                    && change.compareTo(BigDecimal.ZERO) > 0) {
-                thisChange = change;
-                changeAssigned = true;
-            }
-            payment.setChange(thisChange);
-            payment.setCreatedAt(LocalDateTime.now());
-            paymentRepository.save(payment);
-        }
-
-        return finalizeSale(sale);
+        return salePaymentService.payMixed(sale, inputs);
     }
 
     @Transactional
     public Sale finalizeOnCredit(Sale sale) {
-        if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
-            throw new IllegalSaleStateException();
-        }
-        Payment payment = new Payment();
-        payment.setSale(sale);
-        payment.setMethod(PaymentMethod.PRAZO);
-        payment.setAmountReceived(sale.getTotal());
-        payment.setChange(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
-        payment.setCreatedAt(LocalDateTime.now());
-        paymentRepository.save(payment);
-
-        return finalizeSale(sale);
+        return salePaymentService.finalizeOnCredit(sale);
     }
 
-    private void decreaseStock(Sale sale) {
-        for (SaleItem item : sale.getItems()) {
-            Product product = item.getProduct();
-            product.setQuantity(product.getQuantity().subtract(item.getQuantity()));
-            productRepository.save(product);
-        }
+    public List<Sale> history() {
+        return saleRepository.findByStatusOrderByCreatedAtDesc(Sale.Status.FINALIZADA);
     }
 
     private BigDecimal calculateTotal(Sale sale) {
