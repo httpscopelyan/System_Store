@@ -87,6 +87,7 @@ public class SaleService {
         BigDecimal normalizedQuantity = validateQuantity(product, quantity);
 
         SaleItem existing = findItem(sale, product.getId());
+        requireAvailableStock(product, existing, normalizedQuantity);
 
         if (existing != null) {
             existing.setQuantity(existing.getQuantity().add(normalizedQuantity));
@@ -293,6 +294,20 @@ public class SaleService {
             return BigDecimal.ZERO.setScale(2);
         }
         return unitPrice.multiply(quantity).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private void requireAvailableStock(Product product, SaleItem existing, BigDecimal added) {
+        if (appSettingService.getBoolean(AppSettingService.SALE_ALLOW_NEGATIVE_STOCK, false)) {
+            return;
+        }
+        BigDecimal inSale = existing == null ? BigDecimal.ZERO : existing.getQuantity();
+        BigDecimal available = product.getQuantity() == null ? BigDecimal.ZERO : product.getQuantity();
+        if (inSale.add(added).compareTo(available) > 0) {
+            String unit = product.getUnit() == Product.Unidade.UN ? "" : " " + product.getUnit().name().toLowerCase();
+            throw new InvalidQuantityException("Estoque insuficiente: " + product.getDescription() + " tem apenas "
+                    + available.stripTrailingZeros().toPlainString() + unit + " (já na venda: "
+                    + inSale.stripTrailingZeros().toPlainString() + ")");
+        }
     }
 
     private BigDecimal validateQuantity(Product product, BigDecimal quantity) {

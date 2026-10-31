@@ -160,6 +160,7 @@ com JavaFX real); falta a validação manual do dev com `mvn javafx:run`.
 | RF73 | Venda: campos de desconto, cliente e cancelamento acessíveis | ✅* | F1 | `SaleFocusGuard`; a causa original não foi reproduzida em teste |
 | RF74 | Filtros do Estoque: só abaixo do mínimo e sem custo | ✅* | F1 | `ProductService.filterForStock` |
 | RF76 | Apagar produto só por gerente (inativa) e filtro "Só inativos" no Estoque | ✅* | F1 | `ProductService.inactivate(code, actor)`; visão padrão só ativos |
+| RF77 | Venda não aceita quantidade acima do estoque; aviso na tela | ✅* | F1 | `SaleService.addItem` (`requireAvailableStock`); liberável em `sale.allow_negative_stock` |
 
 ## Regras de Negócio (RN)
 | RN | Descrição | Status |
@@ -195,6 +196,7 @@ com JavaFX real); falta a validação manual do dev com `mvn javafx:run`.
 | RN29 | Retificação é movimento compensatório com gerente e motivo; o original nunca é alterado | ✅* |
 | RN30 | Voltar usa histórico de 10 páginas e nunca reentra em telas de pagamento | ✅* |
 | RN31 | Apagar produto = inativar (nunca excluir de fato, RF03) e exige gerente | ✅* |
+| RN32 | Total do produto na venda (já adicionado + novo) não pode passar do estoque, salvo `sale.allow_negative_stock` | ✅* |
 
 ---
 

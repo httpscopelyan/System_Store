@@ -14,6 +14,7 @@ import br.com.scopel.pfv.beta.repository.ProductRepository;
 import br.com.scopel.pfv.beta.repository.UserRepository;
 import br.com.scopel.pfv.beta.service.CashRegisterService;
 import br.com.scopel.pfv.beta.service.ProductService;
+import br.com.scopel.pfv.beta.service.AppSettingService;
 import br.com.scopel.pfv.beta.service.SaleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReopenAndQuickProductTests {
 
     @Autowired private SaleService saleService;
+    @Autowired private AppSettingService appSettingService;
     @Autowired private CashRegisterService cashRegisterService;
     @Autowired private ProductService productService;
     @Autowired private ProductRepository productRepository;
@@ -235,6 +237,7 @@ class ReopenAndQuickProductTests {
     // 8. Produto novo quantity=0, active=true, UN -> addItem 1 (RN19), estoque vai a negativo (RN12 permitido, venda não quebra)
     @Test
     void quickProductUnAddItemFreezesPriceAndAllowsNegativeStock() {
+        appSettingService.set(AppSettingService.SALE_ALLOW_NEGATIVE_STOCK, "true");
         User op = newOperator();
         CashRegister caixa = newOpenCashRegister(op);
         Sale sale = saleService.openSale(op, caixa);
@@ -263,6 +266,7 @@ class ReopenAndQuickProductTests {
     // 9. Produto KG aceita fração; o mesmo valor em UN seria recusado (a unidade escolhida importa)
     @Test
     void quickProductKgAcceptsFractionWhileUnWouldReject() {
+        appSettingService.set(AppSettingService.SALE_ALLOW_NEGATIVE_STOCK, "true");
         User op = newOperator();
         CashRegister caixa = newOpenCashRegister(op);
         Sale sale = saleService.openSale(op, caixa);
