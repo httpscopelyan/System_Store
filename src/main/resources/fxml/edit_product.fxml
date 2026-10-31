@@ -61,7 +61,7 @@
                     </VBox>
                 </HBox>
 
-                <Label text="Formação de preço — preencha custo + margem (calcula o preço) ou digite o preço direto"
+                <Label text="Formação de preço — informe a margem para sugerir o preço de venda, ou digite o preço direto"
                        styleClass="form-label"/>
                 <HBox spacing="16">
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
@@ -71,7 +71,7 @@
                     </VBox>
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
                         <Label text="Margem (%)" styleClass="form-label"/>
-                        <TextField fx:id="margemField" promptText="Ex: 30"
+                        <TextField fx:id="marginField" promptText="Ex: 30"
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
@@ -83,7 +83,7 @@
 
                 <HBox spacing="16" alignment="CENTER_LEFT">
                     <Label text="Lucro:" styleClass="form-label"/>
-                    <Label fx:id="lucroLabel" text="-" styleClass="form-section-title"/>
+                    <Label fx:id="profitLabel" text="-" styleClass="form-section-title"/>
                     <CheckBox fx:id="activeBox" text="Ativo">
                         <padding>
                             <Insets top="8" bottom="8"/>

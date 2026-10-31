@@ -36,8 +36,8 @@
                 <TableColumn fx:id="colCode" text="Código" prefWidth="130"/>
                 <TableColumn fx:id="colDesc" text="Nome" prefWidth="260"/>
                 <TableColumn fx:id="colCost" text="Custo" prefWidth="90"/>
-                <TableColumn fx:id="colLucro" text="Lucro (%)" prefWidth="90"/>
-                <TableColumn fx:id="colSugest" text="Sugest." prefWidth="90"/>
+                <TableColumn fx:id="colMarginPercent" text="Lucro (%)" prefWidth="90"/>
+                <TableColumn fx:id="colSuggestedPrice" text="Preço sugerido" prefWidth="90"/>
                 <TableColumn fx:id="colPrice" text="Vr. Venda" prefWidth="90"/>
                 <TableColumn fx:id="colMin" text="Qtd. Mín." prefWidth="80"/>
                 <TableColumn fx:id="colStock" text="Qtd. Atual" prefWidth="80"/>

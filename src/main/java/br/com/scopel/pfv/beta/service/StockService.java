@@ -14,11 +14,6 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Entrada e ajuste de estoque, com histórico auditável (RF09/RF10/RF13).
- * A baixa de estoque da venda continua no SaleService; este serviço cuida das
- * movimentações fora da venda.
- */
 @Service
 public class StockService {
 
@@ -31,11 +26,10 @@ public class StockService {
         this.movementRepository = movementRepository;
     }
 
-    /** Entrada de mercadoria: soma ao estoque e (se informado) atualiza o custo. */
     @Transactional
     public Product registerEntry(String code, BigDecimal quantity, BigDecimal unitCost,
                                  String reason, User operator) {
-        Product product = productRepository.findByCode(code)
+        Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
 
         BigDecimal qty = quantity.setScale(3, RoundingMode.HALF_UP);
@@ -50,10 +44,9 @@ public class StockService {
         return product;
     }
 
-    /** Ajuste manual com motivo (RF10): define o novo estoque e registra o movimento. */
     @Transactional
     public Product adjust(String code, BigDecimal newQuantity, String reason, User operator) {
-        Product product = productRepository.findByCode(code)
+        Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
 
         BigDecimal target = newQuantity.setScale(3, RoundingMode.HALF_UP);
@@ -65,9 +58,8 @@ public class StockService {
         return product;
     }
 
-    /** Histórico de movimentação de um produto, mais recente primeiro (RF13). */
     public List<StockMovement> history(String code) {
-        Product product = productRepository.findByCode(code)
+        Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
         return movementRepository.findByProduct_IdOrderByCreatedAtDesc(product.getId());
     }

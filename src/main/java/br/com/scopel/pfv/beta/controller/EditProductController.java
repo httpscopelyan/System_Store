@@ -3,30 +3,30 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
+import br.com.scopel.pfv.beta.controller.support.DecimalInput;
+import br.com.scopel.pfv.beta.controller.support.SuggestedPriceBinding;
 import br.com.scopel.pfv.beta.model.Product;
+import br.com.scopel.pfv.beta.service.PricingSuggestionService;
 import br.com.scopel.pfv.beta.service.ProductService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
-/**
- * Edição das informações de um produto (RF04). Recebe o id do produto via
- * {@link UserSession} (selecionado no Estoque) e grava via
- * {@link ProductService#update}. Não edita o código (identidade) nem o estoque
- * (fluxo próprio). Mostra uma prévia do lucro (derivado, não armazenado).
- */
 @Component
 public class EditProductController {
 
     private final ProductService productService;
+    private final PricingSuggestionService pricingSuggestionService;
     private final Navigator navigator;
     private final UserSession userSession;
 
-    private Long produtoId;
+    private Long productId;
 
     @FXML private TextField codeField;
     @FXML private Label stockLabel;
@@ -34,15 +34,18 @@ public class EditProductController {
     @FXML private ComboBox<Product.Unidade> unitBox;
     @FXML private TextField categoryField;
     @FXML private TextField costField;
-    @FXML private TextField margemField;
+    @FXML private TextField marginField;
     @FXML private TextField priceField;
     @FXML private TextField minStockField;
-    @FXML private Label lucroLabel;
+    @FXML private Label profitLabel;
     @FXML private CheckBox activeBox;
     @FXML private Label messageLabel;
 
-    public EditProductController(ProductService productService, Navigator navigator, UserSession userSession) {
+    public EditProductController(ProductService productService,
+                                 PricingSuggestionService pricingSuggestionService,
+                                 Navigator navigator, UserSession userSession) {
         this.productService = productService;
+        this.pricingSuggestionService = pricingSuggestionService;
         this.navigator = navigator;
         this.userSession = userSession;
     }
@@ -51,56 +54,56 @@ public class EditProductController {
     public void initialize() {
         unitBox.getItems().setAll(Product.Unidade.values());
 
-        produtoId = userSession.getProdutoEmEdicaoId();
-        if (produtoId == null) {
+        productId = userSession.getProdutoEmEdicaoId();
+        if (productId == null) {
             messageLabel.setText("Nenhum produto selecionado para edição.");
             return;
         }
 
-        Product p = productService.findById(produtoId);
-        codeField.setText(p.getCode());
-        stockLabel.setText(formatQuantity(p.getQuantity()));
-        descriptionField.setText(p.getDescription());
-        unitBox.setValue(p.getUnit());
-        categoryField.setText(p.getCategory());
-        costField.setText(plain(p.getCostPrice()));
-        priceField.setText(plain(p.getPrice()));
-        minStockField.setText(formatQuantity(p.getMinStock()));
-        activeBox.setSelected(Boolean.TRUE.equals(p.getActive()));
+        Product product = productService.findById(productId);
+        codeField.setText(product.getCode());
+        stockLabel.setText(formatQuantity(product.getQuantity()));
+        descriptionField.setText(product.getDescription());
+        unitBox.setValue(product.getUnit());
+        categoryField.setText(product.getCategory());
+        costField.setText(plain(product.getCostPrice()));
+        minStockField.setText(formatQuantity(product.getMinStock()));
+        activeBox.setSelected(Boolean.TRUE.equals(product.getActive()));
 
-        // Custo ou margem → recalcula o preço (modo markup). Preço digitado à mão
-        // só atualiza o lucro (não mexe na margem), evitando loop.
-        costField.textProperty().addListener((o, a, b) -> onCostOrMargin());
-        margemField.textProperty().addListener((o, a, b) -> onCostOrMargin());
-        priceField.textProperty().addListener((o, a, b) -> updateLucro());
-        updateLucro();
+        SuggestedPriceBinding priceBinding =
+                new SuggestedPriceBinding(costField, marginField, priceField, pricingSuggestionService, false);
+        priceBinding.loadPrice(plain(product.getPrice()));
+
+        costField.textProperty().addListener((observable, previous, current) -> refreshProfit());
+        priceField.textProperty().addListener((observable, previous, current) -> refreshProfit());
+        refreshProfit();
 
         Platform.runLater(() -> descriptionField.requestFocus());
     }
 
     @FXML
     public void onSave() {
-        if (produtoId == null) {
+        if (productId == null) {
             messageLabel.setText("Nenhum produto selecionado para edição.");
             return;
         }
         try {
             productService.update(
-                    produtoId,
+                    productId,
                     descriptionField.getText(),
                     unitBox.getValue(),
-                    new BigDecimal(priceField.getText().trim()),
-                    new BigDecimal(costField.getText().trim()),
-                    new BigDecimal(minStockField.getText().trim()),
+                    DecimalInput.parseRequired(priceField.getText()),
+                    DecimalInput.parseRequired(costField.getText()),
+                    DecimalInput.parseRequired(minStockField.getText()),
                     categoryField.getText(),
                     activeBox.isSelected());
             userSession.setProdutoEmEdicaoId(null);
             navigator.navigate(Page.ESTOQUE);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException invalidNumber) {
             messageLabel.setText("Custo, preço ou estoque mínimo inválidos.");
-        } catch (IllegalArgumentException e) {
-            messageLabel.setText(e.getMessage());
-        } catch (Exception e) {
+        } catch (IllegalArgumentException invalidField) {
+            messageLabel.setText(invalidField.getMessage());
+        } catch (Exception unexpected) {
             messageLabel.setText("Não foi possível salvar. Verifique os campos.");
         }
     }
@@ -111,58 +114,23 @@ public class EditProductController {
         navigator.navigate(Page.ESTOQUE);
     }
 
-    /**
-     * Modo markup: com custo + margem válidos, calcula o preço de venda
-     * (custo × (1 + margem/100)). Margem em branco = modo preço direto (não
-     * mexe no preço). Em qualquer caso, atualiza a prévia do lucro.
-     */
-    private void onCostOrMargin() {
-        BigDecimal cost = parseOrNull(costField.getText());
-        BigDecimal margem = parseOrNull(margemField.getText());
-        if (cost != null && cost.compareTo(BigDecimal.ZERO) >= 0
-                && margem != null && !margemField.getText().isBlank()) {
-            BigDecimal factor = BigDecimal.ONE.add(margem.divide(new BigDecimal("100"), 6, RoundingMode.HALF_UP));
-            BigDecimal price = cost.multiply(factor).setScale(2, RoundingMode.HALF_UP);
-            priceField.setText(price.toPlainString()); // dispara updateLucro() via listener do preço
-        }
-        updateLucro();
-    }
-
-    /** Prévia do lucro (R$ e % sobre o custo) — derivado, nunca armazenado. */
-    private void updateLucro() {
-        BigDecimal cost = parseOrNull(costField.getText());
-        BigDecimal price = parseOrNull(priceField.getText());
-        if (cost == null || price == null || cost.compareTo(BigDecimal.ZERO) <= 0) {
-            lucroLabel.setText("-");
+    private void refreshProfit() {
+        BigDecimal cost = DecimalInput.parseOrNull(costField.getText());
+        BigDecimal price = DecimalInput.parseOrNull(priceField.getText());
+        BigDecimal profit = pricingSuggestionService.profitOf(price, cost);
+        BigDecimal marginPercent = pricingSuggestionService.marginPercentOf(price, cost);
+        if (profit == null || marginPercent == null) {
+            profitLabel.setText("-");
             return;
         }
-        BigDecimal lucro = price.subtract(cost).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal pct = lucro.multiply(new BigDecimal("100")).divide(cost, 1, RoundingMode.HALF_UP);
-        lucroLabel.setText("R$ " + lucro.toPlainString() + " (" + pct.toPlainString() + "%)");
+        profitLabel.setText("R$ " + profit.toPlainString() + " (" + marginPercent.toPlainString() + "%)");
     }
 
-    private BigDecimal parseOrNull(String text) {
-        if (text == null || text.isBlank()) {
-            return null;
-        }
-        try {
-            return new BigDecimal(text.trim());
-        } catch (NumberFormatException e) {
-            return null;
-        }
+    private String plain(BigDecimal value) {
+        return value == null ? "" : value.toPlainString();
     }
 
-    /** Formata DINHEIRO (custo/preço): mantém as casas decimais do valor armazenado. */
-    private String plain(BigDecimal v) {
-        return v == null ? "" : v.toPlainString();
-    }
-
-    /**
-     * Formata QUANTIDADE (estoque e estoque mínimo) para exibição, sem zeros à
-     * direita: 32.000 → "32", 1.250 → "1.25", 0 → "0". Apenas visual — não
-     * altera o {@link BigDecimal} armazenado nem o banco.
-     */
-    private String formatQuantity(BigDecimal v) {
-        return v == null ? "" : v.stripTrailingZeros().toPlainString();
+    private String formatQuantity(BigDecimal value) {
+        return value == null ? "" : value.stripTrailingZeros().toPlainString();
     }
 }

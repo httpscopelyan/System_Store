@@ -12,10 +12,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Controle de lotes de validade (PDV Prático: LotesProduto). Permite registrar
- * lotes com vencimento e consultar o que está a vencer.
- */
 @Service
 public class ProductBatchService {
 
@@ -30,7 +26,7 @@ public class ProductBatchService {
 
     public ProductBatch registerBatch(String code, String batchCode, LocalDate expiryDate,
                                       BigDecimal quantity) {
-        Product product = productRepository.findByCode(code)
+        Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
 
         ProductBatch batch = new ProductBatch();
@@ -43,14 +39,12 @@ public class ProductBatchService {
         return batchRepository.save(batch);
     }
 
-    /** Lotes disponíveis de um produto, vencendo primeiro (FEFO). */
     public List<ProductBatch> availableBatches(String code) {
-        Product product = productRepository.findByCode(code)
+        Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
         return batchRepository.findByProduct_IdAndAvailableTrueOrderByExpiryDateAsc(product.getId());
     }
 
-    /** Lotes disponíveis que vencem até a data informada (alerta de validade). */
     public List<ProductBatch> expiringUntil(LocalDate limit) {
         return batchRepository.findByAvailableTrueAndExpiryDateLessThanEqualOrderByExpiryDateAsc(limit);
     }

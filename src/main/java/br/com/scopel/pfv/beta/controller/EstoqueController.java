@@ -5,6 +5,7 @@ import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.exception.ProductNotfindException;
 import br.com.scopel.pfv.beta.model.Product;
+import br.com.scopel.pfv.beta.service.PricingSuggestionService;
 import br.com.scopel.pfv.beta.service.ProductService;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -14,13 +15,13 @@ import javafx.scene.control.*;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 
 @Component
 public class EstoqueController {
 
     private final ProductService productService;
+    private final PricingSuggestionService pricingSuggestionService;
     private final Navigator navigator;
     private final UserSession userSession;
 
@@ -30,15 +31,17 @@ public class EstoqueController {
     @FXML private TableColumn<Product, String> colCode;
     @FXML private TableColumn<Product, String> colDesc;
     @FXML private TableColumn<Product, String> colCost;
-    @FXML private TableColumn<Product, String> colLucro;
-    @FXML private TableColumn<Product, String> colSugest;
+    @FXML private TableColumn<Product, String> colMarginPercent;
+    @FXML private TableColumn<Product, String> colSuggestedPrice;
     @FXML private TableColumn<Product, String> colPrice;
     @FXML private TableColumn<Product, String> colMin;
     @FXML private TableColumn<Product, String> colStock;
     @FXML private Label messageLabel;
 
-    public EstoqueController(ProductService productService, Navigator navigator, UserSession userSession) {
+    public EstoqueController(ProductService productService, PricingSuggestionService pricingSuggestionService,
+                             Navigator navigator, UserSession userSession) {
         this.productService = productService;
+        this.pricingSuggestionService = pricingSuggestionService;
         this.navigator = navigator;
         this.userSession = userSession;
     }
@@ -48,48 +51,32 @@ public class EstoqueController {
         colCode.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCode()));
         colDesc.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDescription()));
         colCost.setCellValueFactory(c -> new SimpleStringProperty(plain(c.getValue().getCostPrice())));
-        colLucro.setCellValueFactory(c -> new SimpleStringProperty(lucroPercent(c.getValue())));
-        colSugest.setCellValueFactory(c -> new SimpleStringProperty(sugestao(c.getValue())));
+        colMarginPercent.setCellValueFactory(c -> new SimpleStringProperty(marginPercentText(c.getValue())));
+        colSuggestedPrice.setCellValueFactory(c -> new SimpleStringProperty(suggestedPriceText(c.getValue())));
         colPrice.setCellValueFactory(c -> new SimpleStringProperty(plain(c.getValue().getPrice())));
         colMin.setCellValueFactory(c -> new SimpleStringProperty(formatQuantity(c.getValue().getMinStock())));
         colStock.setCellValueFactory(c -> new SimpleStringProperty(formatQuantity(c.getValue().getQuantity())));
-        for (TableColumn<Product, String> col : List.of(colCost, colLucro, colSugest, colPrice, colMin, colStock)) {
+        for (TableColumn<Product, String> col : List.of(colCost, colMarginPercent, colSuggestedPrice, colPrice, colMin, colStock)) {
             col.setStyle("-fx-alignment: CENTER-RIGHT;");
         }
         load(productService.listAll());
-        // Bipe: foco no código ao abrir a página.
         Platform.runLater(() -> codeFilter.requestFocus());
     }
 
-    private String lucroPercent(Product p) {
-        BigDecimal cost = p.getCostPrice();
-        if (cost == null || cost.compareTo(BigDecimal.ZERO) <= 0) {
-            return "-";
-        }
-        return p.getPrice().subtract(cost)
-                .multiply(new BigDecimal("100"))
-                .divide(cost, 1, RoundingMode.HALF_UP)
-                .toPlainString() + "%";
+    private String marginPercentText(Product product) {
+        BigDecimal marginPercent = pricingSuggestionService.marginPercentOf(product);
+        return marginPercent == null ? "-" : marginPercent.toPlainString() + "%";
     }
 
-    private String sugestao(Product p) {
-        BigDecimal cost = p.getCostPrice();
-        if (cost == null || cost.compareTo(BigDecimal.ZERO) <= 0) {
-            return "-";
-        }
-        return cost.multiply(new BigDecimal("1.30")).setScale(2, RoundingMode.HALF_UP).toPlainString();
+    private String suggestedPriceText(Product product) {
+        BigDecimal suggestedPrice = pricingSuggestionService.suggestFor(product);
+        return suggestedPrice == null ? "-" : suggestedPrice.toPlainString();
     }
 
-    /** Formata DINHEIRO (custo/preço): mantém as casas decimais do valor armazenado. */
     private String plain(BigDecimal v) {
         return v == null ? "" : v.toPlainString();
     }
 
-    /**
-     * Formata QUANTIDADE (estoque e estoque mínimo) para exibição, sem zeros à
-     * direita: 32.000 → "32", 1.250 → "1.25", 0 → "0". Apenas visual — não
-     * altera o {@link BigDecimal} armazenado nem o banco.
-     */
     private String formatQuantity(BigDecimal v) {
         return v == null ? "" : v.stripTrailingZeros().toPlainString();
     }

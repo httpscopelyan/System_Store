@@ -646,3 +646,8 @@
     -fx-padding: 6 16 6 16;
     -fx-cursor: hand;
 }
+
+.text-field.suggested-value {
+    -fx-text-fill: #8a9099;
+    -fx-font-style: italic;
+}
