@@ -1,8 +1,10 @@
 {
-  "version": "1.0.0",
-  "releaseDate": "2026-10-25",
-  "minJavaVersion": "21",
-  "changelog": "Versão inicial do PDV Scopel Store",
+  "version": "1.1.0",
+  "releaseDate": "2026-11-01",
+  "minJavaVersion": 24,
+  "changelog": "feat(cartao): cobrança automática na maquininha Mercado Pago Point (Orders API)",
   "mandatory": false,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/latest/download/scopel-store.jar"
+  "sha256": "09df040f8b5a66e0ab5f44e98e76661b8b75f2f4ba7b8867ce41a8615baa8752",
+  "size": 59511452,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.1.0/scopel-store.jar"
 }
