@@ -301,3 +301,13 @@ CARTAO/PIX e pagamento múltiplo (RN18) ficam na F4.
 - `PagamentoEsperaController` + `controller/support/CardChargePoller`: cobrança e polling (2 s) em thread própria; ENTER manual desligado quando integrado; ESC cancela na API e só sai se o cancelamento der certo.
 - Terminal em modo PDV (via `PATCH /terminals/v1/setup`).
 - Testes: `MercadoPagoCardPaymentGatewayTests` (sem rede). Cobrança real de R$ 1,00 (débito) confirmada em 2026-11-01: created → at_terminal → processed/accredited. **Pendente:** teste de recusa/cancelamento, PIX na maquininha (`default_type=qr`) e QR na tela (FIXES.md).
+
+---
+
+## 2026-11-01 — PIX com QR Code na maquininha (Point, `default_type=qr`)
+
+- `CardPaymentGateway.createPixCharge(amount)` + `MercadoPagoCardPaymentGateway`: mesma Orders API, `config.payment_method.default_type = "qr"`, sem parcelas. Teste real: a Point recebeu a cobrança (`at_terminal`) e exibiu "PIX QR Code" (cancelada à mão pelo dev; nada cobrado).
+- `PagamentoPixController`: com `MP_ACCESS_TOKEN` + `MP_TERMINAL_ID` envia a cobrança PIX à maquininha, acompanha por polling (`CardChargePoller`, agora recebe um `Supplier`) e finaliza sozinho ao aprovar; ESC cancela na API. Sem maquininha, mantém o copia e cola estático com confirmação manual.
+- Configurações: a seção de chave PIX virou "PIX sem maquininha (alternativo)"; com a maquininha o QR vem da conta Mercado Pago (a conta precisa ter chave PIX cadastrada).
+- Testes: `MercadoPagoCardPaymentGatewayTests` (+2, corpo do PIX e recusa sem credenciais).
+- **Pendente:** pagamento PIX real aprovado de ponta a ponta (status final), QR na tela do PC só para o modo alternativo.

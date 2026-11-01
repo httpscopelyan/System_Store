@@ -72,6 +72,27 @@ class MercadoPagoCardPaymentGatewayTests {
     }
 
     @Test
+    void createsPixChargeAsQrWithoutInstallments() throws Exception {
+        CardChargeResult result = gateway.createPixCharge(new BigDecimal("7.9"));
+
+        assertEquals("ORD1", result.chargeId());
+        JsonNode body = new ObjectMapper().readTree(api.bodies.get(0));
+        assertEquals("7.90", body.path("transactions").path("payments").path(0).path("amount").asText());
+        assertEquals(TERMINAL, body.path("config").path("point").path("terminal_id").asText());
+        JsonNode method = body.path("config").path("payment_method");
+        assertEquals("qr", method.path("default_type").asText());
+        assertTrue(method.path("default_installments").isMissingNode());
+    }
+
+    @Test
+    void pixChargeWithoutCredentialsRefuses() {
+        api.credentials = false;
+
+        assertThrows(CardGatewayException.class, () -> gateway.createPixCharge(BigDecimal.ONE));
+        assertTrue(api.paths.isEmpty());
+    }
+
+    @Test
     void usesDifferentIdempotencyKeyPerCharge() {
         gateway.createCharge(BigDecimal.TEN, CardType.DEBITO);
         gateway.createCharge(BigDecimal.TEN, CardType.DEBITO);

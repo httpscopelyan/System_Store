@@ -2,14 +2,14 @@ package br.com.scopel.pfv.beta.controller.support;
 
 import br.com.scopel.pfv.beta.exception.CardGatewayException;
 import br.com.scopel.pfv.beta.hardware.CardPaymentGateway;
-import br.com.scopel.pfv.beta.model.CardType;
+import br.com.scopel.pfv.beta.hardware.CardChargeResult;
 import javafx.application.Platform;
 
-import java.math.BigDecimal;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public final class CardChargePoller {
 
@@ -36,10 +36,10 @@ public final class CardChargePoller {
         this.onEnded = onEnded;
     }
 
-    public void start(BigDecimal amount, CardType type) {
+    public void start(Supplier<CardChargeResult> chargeCreator) {
         executor.execute(() -> {
             try {
-                chargeId = gateway.createCharge(amount, type).chargeId();
+                chargeId = chargeCreator.get().chargeId();
                 post(onMessage, "Cobrança enviada à maquininha. Aguardando o cliente pagar...");
                 executor.schedule(this::poll, POLL_INTERVAL_SECONDS, TimeUnit.SECONDS);
             } catch (CardGatewayException failure) {

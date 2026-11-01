@@ -129,7 +129,7 @@ public class PagamentoEsperaController {
                 poller.stop();
             }
         });
-        poller.start(total, cardType);
+        poller.start(() -> gateway.createCharge(total, cardType));
     }
 
     private void approve() {

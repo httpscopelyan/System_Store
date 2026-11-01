@@ -1,5 +1,6 @@
 package br.com.scopel.pfv.beta.hardware;
 
+import br.com.scopel.pfv.beta.exception.CardGatewayException;
 import br.com.scopel.pfv.beta.model.CardType;
 
 import java.math.BigDecimal;
@@ -21,6 +22,10 @@ public interface CardPaymentGateway {
 
     default boolean isIntegrated() {
         return false;
+    }
+
+    default CardChargeResult createPixCharge(BigDecimal amount) {
+        throw new CardGatewayException("PIX na maquininha indisponível.");
     }
 
     /**

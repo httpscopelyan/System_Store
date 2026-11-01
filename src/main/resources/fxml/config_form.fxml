@@ -47,7 +47,9 @@
                 </VBox>
 
                 <VBox styleClass="form-card" spacing="12" maxWidth="Infinity">
-                    <Label text="PIX" styleClass="form-section-title"/>
+                    <Label text="PIX sem maquininha (alternativo)" styleClass="form-section-title"/>
+                    <Label text="Só vale quando a maquininha não está configurada. Com a maquininha, o QR Code do PIX vem da conta Mercado Pago e estes campos não são usados."
+                           styleClass="form-label" wrapText="true"/>
                     <VBox spacing="6">
                         <Label text="Chave PIX" styleClass="form-label"/>
                         <TextField fx:id="pixKeyField" styleClass="text-input" maxWidth="Infinity"/>

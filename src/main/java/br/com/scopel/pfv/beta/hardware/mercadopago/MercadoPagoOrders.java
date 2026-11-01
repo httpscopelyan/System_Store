@@ -17,7 +17,17 @@ final class MercadoPagoOrders {
     private MercadoPagoOrders() {
     }
 
-    static String createBody(BigDecimal amount, CardType type, String reference, String terminalId) {
+    static String cardBody(BigDecimal amount, CardType type, String reference, String terminalId) {
+        String paymentType = type == CardType.DEBITO ? "debit_card" : "credit_card";
+        return body(amount, paymentType, type == CardType.CREDITO, reference, terminalId);
+    }
+
+    static String pixBody(BigDecimal amount, String reference, String terminalId) {
+        return body(amount, "qr", false, reference, terminalId);
+    }
+
+    private static String body(BigDecimal amount, String paymentType, boolean oneInstallment, String reference,
+                               String terminalId) {
         ObjectNode root = MAPPER.createObjectNode();
         root.put("type", "point");
         root.put("external_reference", reference);
@@ -28,8 +38,8 @@ final class MercadoPagoOrders {
         point.put("terminal_id", terminalId);
         point.put("print_on_terminal", "no_ticket");
         ObjectNode paymentMethod = config.putObject("payment_method");
-        paymentMethod.put("default_type", type == CardType.DEBITO ? "debit_card" : "credit_card");
-        if (type == CardType.CREDITO) {
+        paymentMethod.put("default_type", paymentType);
+        if (oneInstallment) {
             paymentMethod.put("default_installments", 1);
         }
         return root.toString();

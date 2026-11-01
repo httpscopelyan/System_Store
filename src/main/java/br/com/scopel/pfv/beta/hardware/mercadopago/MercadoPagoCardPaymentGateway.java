@@ -33,10 +33,21 @@ public class MercadoPagoCardPaymentGateway implements CardPaymentGateway {
 
     @Override
     public CardChargeResult createCharge(BigDecimal amount, CardType type) {
+        return createOrder(MercadoPagoOrders.cardBody(amount, type, newReference(), terminalId));
+    }
+
+    @Override
+    public CardChargeResult createPixCharge(BigDecimal amount) {
+        return createOrder(MercadoPagoOrders.pixBody(amount, newReference(), terminalId));
+    }
+
+    private String newReference() {
+        return "pdv-" + UUID.randomUUID();
+    }
+
+    private CardChargeResult createOrder(String body) {
         requireIntegrated();
-        String reference = "pdv-" + UUID.randomUUID();
-        ApiResponse response = api.send("POST", ORDERS_PATH,
-                MercadoPagoOrders.createBody(amount, type, reference, terminalId),
+        ApiResponse response = api.send("POST", ORDERS_PATH, body,
                 Map.of("X-Idempotency-Key", UUID.randomUUID().toString()));
         if (!response.isSuccess()) {
             throw MercadoPagoOrders.failure(response);
