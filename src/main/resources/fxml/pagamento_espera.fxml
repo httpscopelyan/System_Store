@@ -13,7 +13,7 @@
     <top>
         <VBox styleClass="page-header">
             <Label text="Pagamento em Cartão — Mercado Scopel" styleClass="page-header-title"/>
-            <Label text="Confirmação manual" styleClass="page-header-subtitle"/>
+            <Label fx:id="subtitleLabel" text="Confirmação manual" styleClass="page-header-subtitle"/>
         </VBox>
     </top>
 
@@ -38,7 +38,7 @@
             <Label fx:id="statusLabel" styleClass="sale-status"/>
 
             <HBox spacing="12" alignment="CENTER">
-                <Button text="Confirmar (ENTER)" onAction="#onConfirm" styleClass="primary-button" defaultButton="true"/>
+                <Button fx:id="confirmButton" text="Confirmar (ENTER)" onAction="#onConfirm" styleClass="primary-button" defaultButton="true"/>
                 <Button text="Cancelar (ESC)" onAction="#onCancel" styleClass="danger-button"/>
             </HBox>
         </VBox>

@@ -291,3 +291,13 @@ CARTAO/PIX e pagamento múltiplo (RN18) ficam na F4.
 ### Documentos tocados
 `MAPA-REQUISITOS.md` (RF25/RF26/RN09/RN21), `ESPECIFICACAO-PROJETO.md`
 (seções 5, 8, 9.4, 10, 12, 13, 14 — ADR 0011 + nota na 0010), este `REVISION.md`.
+
+---
+
+## 2026-11-01 — Gateway real da maquininha (Mercado Pago Point, Orders API)
+
+- `hardware/mercadopago/`: `MercadoPagoCardPaymentGateway` (cria/consulta/cancela `POST|GET /v1/orders`, `type=point`, idempotência por UUID), `HttpMercadoPagoApi` (JDK HttpClient), `MercadoPagoOrders` (corpo, mapa de status e erros em português).
+- Ativa só com `MP_ACCESS_TOKEN` e `MP_TERMINAL_ID` no `.env`; sem eles `isIntegrated()` é falso e a tela de cartão segue com confirmação manual.
+- `PagamentoEsperaController` + `controller/support/CardChargePoller`: cobrança e polling (2 s) em thread própria; ENTER manual desligado quando integrado; ESC cancela na API e só sai se o cancelamento der certo.
+- Terminal em modo PDV (via `PATCH /terminals/v1/setup`).
+- Testes: `MercadoPagoCardPaymentGatewayTests` (sem rede). Cobrança real de R$ 1,00 (débito) confirmada em 2026-11-01: created → at_terminal → processed/accredited. **Pendente:** teste de recusa/cancelamento, PIX na maquininha (`default_type=qr`) e QR na tela (FIXES.md).

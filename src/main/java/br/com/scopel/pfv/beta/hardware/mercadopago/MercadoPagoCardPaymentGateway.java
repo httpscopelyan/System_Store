@@ -1,0 +1,78 @@
+package br.com.scopel.pfv.beta.hardware.mercadopago;
+
+import br.com.scopel.pfv.beta.exception.CardGatewayException;
+import br.com.scopel.pfv.beta.hardware.CardChargeResult;
+import br.com.scopel.pfv.beta.hardware.CardPaymentGateway;
+import br.com.scopel.pfv.beta.hardware.CardPaymentStatus;
+import br.com.scopel.pfv.beta.model.CardType;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.Map;
+import java.util.UUID;
+
+@Component
+public class MercadoPagoCardPaymentGateway implements CardPaymentGateway {
+
+    private static final String ORDERS_PATH = "/v1/orders";
+
+    private final MercadoPagoApi api;
+    private final String terminalId;
+
+    public MercadoPagoCardPaymentGateway(MercadoPagoApi api, @Value("${MP_TERMINAL_ID:}") String terminalId) {
+        this.api = api;
+        this.terminalId = terminalId == null ? "" : terminalId.trim();
+    }
+
+    @Override
+    public boolean isIntegrated() {
+        return api.hasCredentials() && !terminalId.isEmpty();
+    }
+
+    @Override
+    public CardChargeResult createCharge(BigDecimal amount, CardType type) {
+        requireIntegrated();
+        String reference = "pdv-" + UUID.randomUUID();
+        ApiResponse response = api.send("POST", ORDERS_PATH,
+                MercadoPagoOrders.createBody(amount, type, reference, terminalId),
+                Map.of("X-Idempotency-Key", UUID.randomUUID().toString()));
+        if (!response.isSuccess()) {
+            throw MercadoPagoOrders.failure(response);
+        }
+        JsonNode order = MercadoPagoOrders.parse(response.body());
+        String orderId = order.path("id").asText("");
+        if (orderId.isEmpty()) {
+            throw new CardGatewayException("O Mercado Pago não devolveu o identificador da cobrança.");
+        }
+        return new CardChargeResult(orderId, MercadoPagoOrders.statusOf(order));
+    }
+
+    @Override
+    public CardPaymentStatus getStatus(String chargeId) {
+        requireIntegrated();
+        ApiResponse response = api.send("GET", ORDERS_PATH + "/" + chargeId, null, Map.of());
+        if (!response.isSuccess()) {
+            throw MercadoPagoOrders.failure(response);
+        }
+        return MercadoPagoOrders.statusOf(MercadoPagoOrders.parse(response.body()));
+    }
+
+    @Override
+    public void cancel(String chargeId) {
+        requireIntegrated();
+        ApiResponse response = api.send("POST", ORDERS_PATH + "/" + chargeId + "/cancel", null,
+                Map.of("x-allow-cancelable-status", "at_terminal"));
+        if (!response.isSuccess()) {
+            throw MercadoPagoOrders.failure(response);
+        }
+    }
+
+    private void requireIntegrated() {
+        if (!isIntegrated()) {
+            throw new CardGatewayException(
+                    "Maquininha não configurada: informe MP_ACCESS_TOKEN e MP_TERMINAL_ID no .env.");
+        }
+    }
+}

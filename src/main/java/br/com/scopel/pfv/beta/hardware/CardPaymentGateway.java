@@ -19,6 +19,10 @@ import java.math.BigDecimal;
  */
 public interface CardPaymentGateway {
 
+    default boolean isIntegrated() {
+        return false;
+    }
+
     /**
      * Aciona a maquininha com o valor total da compra e o tipo de cartão.
      * Devolve o id da cobrança gerado e o status inicial (normalmente

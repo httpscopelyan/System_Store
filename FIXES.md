@@ -39,3 +39,12 @@ Registro de concertos curtos por rodada. Correções longas/estruturais ficam em
   preservando a cobertura de baixa de estoque (UN + KG). Nenhuma classe de produção
   além do `SaleService` foi tocada. Suíte verde: `mvn test` (JDK 26) → 36 testes,
   0 falhas, 0 erros.
+
+## PENDENTE — 2026-11-01
+
+- **PIX: QR Code não aparece na tela de pagamento.** `pagamento_pix.fxml` mostra só o texto
+  "copia e cola" (`pixArea`); não há `ImageView` nem biblioteca de QR no `pom.xml`. A mensagem
+  "Mostre o QR / copie o código" não corresponde ao que a tela faz. Proposta: dependência
+  `com.google.zxing:core`, helper em `controller/support/` que converte o payload do `PixService`
+  em imagem JavaFX, `ImageView` ~260 px no painel direito e teste de tela. Confirmação do PIX
+  continua manual (PIX estático).
