@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.ConfigTerminalController"
+      styleClass="form-card" spacing="12" maxWidth="Infinity">
+    <Label text="Maquininha (Mercado Pago Point)" styleClass="form-section-title"/>
+    <Label fx:id="modeLabel" styleClass="form-label" wrapText="true"/>
+    <Label text="No modo PDV, cartão e PIX são cobrados pelo sistema. No modo manual, a maquininha funciona sozinha e o PDV não consegue cobrar. Depois de alterar, reinicie a maquininha."
+           styleClass="form-label" wrapText="true"/>
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Button fx:id="pdvButton" text="Usar com o PDV (automático)" onAction="#onUsePdv" styleClass="success-button"/>
+        <Button fx:id="manualButton" text="Usar manualmente" onAction="#onUseManual" styleClass="win-button"/>
+        <Button fx:id="refreshButton" text="Atualizar" onAction="#onRefresh" styleClass="secondary-button"/>
+    </HBox>
+    <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+</VBox>

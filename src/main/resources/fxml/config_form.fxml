@@ -68,6 +68,8 @@
 
                 <fx:include source="config_alerts.fxml"/>
 
+                <fx:include source="config_terminal.fxml"/>
+
                 <VBox styleClass="form-card" spacing="12" maxWidth="Infinity">
                     <Label text="Aparência (Tema)" styleClass="form-section-title"/>
                     <HBox spacing="12" alignment="CENTER_LEFT">

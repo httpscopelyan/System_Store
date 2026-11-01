@@ -313,3 +313,5 @@ CARTAO/PIX e pagamento múltiplo (RN18) ficam na F4.
 - **Pendente:** pagamento PIX real aprovado de ponta a ponta (status final), QR na tela do PC só para o modo alternativo.
 
 - **Correção (1.2.0):** `cancel` do gateway passou a enviar `X-Idempotency-Key`; sem ela o Mercado Pago recusava o cancelamento (400). Cancelamento real validado (202 → `canceled`). Teste PIX real aprovado de ponta a ponta (`processed/accredited`, método `pix`) e estornado.
+
+- **Modo da maquininha nas Configurações (1.2.0):** seção "Maquininha (Mercado Pago Point)" mostra o modo atual (PDV ou manual) e alterna por botão via `PATCH /terminals/v1/setup` (`MercadoPagoTerminalModeControl`, `ConfigTerminalController`). Depois de alterar, reiniciar a maquininha. Com a Point em modo manual o PDV não consegue cobrar.
