@@ -1,10 +1,10 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "releaseDate": "2026-11-01",
   "minJavaVersion": 24,
-  "changelog": "feat(cartao): cobrança automática na maquininha Mercado Pago Point (Orders API)",
+  "changelog": "feat(config): botão para alternar a maquininha entre modo PDV e modo manual",
   "mandatory": false,
-  "sha256": "09df040f8b5a66e0ab5f44e98e76661b8b75f2f4ba7b8867ce41a8615baa8752",
-  "size": 59511452,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.1.0/scopel-store.jar"
+  "sha256": "f6be429605cbca95bf77a1ae9e7e6c8d1b85b35de3d6f374612d723f0fb454a7",
+  "size": 59522212,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.0/scopel-store.jar"
 }
