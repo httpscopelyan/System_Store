@@ -74,7 +74,8 @@ public class MercadoPagoCardPaymentGateway implements CardPaymentGateway {
     public void cancel(String chargeId) {
         requireIntegrated();
         ApiResponse response = api.send("POST", ORDERS_PATH + "/" + chargeId + "/cancel", null,
-                Map.of("x-allow-cancelable-status", "at_terminal"));
+                Map.of("x-allow-cancelable-status", "at_terminal",
+                        "X-Idempotency-Key", UUID.randomUUID().toString()));
         if (!response.isSuccess()) {
             throw MercadoPagoOrders.failure(response);
         }

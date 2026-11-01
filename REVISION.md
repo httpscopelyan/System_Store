@@ -311,3 +311,5 @@ CARTAO/PIX e pagamento múltiplo (RN18) ficam na F4.
 - Configurações: a seção de chave PIX virou "PIX sem maquininha (alternativo)"; com a maquininha o QR vem da conta Mercado Pago (a conta precisa ter chave PIX cadastrada).
 - Testes: `MercadoPagoCardPaymentGatewayTests` (+2, corpo do PIX e recusa sem credenciais).
 - **Pendente:** pagamento PIX real aprovado de ponta a ponta (status final), QR na tela do PC só para o modo alternativo.
+
+- **Correção (1.2.0):** `cancel` do gateway passou a enviar `X-Idempotency-Key`; sem ela o Mercado Pago recusava o cancelamento (400). Cancelamento real validado (202 → `canceled`). Teste PIX real aprovado de ponta a ponta (`processed/accredited`, método `pix`) e estornado.

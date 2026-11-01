@@ -119,6 +119,7 @@ class MercadoPagoCardPaymentGatewayTests {
 
         assertEquals("/v1/orders/ORD1/cancel", api.paths.get(0));
         assertEquals("at_terminal", api.headers.get(0).get("x-allow-cancelable-status"));
+        assertTrue(api.headers.get(0).containsKey("X-Idempotency-Key"));
     }
 
     @Test
