@@ -8,9 +8,13 @@ import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
+
+    private static final int MAX_LOGIN_LENGTH = 30;
+    private static final int MIN_PASSWORD_LENGTH = 4;
 
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder; 
@@ -46,6 +50,33 @@ public class UserService {
         user.setRole(role);
         repository.save(user);
         return true;
+    }
+
+    @Transactional
+    public User updateOwnCredentials(Long userId, String currentPassword, String newLogin, String newPassword) {
+        User user = repository.findById(userId).orElseThrow(() -> new UserNotFindException());
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new InvalidPasswordException();
+        }
+        String login = newLogin == null ? "" : newLogin.trim();
+        if (login.isEmpty() || login.length() > MAX_LOGIN_LENGTH) {
+            throw new IllegalArgumentException("O nome deve ter de 1 a " + MAX_LOGIN_LENGTH + " caracteres.");
+        }
+        boolean takenByAnother = repository.findByLogin(login)
+                .filter(other -> !other.getId().equals(user.getId()))
+                .isPresent();
+        if (takenByAnother) {
+            throw new UserDuplicatedException();
+        }
+        user.setLogin(login);
+        user.setName(login);
+        if (newPassword != null && !newPassword.isEmpty()) {
+            if (newPassword.length() < MIN_PASSWORD_LENGTH) {
+                throw new IllegalArgumentException("A senha nova deve ter pelo menos " + MIN_PASSWORD_LENGTH + " caracteres.");
+            }
+            user.setPassword(passwordEncoder.encode(newPassword));
+        }
+        return repository.save(user);
     }
 
     public boolean hasUsers() {

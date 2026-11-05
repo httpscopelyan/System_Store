@@ -21,15 +21,19 @@ public class OperatorSeed implements ApplicationRunner {
             new SeededOperator("Dayana", "Dayana", "$2a$10$npOry.e8FSL4.kZrD9jAnuYiBNiVZ6sLQN8AjZIoOeEuL8FKRXmfG"),
             new SeededOperator("Maria", "Maria", "$2a$10$QtJVRI4bklF3ebwo2iESlu7SvMRWezA3W7ih8TR6j.UeUsij3aFEa"));
 
-    private final UserService userService;
+    static final String DONE_FLAG = "seed.operators_dayana_maria.done";
 
-    public OperatorSeed(UserService userService) {
+    private final UserService userService;
+    private final AppSettingService settings;
+
+    public OperatorSeed(UserService userService, AppSettingService settings) {
         this.userService = userService;
+        this.settings = settings;
     }
 
     @Override
     public void run(ApplicationArguments args) {
-        if (!userService.hasUsers()) {
+        if (settings.getBoolean(DONE_FLAG, false) || !userService.hasUsers()) {
             return;
         }
         for (SeededOperator operator : OPERATORS) {
@@ -39,5 +43,6 @@ public class OperatorSeed implements ApplicationRunner {
                 log.info("[OperatorSeed] Operador '{}' criado.", operator.login());
             }
         }
+        settings.set(DONE_FLAG, "true");
     }
 }

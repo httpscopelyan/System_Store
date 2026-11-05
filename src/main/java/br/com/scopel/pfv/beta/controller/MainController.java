@@ -4,6 +4,7 @@ import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.DrawerShortcut;
+import br.com.scopel.pfv.beta.controller.support.FullscreenShortcut;
 import br.com.scopel.pfv.beta.controller.support.UpdateNotice;
 import br.com.scopel.pfv.beta.hardware.PrinterPort;
 import br.com.scopel.pfv.beta.model.Sale;
@@ -144,6 +145,7 @@ public class MainController {
         root.sceneProperty().addListener((obs, oldScene, scene) -> {
             if (scene == null) return;
             new DrawerShortcut(printer, this::showHint).install(scene);
+            FullscreenShortcut.install(scene);
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F1), this::onConsultaPreco);
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F2), this::onVender);
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F3), () -> navigator.navigate(Page.ESTOQUE));

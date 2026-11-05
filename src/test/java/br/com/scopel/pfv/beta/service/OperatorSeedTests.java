@@ -27,9 +27,10 @@ class OperatorSeedTests {
     @Test
     void existingInstallationGetsBothOperators() {
         UserService userService = mock(UserService.class);
+        AppSettingService settings = mock(AppSettingService.class);
         when(userService.hasUsers()).thenReturn(true);
 
-        new OperatorSeed(userService).run(null);
+        new OperatorSeed(userService, settings).run(null);
 
         verify(userService).registerWithPasswordHash(eqLogin("Dayana"), anyString(), anyString(), any());
         verify(userService).registerWithPasswordHash(eqLogin("Maria"), anyString(), anyString(), any());
@@ -38,9 +39,22 @@ class OperatorSeedTests {
     @Test
     void emptyDatabaseIsLeftToTheInitialBootstrap() {
         UserService userService = mock(UserService.class);
+        AppSettingService settings = mock(AppSettingService.class);
         when(userService.hasUsers()).thenReturn(false);
 
-        new OperatorSeed(userService).run(null);
+        new OperatorSeed(userService, settings).run(null);
+
+        verify(userService, never()).registerWithPasswordHash(anyString(), anyString(), anyString(), any(User.Role.class));
+    }
+
+    @Test
+    void doesNotRecreateOperatorsAfterTheFirstRun() {
+        UserService userService = mock(UserService.class);
+        AppSettingService settings = mock(AppSettingService.class);
+        when(userService.hasUsers()).thenReturn(true);
+        when(settings.getBoolean(OperatorSeed.DONE_FLAG, false)).thenReturn(true);
+
+        new OperatorSeed(userService, settings).run(null);
 
         verify(userService, never()).registerWithPasswordHash(anyString(), anyString(), anyString(), any(User.Role.class));
     }

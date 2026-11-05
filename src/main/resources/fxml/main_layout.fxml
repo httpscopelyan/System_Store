@@ -36,6 +36,7 @@
                 <Button text="🏷&#10;Preços" styleClass="block-button" onAction="#onNavigate" userData="TABELAS_PRECO"/>
                 <Separator orientation="VERTICAL"/>
                 <Button text="📊&#10;Relatórios (F8)" styleClass="block-button" onAction="#onNavigate" userData="RELATORIOS"/>
+                <Button text="👤&#10;Minha conta" styleClass="block-button" onAction="#onNavigate" userData="MINHA_CONTA"/>
                 <Button fx:id="configButton" text="⚙&#10;Config" styleClass="block-button" onAction="#onNavigate" userData="CONFIG"/>
             </ToolBar>
         </VBox>

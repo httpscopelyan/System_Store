@@ -19,6 +19,7 @@ public enum Page {
     AJUSTE_PRECOS("/fxml/price_adjust.fxml"),
     TABELAS_PRECO("/fxml/price_table_form.fxml"),
     CONFIG("/fxml/config_form.fxml"),
+    MINHA_CONTA("/fxml/my_account.fxml"),
     COMPRAS("/fxml/purchase_form.fxml"),
     ORCAMENTO("/fxml/quote_form.fxml"),
     CONTAS_RECEBER("/fxml/receivable_list.fxml"),
