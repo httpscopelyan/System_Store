@@ -6,6 +6,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBoxBase;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
@@ -40,11 +41,19 @@ public final class EscapeToBack {
     }
 
     private void handle(KeyEvent event) {
-        if (event.getCode() != KeyCode.ESCAPE || isOpenComboBox(event.getTarget())) {
+        if (isOpenComboBox(event.getTarget()) || !isBackKey(event)) {
             return;
         }
         event.consume();
         Platform.runLater(navigator::back);
+    }
+
+    private boolean isBackKey(KeyEvent event) {
+        boolean typing = event.getTarget() instanceof TextInputControl;
+        if (typing) {
+            return event.getCode() == KeyCode.ESCAPE;
+        }
+        return event.getCode() == KeyCode.V && !event.isControlDown() && !event.isAltDown() && !event.isMetaDown();
     }
 
     private boolean isOpenComboBox(Object target) {

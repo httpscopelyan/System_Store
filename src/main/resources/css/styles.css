@@ -821,3 +821,17 @@
     -fx-min-height: 76;
     -fx-font-size: 28px;
 }
+
+.page-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+.page-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.page-scroll .scroll-bar:vertical {
+    -fx-pref-width: 14;
+}

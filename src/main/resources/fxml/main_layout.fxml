@@ -13,7 +13,7 @@
                 <Label styleClass="brand-bar-title" text="SCOPEL STORE" />
             </HBox>
             <TilePane fx:id="blocksBar" hgap="6" prefColumns="9" styleClass="top-bar" tileAlignment="CENTER" vgap="6">
-                <Button fx:id="backButton" disable="true" onAction="#onBack" styleClass="block-button" text="◀&#10;Voltar&#10;Esc" />
+                <Button fx:id="backButton" disable="true" onAction="#onBack" styleClass="block-button" text="◀&#10;Voltar&#10;V" />
                 <Button onAction="#onConsultaPreco" styleClass="block-button" text="🏷&#10;Preço&#10;F1" />
                 <Button onAction="#onVender" styleClass="block-button, block-primary" text="🛒&#10;Nova Venda&#10;F2" />
                 <Button onAction="#onNavigate" styleClass="block-button" text="🧮&#10;Cobrar" userData="COBRAR" />

@@ -51,7 +51,7 @@
 
             <Label fx:id="statusLabel" styleClass="sale-status"/>
 
-            <Button text="Voltar (Esc)" onAction="#onBack" styleClass="secondary-button"/>
+            <Button text="Voltar (V)" onAction="#onBack" styleClass="secondary-button"/>
         </VBox>
     </center>
 

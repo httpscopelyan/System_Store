@@ -10,5 +10,5 @@
     <padding>
         <Insets top="8" right="14" bottom="8" left="14"/>
     </padding>
-    <Button fx:id="backButton" text="◀ Voltar (Esc)" onAction="#onBack" styleClass="back-button"/>
+    <Button fx:id="backButton" text="◀ Voltar (V)" onAction="#onBack" styleClass="back-button"/>
 </HBox>

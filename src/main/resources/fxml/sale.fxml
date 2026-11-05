@@ -84,11 +84,34 @@
     </right>
 
     <bottom>
-        <HBox alignment="CENTER_LEFT" spacing="8" styleClass="sale-footer">
-            <Label styleClass="key-hint" text="F10" />
-            <Label text="Finalizar venda" />
-            <Label styleClass="key-hint" text="   Enter" />
+        <HBox alignment="CENTER_LEFT" spacing="6" styleClass="sale-footer">
+            <Label styleClass="key-hint" text="Enter" />
             <Label text="Adicionar item" />
+            <Region prefWidth="6" />
+            <Label styleClass="key-hint" text="F1" />
+            <Label text="Preço" />
+            <Region prefWidth="6" />
+            <Label styleClass="key-hint" text="F5" />
+            <Label text="Desconto" />
+            <Region prefWidth="6" />
+            <Label styleClass="key-hint" text="F6" />
+            <Label text="Cancelar item" />
+            <Region prefWidth="6" />
+            <Label styleClass="key-hint" text="F7" />
+            <Label text="Cancelar venda" />
+            <Region prefWidth="6" />
+            <Label styleClass="key-hint" text="F9" />
+            <Label text="Cliente" />
+            <Region prefWidth="6" />
+            <Label styleClass="key-hint" text="F10" />
+            <Label text="Finalizar" />
+            <Region prefWidth="6" />
+            <Label styleClass="key-hint" text="F11" />
+            <Label text="Tela cheia" />
+            <Region prefWidth="6" />
+            <Label styleClass="key-hint" text="F12" />
+            <Label text="Gaveta" />
+            <Region prefWidth="6" />
         </HBox>
     </bottom>
 
