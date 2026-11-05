@@ -141,6 +141,17 @@ class MainLayoutTests {
     }
 
     @Test
+    void everyPageIsWrappedInAScrollPaneWithAMinimumHeightOf700() throws Exception {
+        FxTestSupport.runOnFx(() -> {
+            navigator.navigate(Page.CLIENTES);
+            javafx.scene.Node center = ((javafx.scene.layout.BorderPane) root).getCenter();
+            assertTrue(center instanceof javafx.scene.control.ScrollPane);
+            javafx.scene.Node page = ((javafx.scene.control.ScrollPane) center).getContent();
+            assertTrue(((javafx.scene.layout.Region) page).getMinHeight() >= 700);
+        });
+    }
+
+    @Test
     void functionKeysStillOpenTheirPages_RF69() throws Exception {
         FxTestSupport.runOnFx(() -> {
             scene.getAccelerators().get(new KeyCodeCombination(KeyCode.F3)).run();
