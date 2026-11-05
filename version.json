@@ -1,10 +1,10 @@
 {
-  "version": "1.2.2",
+  "version": "1.2.3",
   "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "feat(gaveta): atalho F12 abre a gaveta em qualquer tela, sem imprimir; versão 1.2.2",
+  "changelog": "feat: tela Minha conta (nome de acesso e senha) e atalho F11 de tela cheia; versão 1.2.3",
   "mandatory": false,
-  "sha256": "845cea49561b787636c5f0d7c3e7379e7984e43e1530b3035c327a9a8e1fc5e1",
-  "size": 59527299,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.2/scopel-store.jar"
+  "sha256": "84bae5c9c9e2220e1395ab4a38cf2b21da3fd2b0a415a1a2f47a45ccb544fc7c",
+  "size": 59532841,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.3/scopel-store.jar"
 }
