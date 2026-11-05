@@ -55,6 +55,22 @@ public class ProductService {
         return results.values().stream().limit(limit).toList();
     }
 
+    public String resolveCode(String text) {
+        String normalized = text == null ? "" : text.trim();
+        if (repository.findByCodeIgnoreCase(normalized).isPresent()) {
+            return repository.findByCodeIgnoreCase(normalized).get().getCode();
+        }
+        List<Product> matches = searchForSale(normalized, 2);
+        if (matches.isEmpty()) {
+            throw new ProductNotfindException(normalized);
+        }
+        if (matches.size() > 1) {
+            throw new IllegalArgumentException(
+                    "Mais de um produto com esse nome. Escolha na lista ou digite o código.");
+        }
+        return matches.get(0).getCode();
+    }
+
     private void addAll(Map<Long, Product> results, List<Product> products) {
         for (Product product : products) {
             results.putIfAbsent(product.getId(), product);

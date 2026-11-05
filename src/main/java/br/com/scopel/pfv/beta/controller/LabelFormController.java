@@ -1,5 +1,6 @@
 package br.com.scopel.pfv.beta.controller;
 
+import br.com.scopel.pfv.beta.controller.support.ProductCodeInput;
 import br.com.scopel.pfv.beta.exception.ProductNotfindException;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.service.LabelService;
@@ -28,24 +29,27 @@ public class LabelFormController {
 
     @FXML
     public void initialize() {
+        ProductCodeInput.attach(codeField, productService);
         Platform.runLater(() -> codeField.requestFocus());
     }
 
     @FXML
     public void onPreview() {
         try {
-            Product p = productService.findCode(codeField.getText().trim());
+            Product p = productService.findCode(productService.resolveCode(codeField.getText()));
             previewLabel.setText(labelService.buildLabel(p));
             messageLabel.setText("");
         } catch (ProductNotfindException e) {
             messageLabel.setText("Produto não encontrado");
+        } catch (IllegalArgumentException e) {
+            messageLabel.setText(e.getMessage());
         }
     }
 
     @FXML
     public void onPrint() {
         try {
-            Product p = productService.findCode(codeField.getText().trim());
+            Product p = productService.findCode(productService.resolveCode(codeField.getText()));
             int copies = Integer.parseInt(copiesField.getText().trim());
             if (copies < 1) {
                 messageLabel.setText("Informe ao menos 1 cópia");
@@ -57,6 +61,8 @@ public class LabelFormController {
             messageLabel.setText("Número de cópias inválido");
         } catch (ProductNotfindException e) {
             messageLabel.setText("Produto não encontrado");
+        } catch (IllegalArgumentException e) {
+            messageLabel.setText(e.getMessage());
         }
     }
 }

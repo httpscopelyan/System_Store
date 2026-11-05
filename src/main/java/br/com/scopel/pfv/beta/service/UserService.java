@@ -62,6 +62,13 @@ public class UserService {
         if (login.isEmpty() || login.length() > MAX_LOGIN_LENGTH) {
             throw new IllegalArgumentException("O nome deve ter de 1 a " + MAX_LOGIN_LENGTH + " caracteres.");
         }
+        boolean renamed = !login.equals(user.getLogin());
+        if (renamed && StaffPermissions.isRestrictedAccount(user)) {
+            throw new IllegalArgumentException("Esta conta não pode trocar o nome. Peça ao gerente.");
+        }
+        if (renamed && StaffPermissions.isReservedName(login)) {
+            throw new UserDuplicatedException();
+        }
         boolean takenByAnother = repository.findByLogin(login)
                 .filter(other -> !other.getId().equals(user.getId()))
                 .isPresent();

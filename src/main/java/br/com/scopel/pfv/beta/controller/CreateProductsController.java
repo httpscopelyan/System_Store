@@ -1,6 +1,8 @@
 package br.com.scopel.pfv.beta.controller;
 
+import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
+import br.com.scopel.pfv.beta.service.StaffPermissions;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.controller.support.SuggestedPriceBinding;
 import br.com.scopel.pfv.beta.exception.RegisterProductDuplicateException;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
 public class CreateProductsController {
 
     private final ProductService productService;
+    private final UserSession userSession;
     private final PricingSuggestionService pricingSuggestionService;
 
     private SuggestedPriceBinding priceBinding;
@@ -36,7 +39,9 @@ public class CreateProductsController {
     @FXML private Label messageLabel;
 
     public CreateProductsController(ProductService productService,
-                                    PricingSuggestionService pricingSuggestionService) {
+                                    PricingSuggestionService pricingSuggestionService,
+                                    UserSession userSession) {
+        this.userSession = userSession;
         this.productService = productService;
         this.pricingSuggestionService = pricingSuggestionService;
     }
@@ -56,6 +61,10 @@ public class CreateProductsController {
 
     @FXML
     public void onSave() {
+        if (!StaffPermissions.canRegisterProducts(userSession.getLoggedUser())) {
+            messageLabel.setText("Seu usuário não tem permissão para cadastrar produtos.");
+            return;
+        }
         try {
             productService.create(
                     codeField.getText(),

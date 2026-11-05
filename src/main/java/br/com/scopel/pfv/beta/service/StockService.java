@@ -19,6 +19,7 @@ import java.util.List;
 public class StockService {
 
     private static final int MAX_REASON_LENGTH = 120;
+    private static final String INLINE_EDIT_REASON = "Edição direta na tela de Estoque";
 
     private final ProductRepository productRepository;
     private final StockMovementRepository movementRepository;
@@ -89,6 +90,17 @@ public class StockService {
 
         record(product, StockMovement.Type.AJUSTE, delta, null, normalizedReason, operator, target);
         return product;
+    }
+
+    @Transactional
+    public Product adjustQuantityInline(String code, BigDecimal newQuantity, User actor) {
+        if (!StaffPermissions.canEditStockQuantity(actor)) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+        if (newQuantity == null || newQuantity.signum() < 0) {
+            throw new IllegalArgumentException("A quantidade não pode ser negativa.");
+        }
+        return adjust(code, newQuantity, INLINE_EDIT_REASON, actor);
     }
 
     @Transactional

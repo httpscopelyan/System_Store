@@ -2,6 +2,8 @@ package br.com.scopel.pfv.beta.controller;
 
 import br.com.scopel.pfv.beta.BetaApplication;
 import br.com.scopel.pfv.beta.config.ThemeManager;
+import br.com.scopel.pfv.beta.config.UserSession;
+import br.com.scopel.pfv.beta.service.StaffPermissions;
 import br.com.scopel.pfv.beta.exception.RegisterProductDuplicateException;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.service.ProductService;
@@ -42,6 +44,7 @@ public class QuickProductController {
 
     private final ProductService productService;
     private final ThemeManager themeManager;
+    private final UserSession userSession;
 
     @FXML private TextField codeField;
     @FXML private TextField descriptionField;
@@ -53,7 +56,9 @@ public class QuickProductController {
     private Product registeredProduct;
     private String barcode;
 
-    public QuickProductController(ProductService productService, ThemeManager themeManager) {
+    public QuickProductController(ProductService productService, ThemeManager themeManager,
+                                  UserSession userSession) {
+        this.userSession = userSession;
         this.productService = productService;
         this.themeManager = themeManager;
     }
@@ -110,6 +115,10 @@ public class QuickProductController {
 
     @FXML
     public void onConfirm() {
+        if (!StaffPermissions.canRegisterProducts(userSession.getLoggedUser())) {
+            showError("Seu usuário não tem permissão para cadastrar produtos.");
+            return;
+        }
         String description = descriptionField.getText();
         if (description == null || description.isBlank()) {
             showError("Informe o nome do produto");

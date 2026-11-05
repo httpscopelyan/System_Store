@@ -771,3 +771,8 @@
     -fx-font-weight: bold;
     -fx-text-fill: #15325f;
 }
+
+.compact-button {
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 13px;
+}

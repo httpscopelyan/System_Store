@@ -2,6 +2,7 @@ package br.com.scopel.pfv.beta.controller.support;
 
 import br.com.scopel.pfv.beta.controller.support.ProductTablePresenter.CellEdit;
 import br.com.scopel.pfv.beta.controller.support.ProductTablePresenter.EditableColumn;
+import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.service.ProductBulkEditService;
 import br.com.scopel.pfv.beta.service.ProductBulkEditService.BulkResult;
@@ -54,6 +55,8 @@ public final class BulkCellEditor {
             return new Outcome(true, summary(result), ids, edit.tableColumn());
         } catch (IllegalArgumentException invalidValue) {
             return rejected(invalidValue.getMessage(), ids, edit);
+        } catch (ManagerAuthorizationRequiredException notAllowed) {
+            return rejected("Seu usuário não tem permissão para esta alteração.", ids, edit);
         }
     }
 
@@ -75,7 +78,7 @@ public final class BulkCellEditor {
     }
 
     private List<Long> targetIds(CellEdit edit) {
-        if (edit.column() == EditableColumn.NAME) {
+        if (edit.column() == EditableColumn.NAME || edit.column() == EditableColumn.STOCK) {
             return List.of(edit.product().getId());
         }
         List<Long> selected = selection.idsInColumn(edit.tableColumn());
@@ -86,6 +89,7 @@ public final class BulkCellEditor {
         return switch (edit.column()) {
             case NAME -> bulkEditService.applyDescription(ids, edit.text());
             case MIN_STOCK -> bulkEditService.applyMinStock(ids, number);
+            case STOCK -> managerAction.apply(actor -> bulkEditService.applyStockQuantity(ids, number, actor));
             case PRICE -> managerAction.apply(actor -> bulkEditService.applyPrice(ids, number, actor));
             case COST -> managerAction.apply(actor -> bulkEditService.applyCost(ids, number, actor));
             case MARGIN_PERCENT -> managerAction.apply(actor -> bulkEditService.applyMarginPercent(ids, number, actor));
@@ -105,6 +109,7 @@ public final class BulkCellEditor {
         return switch (column) {
             case PRICE, COST -> "Aplicar " + MoneyFormat.format(number) + " em " + target + "?";
             case MARGIN_PERCENT -> "Aplicar margem de " + MoneyFormat.quantity(number) + "% em " + target + "?";
+            case STOCK -> "Ajustar o estoque para " + MoneyFormat.quantity(number) + "?";
             case MIN_STOCK -> "Aplicar estoque mínimo " + MoneyFormat.quantity(number) + " em " + target + "?";
             case NAME -> "Aplicar o nome \"" + rawText + "\" em " + target + "?";
         };

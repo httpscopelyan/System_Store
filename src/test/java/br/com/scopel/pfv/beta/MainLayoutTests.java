@@ -154,7 +154,23 @@ class MainLayoutTests {
 
     @Test
     void managerSeesTheConfigButton_RF69() throws Exception {
-        FxTestSupport.runOnFx(() -> assertTrue(buttonWithUserData("CONFIG").isVisible()));
+        FxTestSupport.runOnFx(() -> {
+            assertFalse(buttonWithUserData("CONFIG").isVisible());
+            ((Button) root.lookup("#moreButton")).fire();
+            assertTrue(buttonWithUserData("CONFIG").isVisible());
+        });
+    }
+
+    @Test
+    void onlyThePrincipalBlocksShowUntilTheArrowIsPressed() throws Exception {
+        FxTestSupport.runOnFx(() -> {
+            assertFalse(buttonWithUserData("CLIENTES").isVisible());
+            assertTrue(backButton().isVisible());
+            ((Button) root.lookup("#moreButton")).fire();
+            assertTrue(buttonWithUserData("CLIENTES").isVisible());
+            ((Button) root.lookup("#moreButton")).fire();
+            assertFalse(buttonWithUserData("CLIENTES").isVisible());
+        });
     }
 
     @Test
@@ -162,7 +178,11 @@ class MainLayoutTests {
         FxTestSupport.runOnFx(() -> stage.close());
         userSession.setLoggedUser(persistedUser(User.Role.OPERADOR));
         openAgain();
-        FxTestSupport.runOnFx(() -> assertFalse(buttonWithUserData("CONFIG").isVisible()));
+        FxTestSupport.runOnFx(() -> {
+            ((Button) root.lookup("#moreButton")).fire();
+            assertFalse(buttonWithUserData("CONFIG").isVisible());
+            assertTrue(buttonWithUserData("MINHA_CONTA").isVisible());
+        });
     }
 
     private void openAgain() throws Exception {

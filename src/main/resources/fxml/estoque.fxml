@@ -63,7 +63,7 @@
             </HBox>
             <HBox styleClass="win-footer" spacing="10" alignment="CENTER_LEFT">
                 <padding><Insets top="8" right="12" bottom="4" left="12"/></padding>
-                <Button text="＋ Novo" onAction="#onNavigate" userData="PRODUTOS" styleClass="success-button"/>
+                <Button fx:id="newProductButton" text="＋ Novo" onAction="#onNavigate" userData="PRODUTOS" styleClass="success-button"/>
                 <Button text="✎ Alterar" onAction="#onAlterar" styleClass="win-button"/>
                 <Button text="－ Apagar" onAction="#onApagar" styleClass="danger-button"/>
                 <Separator orientation="VERTICAL"/>

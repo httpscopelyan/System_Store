@@ -11,6 +11,7 @@ import br.com.scopel.pfv.beta.controller.support.ProductTablePresenter;
 import br.com.scopel.pfv.beta.controller.support.TableEditKeys;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.User;
+import br.com.scopel.pfv.beta.service.StaffPermissions;
 import br.com.scopel.pfv.beta.service.PricingSuggestionService;
 import br.com.scopel.pfv.beta.service.ProductBulkEditService;
 import br.com.scopel.pfv.beta.service.ProductService;
@@ -64,6 +65,7 @@ public class EstoqueController {
     @FXML private TableColumn<Product, String> colMin;
     @FXML private TableColumn<Product, String> colStock;
     @FXML private Button acceptSuggestionButton;
+    @FXML private Button newProductButton;
     @FXML private ToggleButton marginsToggle;
     @FXML private Label messageLabel;
 
@@ -87,11 +89,14 @@ public class EstoqueController {
         presenter = new ProductTablePresenter(table,
                 new ProductTablePresenter.Columns(colHandle, colCode, colDesc, colCost, colProfit,
                         colMarginPercent, colSuggestedPrice, colPrice, colMin, colStock),
-                pricingSuggestionService, selection, manager, this::onCellEdited);
+                pricingSuggestionService, selection, manager, StaffPermissions.canEditStockQuantity(user),
+                this::onCellEdited);
         managerAction = new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window);
         bulkCellEditor = new BulkCellEditor(bulkEditService, selection, managerAction, BulkEditConfirmation::ask);
-        marginsToggle.setVisible(manager);
-        marginsToggle.setManaged(manager);
+        newProductButton.setVisible(StaffPermissions.canRegisterProducts(user));
+        newProductButton.managedProperty().bind(newProductButton.visibleProperty());
+        marginsToggle.visibleProperty().set(manager);
+        marginsToggle.managedProperty().bind(marginsToggle.visibleProperty());
         marginsToggle.setSelected(manager);
         acceptSuggestionButton.setDisable(true);
         table.getSelectionModel().getSelectedCells().addListener(
@@ -102,9 +107,7 @@ public class EstoqueController {
     }
 
     @FXML
-    public void onFilter() {
-        reload();
-    }
+    public void onFilter() { reload(); }
 
     @FXML
     public void onClear() {
@@ -147,13 +150,8 @@ public class EstoqueController {
 
     @FXML
     public void onAcceptSuggestion() {
-        BulkCellEditor.Outcome outcome = bulkCellEditor.acceptSuggestion(
-                selection.idsInColumn(presenter.priceColumn()), presenter.priceColumn());
-        reload();
-        if (outcome.applied()) {
-            selection.restore(outcome.productIds(), outcome.tableColumn());
-        }
-        messageLabel.setText(outcome.message());
+        finishEdit(bulkCellEditor.acceptSuggestion(
+                selection.idsInColumn(presenter.priceColumn()), presenter.priceColumn()));
     }
 
     @FXML
@@ -170,14 +168,15 @@ public class EstoqueController {
     }
 
     private void onCellEdited(ProductTablePresenter.CellEdit edit) {
-        Platform.runLater(() -> {
-            BulkCellEditor.Outcome outcome = bulkCellEditor.commit(edit);
-            reload();
-            if (outcome.applied()) {
-                selection.restore(outcome.productIds(), outcome.tableColumn());
-            }
-            messageLabel.setText(outcome.message());
-        });
+        Platform.runLater(() -> finishEdit(bulkCellEditor.commit(edit)));
+    }
+
+    private void finishEdit(BulkCellEditor.Outcome outcome) {
+        reload();
+        if (outcome.applied()) {
+            selection.restore(outcome.productIds(), outcome.tableColumn());
+        }
+        messageLabel.setText(outcome.message());
     }
 
     private void refreshAcceptSuggestion() {

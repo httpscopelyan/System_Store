@@ -16,20 +16,21 @@
                 <Button fx:id="backButton" disable="true" onAction="#onBack" styleClass="block-button" text="◀&#10;Voltar&#10;Esc" />
                 <Button onAction="#onConsultaPreco" styleClass="block-button" text="🏷&#10;Preço&#10;F1" />
                 <Button onAction="#onVender" styleClass="block-button, block-primary" text="🛒&#10;Nova Venda&#10;F2" />
-                <Button onAction="#onNavigate" styleClass="block-button" text="📜&#10;Histórico" userData="HISTORICO_VENDAS" />
+                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="📜&#10;Histórico" userData="HISTORICO_VENDAS" />
                 <Button onAction="#onNavigate" styleClass="block-button" text="💰&#10;Caixa&#10;F4" userData="CAIXA" />
                 <Button onAction="#onNavigate" styleClass="block-button" text="📦&#10;Estoque&#10;F3" userData="ESTOQUE" />
-                <Button fx:id="shoppingListButton" onAction="#onNavigate" styleClass="block-button" text="🧺&#10;Lista d/ Compras" userData="LISTA_COMPRAS" />
-                <Button onAction="#onNavigate" styleClass="block-button" text="🧾&#10;Compras&#10;F5" userData="COMPRAS" />
-                <Button onAction="#onNavigate" styleClass="block-button" text="👥&#10;Clientes&#10;F6" userData="CLIENTES" />
-                <Button onAction="#onNavigate" styleClass="block-button" text="🚚&#10;Fornecedores&#10;F7" userData="FORNECEDORES" />
-                <Button onAction="#onNavigate" styleClass="block-button" text="📝&#10;Orçamentos" userData="ORCAMENTO" />
-                <Button onAction="#onNavigate" styleClass="block-button" text="＄&#10;A Receber" userData="CONTAS_RECEBER" />
-                <Button onAction="#onNavigate" styleClass="block-button" text="＄&#10;A Pagar" userData="CONTAS_PAGAR" />
-                <Button onAction="#onNavigate" styleClass="block-button" text="🏷&#10;Preços" userData="TABELAS_PRECO" />
-                <Button onAction="#onNavigate" styleClass="block-button" text="📊&#10;Relatórios&#10;F8" userData="RELATORIOS" />
-                <Button onAction="#onNavigate" styleClass="block-button" text="👤&#10;Minha conta" userData="MINHA_CONTA" />
-                <Button fx:id="configButton" onAction="#onNavigate" styleClass="block-button" text="⚙&#10;Config" userData="CONFIG" />
+                <Button fx:id="shoppingListButton" onAction="#onNavigate" styleClass="block-button, block-extra" text="🧺&#10;Lista d/ Compras" userData="LISTA_COMPRAS" />
+                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="🧾&#10;Compras&#10;F5" userData="COMPRAS" />
+                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="👥&#10;Clientes&#10;F6" userData="CLIENTES" />
+                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="🚚&#10;Fornecedores&#10;F7" userData="FORNECEDORES" />
+                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="📝&#10;Orçamentos" userData="ORCAMENTO" />
+                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="＄&#10;A Receber" userData="CONTAS_RECEBER" />
+                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="＄&#10;A Pagar" userData="CONTAS_PAGAR" />
+                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="🏷&#10;Preços" userData="TABELAS_PRECO" />
+                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="📊&#10;Relatórios&#10;F8" userData="RELATORIOS" />
+                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="👤&#10;Minha conta" userData="MINHA_CONTA" />
+                <Button fx:id="configButton" onAction="#onNavigate" styleClass="block-button, block-extra" text="⚙&#10;Config" userData="CONFIG" />
+                <Button fx:id="moreButton" onAction="#onToggleMore" styleClass="block-button" text="»&#10;Mais" />
             </TilePane>
         </VBox>
     </top>

@@ -5,6 +5,7 @@ import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.BlockButtons;
 import br.com.scopel.pfv.beta.controller.support.DrawerShortcut;
+import br.com.scopel.pfv.beta.controller.support.MoreBlocks;
 import br.com.scopel.pfv.beta.controller.support.FullscreenShortcut;
 import br.com.scopel.pfv.beta.controller.support.UpdateNotice;
 import br.com.scopel.pfv.beta.hardware.PrinterPort;
@@ -48,6 +49,7 @@ public class MainController {
     @FXML private BorderPane root;
     @FXML private Button updateButton;
     @FXML private Button configButton;
+    @FXML private Button moreButton;
     @FXML private javafx.scene.layout.TilePane blocksBar;
     @FXML private Button backButton;
     @FXML private Button shoppingListButton;
@@ -60,6 +62,7 @@ public class MainController {
 
     private Timeline hintClear;
     private UpdateNotice updateNotice;
+    private MoreBlocks moreBlocks;
     private final PrinterPort printer;
 
     public MainController(Navigator navigator, UserSession userSession, UpdateService updateService,
@@ -84,19 +87,19 @@ public class MainController {
         userLabel.setText("Usuário: " + (user != null ? user.getName() : "-"));
         roleLabel.setText("Grupo: " + (user != null ? user.getRole() : "-"));
         terminalLabel.setText("Terminal: CAIXA 01");
-
         refreshCaixaStatus();
-
         boolean gerente = user != null && user.getRole() == User.Role.GERENTE;
-        if (configButton != null) {
-            configButton.setVisible(gerente);
-            configButton.setManaged(gerente);
-        }
+        moreBlocks = new MoreBlocks(blocksBar, moreButton, button -> button != configButton || gerente);
 
         startClock();
         setupShortcuts();
         updateNotice = new UpdateNotice(updateService, updateButton, this::hasSaleInProgress, this::showHint);
         updateNotice.setup();
+    }
+
+    @FXML
+    public void onToggleMore() {
+        moreBlocks.toggle();
     }
 
     @FXML
@@ -171,12 +174,8 @@ public class MainController {
 
     private boolean hasSaleInProgress() {
         Sale sale = userSession.getVendaAtual();
-        if (sale == null) {
-            return false;
-        }
-        boolean hasItems = sale.getItems() != null && !sale.getItems().isEmpty();
-        boolean inPayment = sale.getStatus() == Sale.Status.EM_PAGAMENTO;
-        return hasItems || inPayment;
+        return sale != null && ((sale.getItems() != null && !sale.getItems().isEmpty())
+                || sale.getStatus() == Sale.Status.EM_PAGAMENTO);
     }
 
     private void showHint(String message) {
@@ -196,5 +195,4 @@ public class MainController {
         refreshCaixaStatus();
         navigator.navigate(Page.VENDA);
     }
-
 }

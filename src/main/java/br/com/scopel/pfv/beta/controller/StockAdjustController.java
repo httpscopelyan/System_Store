@@ -1,6 +1,8 @@
 package br.com.scopel.pfv.beta.controller;
 
 import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
+import br.com.scopel.pfv.beta.controller.support.ProductCodeInput;
+import br.com.scopel.pfv.beta.service.ProductService;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.controller.support.ManagerAuthorizedAction;
@@ -30,6 +32,7 @@ public class StockAdjustController {
     private final UserSession userSession;
     private final ManagerAuthorizationController managerAuthorizationController;
 
+    private final ProductService productService;
     @FXML private ComboBox<String> kindBox;
     @FXML private TextField codeField;
     @FXML private TextField quantityField;
@@ -39,7 +42,9 @@ public class StockAdjustController {
     @FXML private Label messageLabel;
 
     public StockAdjustController(StockService stockService, UserSession userSession,
-                                 ManagerAuthorizationController managerAuthorizationController) {
+                                 ManagerAuthorizationController managerAuthorizationController,
+                                 ProductService productService) {
+        this.productService = productService;
         this.stockService = stockService;
         this.userSession = userSession;
         this.managerAuthorizationController = managerAuthorizationController;
@@ -47,6 +52,7 @@ public class StockAdjustController {
 
     @FXML
     public void initialize() {
+        ProductCodeInput.attach(codeField, productService);
         EnterToNextField.install(kindBox, codeField, quantityField, reasonField);
         kindBox.setItems(FXCollections.observableArrayList(ADJUSTMENT, RECTIFICATION));
         kindBox.setValue(ADJUSTMENT);
@@ -58,7 +64,7 @@ public class StockAdjustController {
     public void onSave() {
         try {
             BigDecimal quantity = DecimalInput.parseRequired(quantityField.getText());
-            String code = codeField.getText().trim();
+            String code = productService.resolveCode(codeField.getText());
             String reason = reasonField.getText();
             Product product = RECTIFICATION.equals(kindBox.getValue())
                     ? rectify(code, quantity, reason)

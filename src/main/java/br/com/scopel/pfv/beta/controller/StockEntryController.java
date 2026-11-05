@@ -1,6 +1,8 @@
 package br.com.scopel.pfv.beta.controller;
 
 import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
+import br.com.scopel.pfv.beta.controller.support.ProductCodeInput;
+import br.com.scopel.pfv.beta.service.ProductService;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.controller.support.MoneyFormat;
@@ -21,6 +23,7 @@ public class StockEntryController {
     private final StockService stockService;
     private final UserSession userSession;
 
+    private final ProductService productService;
     @FXML private TextField codeField;
     @FXML private TextField quantityField;
     @FXML private TextField unitCostField;
@@ -28,13 +31,15 @@ public class StockEntryController {
     @FXML private Label costPreviewLabel;
     @FXML private Label messageLabel;
 
-    public StockEntryController(StockService stockService, UserSession userSession) {
+    public StockEntryController(StockService stockService, UserSession userSession, ProductService productService) {
+        this.productService = productService;
         this.stockService = stockService;
         this.userSession = userSession;
     }
 
     @FXML
     public void initialize() {
+        ProductCodeInput.attach(codeField, productService);
         EnterToNextField.install(codeField, quantityField, unitCostField, reasonField);
         codeField.textProperty().addListener((observable, previous, current) -> refreshCostPreview());
         quantityField.textProperty().addListener((observable, previous, current) -> refreshCostPreview());
@@ -56,7 +61,7 @@ public class StockEntryController {
             if (!unitCostField.getText().isBlank() && unitCost == null) {
                 throw new NumberFormatException("Custo unitário inválido");
             }
-            Product product = stockService.registerEntry(codeField.getText().trim(), quantity, unitCost,
+            Product product = stockService.registerEntry(productService.resolveCode(codeField.getText()), quantity, unitCost,
                     reasonField.getText(), userSession.getLoggedUser());
             messageLabel.setText("Entrada registrada. Estoque atual: " + product.getQuantity().toPlainString());
             codeField.clear();
@@ -66,6 +71,8 @@ public class StockEntryController {
             codeField.requestFocus();
         } catch (NumberFormatException invalidNumber) {
             messageLabel.setText("Quantidade ou custo inválidos");
+        } catch (IllegalArgumentException invalidValue) {
+            messageLabel.setText(invalidValue.getMessage());
         } catch (ProductNotfindException notFound) {
             messageLabel.setText("Produto não encontrado");
         } catch (Exception unexpected) {
@@ -81,10 +88,10 @@ public class StockEntryController {
             return;
         }
         try {
-            StockService.CostPreview preview = stockService.previewEntryCost(codeField.getText(), quantity, unitCost);
+            StockService.CostPreview preview = stockService.previewEntryCost(productService.resolveCode(codeField.getText()), quantity, unitCost);
             costPreviewLabel.setText("Custo atual " + MoneyFormat.format(preview.currentCost())
                     + " → novo custo " + MoneyFormat.format(preview.newCost()) + " (" + preview.mode().label() + ")");
-        } catch (ProductNotfindException notFound) {
+        } catch (ProductNotfindException | IllegalArgumentException notResolved) {
             costPreviewLabel.setText("");
         }
     }

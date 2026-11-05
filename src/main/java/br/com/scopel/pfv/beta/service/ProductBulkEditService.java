@@ -21,10 +21,13 @@ public class ProductBulkEditService {
 
     private final ProductRepository repository;
     private final PricingSuggestionService pricingSuggestionService;
+    private final StockService stockService;
 
-    public ProductBulkEditService(ProductRepository repository, PricingSuggestionService pricingSuggestionService) {
+    public ProductBulkEditService(ProductRepository repository, PricingSuggestionService pricingSuggestionService,
+                                  StockService stockService) {
         this.repository = repository;
         this.pricingSuggestionService = pricingSuggestionService;
+        this.stockService = stockService;
     }
 
     @Transactional
@@ -74,6 +77,18 @@ public class ProductBulkEditService {
             product.setPrice(price);
             return true;
         });
+    }
+
+    @Transactional
+    public BulkResult applyStockQuantity(Collection<Long> productIds, BigDecimal quantity, User actor) {
+        if (!StaffPermissions.canEditStockQuantity(actor)) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+        List<Product> products = repository.findAllById(productIds);
+        for (Product product : products) {
+            stockService.adjustQuantityInline(product.getCode(), quantity, actor);
+        }
+        return new BulkResult(products.size(), 0);
     }
 
     @Transactional

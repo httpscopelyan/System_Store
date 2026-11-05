@@ -23,7 +23,8 @@ public final class ProductTablePresenter {
         COST,
         MARGIN_PERCENT,
         PRICE,
-        MIN_STOCK
+        MIN_STOCK,
+        STOCK
     }
 
     public record CellEdit(EditableColumn column, TableColumn<Product, String> tableColumn, Product product,
@@ -45,10 +46,18 @@ public final class ProductTablePresenter {
     private final PricingSuggestionService pricing;
     private final ProductSelection selection;
     private final Consumer<CellEdit> onEdit;
+    private final boolean stockEditable;
     private final Map<EditableColumn, TableColumn<Product, String>> editable = new EnumMap<>(EditableColumn.class);
 
     public ProductTablePresenter(TableView<Product> table, Columns columns, PricingSuggestionService pricing,
                                  ProductSelection selection, boolean manager, Consumer<CellEdit> onEdit) {
+        this(table, columns, pricing, selection, manager, false, onEdit);
+    }
+
+    public ProductTablePresenter(TableView<Product> table, Columns columns, PricingSuggestionService pricing,
+                                 ProductSelection selection, boolean manager, boolean stockEditable,
+                                 Consumer<CellEdit> onEdit) {
+        this.stockEditable = stockEditable;
         this.table = table;
         this.columns = columns;
         this.pricing = pricing;
@@ -141,10 +150,13 @@ public final class ProductTablePresenter {
         register(EditableColumn.MARGIN_PERCENT, columns.marginPercent());
         register(EditableColumn.PRICE, columns.price());
         register(EditableColumn.MIN_STOCK, columns.minStock());
-        for (TableColumn<Product, String> readOnly : List.of(columns.code(), columns.profit(),
-                columns.suggestedPrice(), columns.stock())) {
-            readOnly.setEditable(false);
+        if (stockEditable) {
+            register(EditableColumn.STOCK, columns.stock());
         }
+        List<TableColumn<Product, String>> readOnlyColumns = stockEditable
+                ? List.of(columns.code(), columns.profit(), columns.suggestedPrice())
+                : List.of(columns.code(), columns.profit(), columns.suggestedPrice(), columns.stock());
+        readOnlyColumns.forEach(readOnly -> readOnly.setEditable(false));
     }
 
     private void register(EditableColumn kind, TableColumn<Product, String> column) {

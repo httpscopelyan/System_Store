@@ -14,9 +14,9 @@
     </top>
 
     <center>
-        <VBox spacing="14">
+        <VBox spacing="8">
             <padding>
-                <Insets bottom="18" left="24" right="24" top="18" />
+                <Insets bottom="10" left="24" right="24" top="10" />
             </padding>
 
             <HBox alignment="BOTTOM_LEFT" spacing="0">
@@ -35,7 +35,7 @@
                 <Label fx:id="lastItemLabel" focusTraversable="false" maxWidth="Infinity" styleClass="last-item-name" text="—" wrapText="true" />
             </VBox>
 
-            <TableView fx:id="itemsTable" styleClass="items-table" VBox.vgrow="ALWAYS">
+            <TableView fx:id="itemsTable" minHeight="320" prefHeight="600" styleClass="items-table" VBox.vgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="descriptionCol" prefWidth="520.0" text="Descrição" />
                     <TableColumn fx:id="quantityCol" prefWidth="140.0" text="Qtd" />
@@ -49,15 +49,14 @@
 
             <Label fx:id="statusLabel" styleClass="sale-status" />
 
-            <HBox alignment="CENTER_LEFT" spacing="10">
-                <TextField fx:id="discountField" promptText="Desconto R$ (F5)" />
-                <Button onAction="#onApplyDiscount" styleClass="success-button" text="Aplicar desconto" />
-                <TextField fx:id="customerIdField" promptText="Cliente ID (F9)" />
-                <Button onAction="#onSetCustomer" styleClass="success-button" text="Vincular cliente" />
-            </HBox>
-            <HBox alignment="CENTER_LEFT" spacing="10">
-                <Button onAction="#onCancelItem" styleClass="danger-button" text="Cancelar item" />
-                <Button onAction="#onCancelSale" styleClass="danger-button" text="Cancelar venda" />
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <TextField fx:id="discountField" prefWidth="130" promptText="Desconto R$ (F5)" />
+                <Button onAction="#onApplyDiscount" styleClass="success-button, compact-button" text="Aplicar desconto" />
+                <TextField fx:id="customerIdField" prefWidth="120" promptText="Cliente ID (F9)" />
+                <Button onAction="#onSetCustomer" styleClass="success-button, compact-button" text="Vincular cliente" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button onAction="#onCancelItem" styleClass="danger-button, compact-button" text="Cancelar item" />
+                <Button onAction="#onCancelSale" styleClass="danger-button, compact-button" text="Cancelar venda" />
             </HBox>
         </VBox>
     </center>
