@@ -34,7 +34,7 @@ public class ProductBulkEditService {
 
     @Transactional
     public BulkResult applyPrice(Collection<Long> productIds, BigDecimal price, User actor) {
-        requireManager(actor);
+        requirePriceEditor(actor);
         requireNonNegative(price, "O preço");
         BigDecimal normalized = price.setScale(2, RoundingMode.HALF_UP);
         return update(productIds, product -> {
@@ -70,7 +70,7 @@ public class ProductBulkEditService {
 
     @Transactional
     public BulkResult applySuggestedPrice(Collection<Long> productIds, User actor) {
-        requireManager(actor);
+        requirePriceEditor(actor);
         return update(productIds, product -> {
             BigDecimal price = pricingSuggestionService.suggestFor(product);
             if (price == null) {
@@ -134,6 +134,12 @@ public class ProductBulkEditService {
             }
         }
         return new BulkResult(changed, skipped);
+    }
+
+    private void requirePriceEditor(User actor) {
+        if (!StaffPermissions.canEditPrices(actor)) {
+            throw new ManagerAuthorizationRequiredException();
+        }
     }
 
     private void requireManager(User actor) {

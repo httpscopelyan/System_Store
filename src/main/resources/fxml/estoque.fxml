@@ -63,12 +63,12 @@
             </HBox>
             <HBox styleClass="win-footer" spacing="10" alignment="CENTER_LEFT">
                 <padding><Insets top="8" right="12" bottom="4" left="12"/></padding>
-                <Button fx:id="newProductButton" text="＋ Novo" onAction="#onNavigate" userData="PRODUTOS" styleClass="success-button"/>
-                <Button text="✎ Alterar" onAction="#onAlterar" styleClass="win-button"/>
-                <Button text="－ Apagar" onAction="#onApagar" styleClass="danger-button"/>
+                <Button text="＋ Novo" onAction="#onNavigate" userData="PRODUTOS" styleClass="success-button, edit-action"/>
+                <Button text="✎ Alterar" onAction="#onAlterar" styleClass="win-button, edit-action"/>
+                <Button text="－ Apagar" onAction="#onApagar" styleClass="danger-button, edit-action"/>
                 <Separator orientation="VERTICAL"/>
                 <Button fx:id="acceptSuggestionButton" text="✔ Aceitar Sugestão" onAction="#onAcceptSuggestion"
-                        styleClass="win-button"/>
+                        styleClass="win-button, edit-action"/>
                 <ToggleButton fx:id="marginsToggle" text="Margens" onAction="#onToggleMargins"
                               styleClass="win-button"/>
                 <Region HBox.hgrow="ALWAYS"/>
@@ -76,9 +76,9 @@
             </HBox>
             <HBox styleClass="win-footer" spacing="10" alignment="CENTER_LEFT">
                 <padding><Insets top="4" right="12" bottom="8" left="12"/></padding>
-                <Button text="➕ Entrada" onAction="#onNavigate" userData="ENTRADA_ESTOQUE" styleClass="win-button"/>
-                <Button text="⚖ Ajuste" onAction="#onNavigate" userData="AJUSTE_ESTOQUE" styleClass="win-button"/>
-                <Button text="📅 Lotes" onAction="#onNavigate" userData="LOTES" styleClass="win-button"/>
+                <Button text="➕ Entrada" onAction="#onNavigate" userData="ENTRADA_ESTOQUE" styleClass="win-button, edit-action"/>
+                <Button text="⚖ Ajuste" onAction="#onNavigate" userData="AJUSTE_ESTOQUE" styleClass="win-button, edit-action"/>
+                <Button text="📅 Lotes" onAction="#onNavigate" userData="LOTES" styleClass="win-button, edit-action"/>
                 <Button text="🏷 Etiquetas" onAction="#onNavigate" userData="ETIQUETAS" styleClass="win-button"/>
                 <Button text="🖨 Relatórios" onAction="#onNavigate" userData="RELATORIOS" styleClass="win-button"/>
                 <Button text="🧺 Lista d/ Compras" onAction="#onNavigate" userData="LISTA_COMPRAS" styleClass="win-button"/>

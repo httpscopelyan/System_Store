@@ -9,7 +9,8 @@ import java.util.Set;
 public final class StaffPermissions {
 
     private static final Set<String> STOCK_QUANTITY_EDITORS = Set.of("dayana", "joao");
-    private static final Set<String> CANNOT_REGISTER_PRODUCTS = Set.of("ana clara");
+    private static final Set<String> PRICE_EDITORS = Set.of("dayana");
+    private static final Set<String> VIEW_ONLY = Set.of("ana clara");
 
     private StaffPermissions() {
     }
@@ -18,17 +19,22 @@ public final class StaffPermissions {
         return user != null && matchesAny(user, STOCK_QUANTITY_EDITORS);
     }
 
+    public static boolean canEditPrices(User user) {
+        return user != null && (user.getRole() == User.Role.GERENTE || matchesAny(user, PRICE_EDITORS));
+    }
+
     public static boolean canRegisterProducts(User user) {
-        return user != null && !matchesAny(user, CANNOT_REGISTER_PRODUCTS);
+        return user != null && !isViewOnly(user);
+    }
+
+    public static boolean isViewOnly(User user) {
+        return user != null && matchesAny(user, VIEW_ONLY);
     }
 
     public static boolean isReservedName(String name) {
         String normalized = normalize(name);
-        return STOCK_QUANTITY_EDITORS.contains(normalized) || CANNOT_REGISTER_PRODUCTS.contains(normalized);
-    }
-
-    public static boolean isRestrictedAccount(User user) {
-        return user != null && matchesAny(user, CANNOT_REGISTER_PRODUCTS);
+        return STOCK_QUANTITY_EDITORS.contains(normalized) || PRICE_EDITORS.contains(normalized)
+                || VIEW_ONLY.contains(normalized);
     }
 
     private static boolean matchesAny(User user, Set<String> names) {

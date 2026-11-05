@@ -1,6 +1,7 @@
 package br.com.scopel.pfv.beta.controller;
 
 import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
+import br.com.scopel.pfv.beta.service.StaffPermissions;
 import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
@@ -86,6 +87,10 @@ public class EditProductController {
 
     @FXML
     public void onSave() {
+        if (StaffPermissions.isViewOnly(userSession.getLoggedUser())) {
+            messageLabel.setText("Seu usuário só pode visualizar o estoque.");
+            return;
+        }
         if (productId == null) {
             messageLabel.setText("Nenhum produto selecionado para edição.");
             return;

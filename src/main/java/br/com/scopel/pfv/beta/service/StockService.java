@@ -19,6 +19,7 @@ import java.util.List;
 public class StockService {
 
     private static final int MAX_REASON_LENGTH = 120;
+    private static final String VIEW_ONLY_MESSAGE = "Seu usuário só pode visualizar o estoque.";
     private static final String INLINE_EDIT_REASON = "Edição direta na tela de Estoque";
 
     private final ProductRepository productRepository;
@@ -61,6 +62,7 @@ public class StockService {
     @Transactional
     public Product registerEntry(String code, BigDecimal quantity, BigDecimal unitCost,
                                  String reason, User operator) {
+        requireNotViewOnly(operator);
         Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
 
@@ -79,6 +81,7 @@ public class StockService {
 
     @Transactional
     public Product adjust(String code, BigDecimal newQuantity, String reason, User operator) {
+        requireNotViewOnly(operator);
         String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);
         Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
@@ -133,6 +136,12 @@ public class StockService {
         Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
         return movementRepository.findByProduct_IdOrderByCreatedAtDesc(product.getId());
+    }
+
+    private void requireNotViewOnly(User operator) {
+        if (StaffPermissions.isViewOnly(operator)) {
+            throw new IllegalArgumentException(VIEW_ONLY_MESSAGE);
+        }
     }
 
     private StockMovement record(Product product, StockMovement.Type type, BigDecimal quantity,

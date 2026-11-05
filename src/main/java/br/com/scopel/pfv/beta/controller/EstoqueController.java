@@ -5,6 +5,7 @@ import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.BulkCellEditor;
 import br.com.scopel.pfv.beta.controller.support.BulkEditConfirmation;
+import br.com.scopel.pfv.beta.controller.support.ViewOnlyMode;
 import br.com.scopel.pfv.beta.controller.support.ManagerAuthorizedAction;
 import br.com.scopel.pfv.beta.controller.support.ProductSelection;
 import br.com.scopel.pfv.beta.controller.support.ProductTablePresenter;
@@ -65,7 +66,6 @@ public class EstoqueController {
     @FXML private TableColumn<Product, String> colMin;
     @FXML private TableColumn<Product, String> colStock;
     @FXML private Button acceptSuggestionButton;
-    @FXML private Button newProductButton;
     @FXML private ToggleButton marginsToggle;
     @FXML private Label messageLabel;
 
@@ -93,8 +93,7 @@ public class EstoqueController {
                 this::onCellEdited);
         managerAction = new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window);
         bulkCellEditor = new BulkCellEditor(bulkEditService, selection, managerAction, BulkEditConfirmation::ask);
-        newProductButton.setVisible(StaffPermissions.canRegisterProducts(user));
-        newProductButton.managedProperty().bind(newProductButton.visibleProperty());
+        ViewOnlyMode.apply(user, table);
         marginsToggle.visibleProperty().set(manager);
         marginsToggle.managedProperty().bind(marginsToggle.visibleProperty());
         marginsToggle.setSelected(manager);

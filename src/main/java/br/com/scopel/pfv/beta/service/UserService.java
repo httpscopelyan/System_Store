@@ -63,7 +63,7 @@ public class UserService {
             throw new IllegalArgumentException("O nome deve ter de 1 a " + MAX_LOGIN_LENGTH + " caracteres.");
         }
         boolean renamed = !login.equals(user.getLogin());
-        if (renamed && StaffPermissions.isRestrictedAccount(user)) {
+        if (renamed && StaffPermissions.isViewOnly(user)) {
             throw new IllegalArgumentException("Esta conta não pode trocar o nome. Peça ao gerente.");
         }
         if (renamed && StaffPermissions.isReservedName(login)) {

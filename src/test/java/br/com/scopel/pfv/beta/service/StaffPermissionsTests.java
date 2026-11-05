@@ -46,4 +46,19 @@ class StaffPermissionsTests {
         assertTrue(StaffPermissions.isReservedName("Ana Clara"));
         assertFalse(StaffPermissions.isReservedName("Maria"));
     }
+
+    @Test
+    void dayanaAndManagersEditSalePriceButOtherOperatorsDoNot() {
+        assertTrue(StaffPermissions.canEditPrices(user("Dayana", User.Role.OPERADOR)));
+        assertTrue(StaffPermissions.canEditPrices(user("Chefe", User.Role.GERENTE)));
+        assertFalse(StaffPermissions.canEditPrices(user("Joao", User.Role.OPERADOR)));
+        assertFalse(StaffPermissions.canEditPrices(user("Ana Clara", User.Role.OPERADOR)));
+    }
+
+    @Test
+    void onlyAnaClaraIsViewOnly() {
+        assertTrue(StaffPermissions.isViewOnly(user("Ana Clara", User.Role.OPERADOR)));
+        assertFalse(StaffPermissions.isViewOnly(user("Dayana", User.Role.OPERADOR)));
+        assertFalse(StaffPermissions.isViewOnly(null));
+    }
 }
