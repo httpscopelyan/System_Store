@@ -10,10 +10,14 @@ import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.service.ReceiptService;
 import br.com.scopel.pfv.beta.service.SaleService;
+import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Duration;
 import org.springframework.stereotype.Component;
@@ -45,6 +49,8 @@ public class PagamentoEsperaController {
     @FXML private Label subtitleLabel;
     @FXML private Label statusLabel;
     @FXML private Button confirmButton;
+    @FXML private VBox manualBox;
+    @FXML private TextField receivedField;
 
     public PagamentoEsperaController(SaleService saleService, UserSession userSession, Navigator navigator,
                                      ReceiptService receiptService, CardPaymentGateway gateway) {
@@ -73,7 +79,7 @@ public class PagamentoEsperaController {
         if (gateway.isIntegrated()) {
             startIntegratedCharge(total);
         } else {
-            statusLabel.setText("Passe o cartão na maquininha. Aprovou? Pressione ENTER para confirmar.");
+            startManualCharge(total);
         }
     }
 
@@ -98,6 +104,16 @@ public class PagamentoEsperaController {
         if (done || gateway.isIntegrated() || vendaAtual == null || cardType == null) {
             return;
         }
+        BigDecimal received = DecimalInput.parseOrNull(receivedField.getText());
+        if (received == null) {
+            statusLabel.setText("Informe o valor recebido na maquininha.");
+            return;
+        }
+        if (received.compareTo(vendaAtual.getTotal()) != 0) {
+            statusLabel.setText("O valor recebido (R$ " + MONEY.format(received)
+                    + ") não confere com o total (R$ " + MONEY.format(vendaAtual.getTotal()) + ").");
+            return;
+        }
         approve();
     }
 
@@ -116,6 +132,15 @@ public class PagamentoEsperaController {
             done = true;
             navigator.navigate(Page.PAGAMENTO);
         }, statusLabel::setText);
+    }
+
+    private void startManualCharge(BigDecimal total) {
+        subtitleLabel.setText("Maquininha em modo manual");
+        manualBox.setVisible(true);
+        manualBox.setManaged(true);
+        statusLabel.setText("Digite R$ " + MONEY.format(total) + " na maquininha e cobre o cliente. "
+                + "Depois informe o valor recebido e pressione ENTER.");
+        Platform.runLater(() -> receivedField.requestFocus());
     }
 
     private void startIntegratedCharge(BigDecimal total) {

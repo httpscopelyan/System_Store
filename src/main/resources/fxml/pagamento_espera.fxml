@@ -23,7 +23,7 @@
                 <Insets top="40" right="40" bottom="40" left="40"/>
             </padding>
 
-            <Label text="Passe o cartão na maquininha e confirme a aprovação" styleClass="finalized-caption"/>
+            <Label text="Cobrança no cartão" styleClass="finalized-caption"/>
 
             <VBox styleClass="total-panel" spacing="4" maxWidth="Infinity">
                 <Label text="TOTAL" styleClass="total-caption"/>
@@ -35,7 +35,12 @@
                 <Label fx:id="typeLabel" text="-" styleClass="finalized-caption"/>
             </HBox>
 
-            <Label fx:id="statusLabel" styleClass="sale-status"/>
+            <VBox fx:id="manualBox" spacing="8" alignment="CENTER" visible="false" managed="false">
+                <Label text="Valor recebido na maquininha" styleClass="finalized-caption"/>
+                <TextField fx:id="receivedField" promptText="Ex: 25,90" maxWidth="260"/>
+            </VBox>
+
+            <Label fx:id="statusLabel" styleClass="sale-status" wrapText="true"/>
 
             <HBox spacing="12" alignment="CENTER">
                 <Button fx:id="confirmButton" text="Confirmar (ENTER)" onAction="#onConfirm" styleClass="primary-button" defaultButton="true"/>

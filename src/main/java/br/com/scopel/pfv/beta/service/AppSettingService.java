@@ -17,6 +17,7 @@ public class AppSettingService {
     public static final String CREDIT_ALLOW_CREDIT_SALE = "credit.allow_credit_sale";
     public static final String CREDIT_BLOCK_OVERDUE = "credit.block_overdue";
     public static final String PRICING_DEFAULT_MARGIN_PERCENT = "pricing.default_margin_percent";
+    public static final String TERMINAL_MANUAL_MODE = "terminal.manual_mode";
     public static final String STORE_NAME = "store.name";
     public static final String STOCK_COST_MODE = "stock.cost_mode";
     public static final String SALE_ASK_QUANTITY_AFTER_SCAN = "sale.ask_quantity_after_scan";

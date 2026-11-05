@@ -3,6 +3,7 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.exception.CardGatewayException;
 import br.com.scopel.pfv.beta.hardware.mercadopago.MercadoPagoTerminalModeControl;
 import br.com.scopel.pfv.beta.hardware.mercadopago.TerminalMode;
+import br.com.scopel.pfv.beta.service.AppSettingService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -18,6 +19,7 @@ import java.util.function.Supplier;
 public class ConfigTerminalController {
 
     private final MercadoPagoTerminalModeControl control;
+    private final AppSettingService settings;
 
     @FXML private Label modeLabel;
     @FXML private Button refreshButton;
@@ -25,8 +27,9 @@ public class ConfigTerminalController {
     @FXML private Button manualButton;
     @FXML private Label messageLabel;
 
-    public ConfigTerminalController(MercadoPagoTerminalModeControl control) {
+    public ConfigTerminalController(MercadoPagoTerminalModeControl control, AppSettingService settings) {
         this.control = control;
+        this.settings = settings;
     }
 
     @FXML
@@ -85,6 +88,9 @@ public class ConfigTerminalController {
     }
 
     private void showMode(TerminalMode mode) {
+        if (mode != TerminalMode.UNKNOWN) {
+            settings.set(AppSettingService.TERMINAL_MANUAL_MODE, String.valueOf(mode == TerminalMode.STANDALONE));
+        }
         modeLabel.setText(switch (mode) {
             case PDV -> "Modo atual: PDV (o sistema envia o valor para a maquininha)";
             case STANDALONE -> "Modo atual: manual (o valor é digitado na maquininha)";

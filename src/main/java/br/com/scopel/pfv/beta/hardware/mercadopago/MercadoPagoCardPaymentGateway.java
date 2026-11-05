@@ -6,6 +6,8 @@ import br.com.scopel.pfv.beta.hardware.CardPaymentGateway;
 import br.com.scopel.pfv.beta.hardware.CardPaymentStatus;
 import br.com.scopel.pfv.beta.model.CardType;
 import com.fasterxml.jackson.databind.JsonNode;
+import br.com.scopel.pfv.beta.service.AppSettingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,15 +22,31 @@ public class MercadoPagoCardPaymentGateway implements CardPaymentGateway {
 
     private final MercadoPagoApi api;
     private final String terminalId;
+    private final AppSettingService settings;
 
-    public MercadoPagoCardPaymentGateway(MercadoPagoApi api, @Value("${MP_TERMINAL_ID:}") String terminalId) {
+    public MercadoPagoCardPaymentGateway(MercadoPagoApi api, String terminalId) {
+        this(api, terminalId, null);
+    }
+
+    @Autowired
+    public MercadoPagoCardPaymentGateway(MercadoPagoApi api, @Value("${MP_TERMINAL_ID:}") String terminalId,
+                                         AppSettingService settings) {
         this.api = api;
         this.terminalId = terminalId == null ? "" : terminalId.trim();
+        this.settings = settings;
     }
 
     @Override
     public boolean isIntegrated() {
+        return hasTerminal() && !isManualMode();
+    }
+
+    private boolean hasTerminal() {
         return api.hasCredentials() && !terminalId.isEmpty();
+    }
+
+    private boolean isManualMode() {
+        return settings != null && settings.getBoolean(AppSettingService.TERMINAL_MANUAL_MODE, false);
     }
 
     @Override
@@ -82,9 +100,12 @@ public class MercadoPagoCardPaymentGateway implements CardPaymentGateway {
     }
 
     private void requireIntegrated() {
-        if (!isIntegrated()) {
+        if (!hasTerminal()) {
             throw new CardGatewayException(
                     "Maquininha não configurada: informe MP_ACCESS_TOKEN e MP_TERMINAL_ID no .env.");
+        }
+        if (isManualMode()) {
+            throw new CardGatewayException("Maquininha em modo manual: o valor é digitado na própria maquininha.");
         }
     }
 }

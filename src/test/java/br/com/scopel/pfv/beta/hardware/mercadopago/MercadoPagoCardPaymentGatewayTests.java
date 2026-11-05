@@ -151,6 +151,24 @@ class MercadoPagoCardPaymentGatewayTests {
     }
 
     @Test
+    void manualModeSettingTurnsOffTheAutomaticCharge() {
+        br.com.scopel.pfv.beta.service.AppSettingService settings =
+                org.mockito.Mockito.mock(br.com.scopel.pfv.beta.service.AppSettingService.class);
+        MercadoPagoCardPaymentGateway withSettings = new MercadoPagoCardPaymentGateway(api, TERMINAL, settings);
+        org.mockito.Mockito.when(settings.getBoolean(
+                br.com.scopel.pfv.beta.service.AppSettingService.TERMINAL_MANUAL_MODE, false)).thenReturn(true);
+
+        assertFalse(withSettings.isIntegrated());
+        assertThrows(br.com.scopel.pfv.beta.exception.CardGatewayException.class,
+                () -> withSettings.createCharge(new BigDecimal("5.00"), CardType.DEBITO));
+        assertTrue(api.paths.isEmpty());
+
+        org.mockito.Mockito.when(settings.getBoolean(
+                br.com.scopel.pfv.beta.service.AppSettingService.TERMINAL_MANUAL_MODE, false)).thenReturn(false);
+        assertTrue(withSettings.isIntegrated());
+    }
+
+    @Test
     void withoutTerminalIsNotIntegrated() {
         assertFalse(new MercadoPagoCardPaymentGateway(api, " ").isIntegrated());
         assertTrue(gateway.isIntegrated());
