@@ -6,12 +6,6 @@
 
 <BorderPane fx:id="root" focusTraversable="true" styleClass="sale-root" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.scopel.pfv.beta.controller.DirectChargeController">
 
-    <top>
-        <VBox styleClass="page-header">
-            <Label styleClass="page-header-title" text="Cobrar na maquininha — Mercado Maná" />
-            <Label styleClass="page-header-subtitle" text="Cobrança direta, sem abrir nova venda" />
-        </VBox>
-    </top>
 
     <center>
         <VBox alignment="CENTER" spacing="14">

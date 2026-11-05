@@ -7,12 +7,6 @@
 <BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.scopel.pfv.beta.controller.ReceivableListController"
             stylesheets="@../css/styles.css" styleClass="inicio-root">
-    <top>
-        <VBox styleClass="page-header">
-            <Label text="Contas a Receber / Crediário" styleClass="page-header-title"/>
-            <Label text="Dívida do cliente, recebimento e renegociação" styleClass="page-header-subtitle"/>
-        </VBox>
-    </top>
     <center>
         <VBox spacing="14">
             <padding><Insets top="18" right="28" bottom="18" left="28"/></padding>

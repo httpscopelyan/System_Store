@@ -10,12 +10,6 @@
             styleClass="sale-root"
             onKeyPressed="#onKey">
 
-    <top>
-        <VBox styleClass="page-header">
-            <Label text="Pagamento via PIX — Mercado Maná" styleClass="page-header-title"/>
-            <Label fx:id="subtitleLabel" text="Copia e cola (confirmação manual do recebimento)" styleClass="page-header-subtitle"/>
-        </VBox>
-    </top>
 
     <center>
         <VBox spacing="18" alignment="TOP_LEFT">

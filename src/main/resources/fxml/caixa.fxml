@@ -8,12 +8,6 @@
             fx:controller="br.com.scopel.pfv.beta.controller.CaixaController"
             stylesheets="@../css/styles.css" styleClass="win-root">
 
-    <top>
-        <HBox styleClass="win-titlebar" alignment="CENTER_LEFT">
-            <padding><Insets top="4" right="10" bottom="4" left="10"/></padding>
-            <Label text="Abertura / Fechamento do Caixa" styleClass="win-titlebar-text"/>
-        </HBox>
-    </top>
 
     <left>
         <ScrollPane fitToWidth="true" prefWidth="312" styleClass="group-box"

@@ -10,12 +10,6 @@
             styleClass="sale-root"
             onKeyPressed="#onKey">
 
-    <top>
-        <VBox styleClass="page-header">
-            <Label text="Pagamento em Cartão — Mercado Maná" styleClass="page-header-title"/>
-            <Label fx:id="subtitleLabel" text="Confirmação manual" styleClass="page-header-subtitle"/>
-        </VBox>
-    </top>
 
     <center>
         <VBox spacing="24" alignment="CENTER">

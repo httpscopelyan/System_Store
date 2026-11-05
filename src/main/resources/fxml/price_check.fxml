@@ -9,12 +9,6 @@
             stylesheets="@../css/styles.css"
             styleClass="sale-root">
 
-    <top>
-        <VBox styleClass="page-header">
-            <Label text="Consulta de Preço — Mercado Maná" styleClass="page-header-title"/>
-            <Label text="Consulta rápida (F1) — não registra venda" styleClass="page-header-subtitle"/>
-        </VBox>
-    </top>
 
     <center>
         <VBox spacing="16">

@@ -10,12 +10,6 @@
             styleClass="sale-root"
             onKeyPressed="#onKey">
 
-    <top>
-        <VBox styleClass="page-header">
-            <Label text="Pagamento — Mercado Maná" styleClass="page-header-title"/>
-            <Label text="Escolha a forma de pagamento" styleClass="page-header-subtitle"/>
-        </VBox>
-    </top>
 
     <center>
         <ScrollPane fitToWidth="true" focusTraversable="false">

@@ -9,12 +9,6 @@
             stylesheets="@../css/styles.css"
             styleClass="inicio-root">
 
-    <top>
-        <VBox styleClass="page-header">
-            <Label text="Produtos — Alterar" styleClass="page-header-title"/>
-            <Label text="Edição das informações do produto" styleClass="page-header-subtitle"/>
-        </VBox>
-    </top>
 
     <center>
         <VBox spacing="18">

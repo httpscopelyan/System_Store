@@ -10,10 +10,6 @@
 
     <top>
         <VBox>
-            <HBox styleClass="win-titlebar" alignment="CENTER_LEFT">
-                <padding><Insets top="4" right="10" bottom="4" left="10"/></padding>
-                <Label text="Controle de Estoque" styleClass="win-titlebar-text"/>
-            </HBox>
             <HBox alignment="CENTER" styleClass="group-box">
                 <padding><Insets top="6" right="10" bottom="6" left="10"/></padding>
                 <Label text="Estoque » Visualização" styleClass="estoque-title"/>

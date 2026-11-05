@@ -7,12 +7,6 @@
 <BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.scopel.pfv.beta.controller.BatchFormController"
             stylesheets="@../css/styles.css" styleClass="inicio-root">
-    <top>
-        <VBox styleClass="page-header">
-            <Label text="Estoque — Lotes de validade" styleClass="page-header-title"/>
-            <Label text="Controle de vencimento por lote" styleClass="page-header-subtitle"/>
-        </VBox>
-    </top>
     <center>
         <VBox spacing="18">
             <padding><Insets top="22" right="28" bottom="22" left="28"/></padding>
