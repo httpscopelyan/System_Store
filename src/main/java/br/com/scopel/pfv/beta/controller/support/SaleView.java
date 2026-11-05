@@ -16,12 +16,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Window;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public final class SaleView {
 
     private static final String EMPTY_TOTAL = "R$ 0,00";
     private static final String NO_LAST_ITEM = "—";
 
+    private final TableView<SaleItemRow> itemsTable;
     private final ObservableList<SaleItemRow> rows = FXCollections.observableArrayList();
     private final Label totalLabel;
     private final Label statusLabel;
@@ -36,6 +38,7 @@ public final class SaleView {
                     TableColumn<SaleItemRow, BigDecimal> totalPriceColumn,
                     Label totalLabel, Label statusLabel, Label lastItemLabel, TextArea receiptPreview,
                     ReceiptService receiptService) {
+        this.itemsTable = itemsTable;
         this.totalLabel = totalLabel;
         this.statusLabel = statusLabel;
         this.lastItemLabel = lastItemLabel;
@@ -69,7 +72,7 @@ public final class SaleView {
             return;
         }
         for (SaleItem item : sale.getItems()) {
-            rows.add(new SaleItemRow(item.getProduct().getDescription(), item.getQuantity(),
+            rows.add(new SaleItemRow(item.getProduct().getCode(), item.getProduct().getDescription(), item.getQuantity(),
                     item.getUnitPrice(), item.getTotalPrice()));
         }
         totalLabel.setText("R$ " + sale.getTotal());
@@ -95,6 +98,11 @@ public final class SaleView {
         if (lastItemLabel != null) {
             lastItemLabel.setText(product.getDescription() + "  —  " + MoneyFormat.format(product.getPrice()));
         }
+    }
+
+    public Optional<String> selectedProductCode() {
+        SaleItemRow selected = itemsTable.getSelectionModel().getSelectedItem();
+        return selected == null ? Optional.empty() : Optional.of(selected.getProductCode());
     }
 
     public SaleItem lastItemOf(Sale sale) {

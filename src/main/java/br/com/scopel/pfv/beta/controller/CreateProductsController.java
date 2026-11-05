@@ -1,5 +1,6 @@
 package br.com.scopel.pfv.beta.controller;
 
+import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.controller.support.SuggestedPriceBinding;
 import br.com.scopel.pfv.beta.exception.RegisterProductDuplicateException;
@@ -42,6 +43,8 @@ public class CreateProductsController {
 
     @FXML
     public void initialize() {
+        EnterToNextField.install(codeField, descriptionField, costField, marginField, priceField, quantityField,
+                minStockField, unitBox, categoryField);
         unitBox.getItems().setAll(Product.Unidade.values());
         unitBox.setValue(Product.Unidade.UN);
         activeBox.setSelected(true);

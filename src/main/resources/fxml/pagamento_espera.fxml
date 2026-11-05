@@ -12,7 +12,7 @@
 
     <top>
         <VBox styleClass="page-header">
-            <Label text="Pagamento em Cartão — Mercado Scopel" styleClass="page-header-title"/>
+            <Label text="Pagamento em Cartão — Mercado Maná" styleClass="page-header-title"/>
             <Label fx:id="subtitleLabel" text="Confirmação manual" styleClass="page-header-subtitle"/>
         </VBox>
     </top>

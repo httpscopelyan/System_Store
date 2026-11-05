@@ -1,5 +1,6 @@
 package br.com.scopel.pfv.beta.controller;
 
+import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
 import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
@@ -52,6 +53,8 @@ public class EditProductController {
 
     @FXML
     public void initialize() {
+        EnterToNextField.install(descriptionField, unitBox, categoryField, minStockField, costField, marginField,
+                priceField);
         unitBox.getItems().setAll(Product.Unidade.values());
 
         productId = userSession.getProdutoEmEdicaoId();

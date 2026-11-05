@@ -1,5 +1,6 @@
 package br.com.scopel.pfv.beta.controller;
 
+import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.controller.support.MoneyFormat;
@@ -34,6 +35,7 @@ public class StockEntryController {
 
     @FXML
     public void initialize() {
+        EnterToNextField.install(codeField, quantityField, unitCostField, reasonField);
         codeField.textProperty().addListener((observable, previous, current) -> refreshCostPreview());
         quantityField.textProperty().addListener((observable, previous, current) -> refreshCostPreview());
         unitCostField.textProperty().addListener((observable, previous, current) -> refreshCostPreview());

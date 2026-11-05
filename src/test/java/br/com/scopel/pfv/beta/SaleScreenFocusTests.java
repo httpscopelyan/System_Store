@@ -56,8 +56,7 @@ class SaleScreenFocusTests {
 
     @Test
     void everySaleFieldKeepsTheFocusWhenSelected_RF73() throws Exception {
-        for (String id : new String[]{"discountField", "customerIdField", "cancelItemCodeField",
-                "cancelReasonField"}) {
+        for (String id : new String[]{"discountField", "customerIdField"}) {
             screen.focus(id);
             assertSame(screen.node(id), screen.focusOwner(), id);
         }
@@ -66,7 +65,7 @@ class SaleScreenFocusTests {
     @Test
     void focusMovesFreelyBetweenFieldsAndBackToTheScanField_RF73() throws Exception {
         screen.focus("discountField");
-        screen.focus("cancelReasonField");
+        screen.focus("customerIdField");
         screen.focus("customerIdField");
         assertSame(screen.node("customerIdField"), screen.focusOwner());
         screen.focus("codeField");

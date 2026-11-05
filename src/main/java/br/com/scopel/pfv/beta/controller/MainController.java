@@ -3,6 +3,7 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
+import br.com.scopel.pfv.beta.controller.support.BlockButtons;
 import br.com.scopel.pfv.beta.controller.support.DrawerShortcut;
 import br.com.scopel.pfv.beta.controller.support.FullscreenShortcut;
 import br.com.scopel.pfv.beta.controller.support.UpdateNotice;
@@ -47,6 +48,7 @@ public class MainController {
     @FXML private BorderPane root;
     @FXML private Button updateButton;
     @FXML private Button configButton;
+    @FXML private javafx.scene.layout.FlowPane blocksBar;
     @FXML private Button backButton;
     @FXML private Button shoppingListButton;
     @FXML private Label dateTimeLabel;
@@ -74,6 +76,7 @@ public class MainController {
         navigator.bind(root);
         navigator.addNavigationListener(this::refreshBackButton);
         navigator.addNavigationListener(this::refreshShoppingListCount);
+        BlockButtons.apply(blocksBar);
         refreshBackButton();
         refreshShoppingListCount();
 

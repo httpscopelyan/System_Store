@@ -18,7 +18,7 @@ class PixServiceTests {
     @Test
     void payloadHasEmvStructure() {
         String payload = pix.buildStaticPayload(
-                "chave@loja.com", "Mercado Scopel", "Sao Paulo", new BigDecimal("12.34"), "PEDIDO1");
+                "chave@loja.com", "Mercado Maná", "Sao Paulo", new BigDecimal("12.34"), "PEDIDO1");
 
         assertTrue(payload.startsWith("000201"), "payload format indicator");
         assertTrue(payload.contains("0014br.gov.bcb.pix"), "GUI do PIX");

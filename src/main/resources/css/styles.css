@@ -40,23 +40,65 @@
 }
 
 .block-button {
-    -fx-background-color: linear-gradient(to bottom, #ffffff, #eef2f7);
-    -fx-border-color: #c3ccd6;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-text-fill: #15325f;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-    -fx-text-alignment: center;
-    -fx-min-width: 86;
-    -fx-min-height: 60;
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #e6edf7);
+    -fx-border-color: #9fb3cc;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-min-width: 128;
+    -fx-pref-width: 128;
+    -fx-min-height: 104;
     -fx-cursor: hand;
-    -fx-padding: 6 8 6 8;
+    -fx-padding: 8 6 8 6;
 }
 
 .block-button:hover {
-    -fx-background-color: linear-gradient(to bottom, #ffffff, #d8e9ff);
-    -fx-border-color: #3a8de0;
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #cfe3ff);
+    -fx-border-color: #1e6fd0;
+}
+
+.block-button:disabled {
+    -fx-opacity: 0.45;
+}
+
+.block-primary {
+    -fx-background-color: linear-gradient(to bottom, #43a047, #2e7d32);
+    -fx-border-color: #1b5e20;
+}
+
+.block-primary:hover {
+    -fx-background-color: linear-gradient(to bottom, #4caf50, #388e3c);
+    -fx-border-color: #0d3d12;
+}
+
+.block-icon {
+    -fx-font-size: 34px;
+}
+
+.block-name {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f2a52;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+}
+
+.block-key {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+    -fx-background-color: #15325f;
+    -fx-background-radius: 4;
+    -fx-padding: 1 8 1 8;
+}
+
+.block-primary .block-name {
+    -fx-text-fill: white;
+}
+
+.block-primary .block-key {
+    -fx-background-color: white;
+    -fx-text-fill: #1b5e20;
 }
 
 .side-menu {

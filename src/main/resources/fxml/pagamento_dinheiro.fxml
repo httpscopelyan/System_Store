@@ -12,7 +12,7 @@
 
     <top>
         <VBox styleClass="page-header">
-            <Label text="Pagamento em Dinheiro — Mercado Scopel" styleClass="page-header-title"/>
+            <Label text="Pagamento em Dinheiro — Mercado Maná" styleClass="page-header-title"/>
             <Label text="Informe o valor recebido" styleClass="page-header-subtitle"/>
         </VBox>
     </top>

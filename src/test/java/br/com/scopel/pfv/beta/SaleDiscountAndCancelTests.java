@@ -128,53 +128,39 @@ class SaleDiscountAndCancelTests {
     }
 
     @Test
-    void cancelItemRequiresManager() {
+    void cancelItemByOperatorRemovesItemWithoutManager() {
         User op = user(User.Role.OPERADOR);
-        Product p = product(new BigDecimal("10.00"));
-        Sale sale = openWithItem(op, p, new BigDecimal("3"));
-
-        assertThrows(ManagerAuthorizationRequiredException.class,
-                () -> saleService.cancelItem(sale, p.getCode(), op));
-    }
-
-    @Test
-    void cancelItemByManagerRemovesItem() {
-        User op = user(User.Role.OPERADOR);
-        User gerente = user(User.Role.GERENTE);
         Product p = product(new BigDecimal("10.00"));
         Sale sale = openWithItem(op, p, new BigDecimal("3")); // 30.00
 
-        sale = saleService.cancelItem(sale, p.getCode(), gerente);
+        sale = saleService.cancelItem(sale, p.getCode());
 
         assertTrue(sale.getItems().isEmpty());
         assertEquals(0, BigDecimal.ZERO.compareTo(sale.getTotal()));
     }
 
-    // RN17: cancelar venda mantém o registro com status, usuário e motivo.
+    // RN17: cancelar venda mantém o registro com status e data.
     @Test
-    void cancelSaleKeepsRecordWithReason() {
+    void cancelSaleByOperatorKeepsRecordWithoutManager() {
         User op = user(User.Role.OPERADOR);
-        User gerente = user(User.Role.GERENTE);
         Product p = product(new BigDecimal("10.00"));
         Sale sale = openWithItem(op, p, new BigDecimal("2"));
 
-        sale = saleService.cancelSale(sale, "cliente desistiu", gerente);
+        sale = saleService.cancelSale(sale);
 
         assertEquals(Sale.Status.CANCELADA, sale.getStatus());
-        assertEquals("cliente desistiu", sale.getCancelReason());
         assertNotNull(sale.getCanceledAt());
-        assertEquals(gerente.getId(), sale.getAuthorizedBy().getId());
-        assertNotNull(sale.getId()); // registro preservado
+        assertNotNull(sale.getId());
     }
 
     @Test
-    void cancelSaleRequiresManager() {
+    void cancelSaleOfFinishedOrCanceledSaleIsRefused() {
         User op = user(User.Role.OPERADOR);
         Product p = product(new BigDecimal("10.00"));
-        Sale sale = openWithItem(op, p, new BigDecimal("1"));
+        Sale sale = saleService.cancelSale(openWithItem(op, p, new BigDecimal("1")));
 
-        assertThrows(ManagerAuthorizationRequiredException.class,
-                () -> saleService.cancelSale(sale, "motivo", op));
+        Sale canceled = sale;
+        assertThrows(IllegalSaleStateException.class, () -> saleService.cancelSale(canceled));
     }
 
     @Test

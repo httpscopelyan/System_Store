@@ -171,12 +171,10 @@ public class SaleService {
         return saleRepository.save(sale);
     }
 
-    public Sale cancelItem(Sale sale, String productCode, User authorizedBy) {
+    public Sale cancelItem(Sale sale, String productCode) {
         if (sale.getStatus() != Sale.Status.ABERTA) {
             throw new IllegalSaleStateException();
         }
-        requireManager(authorizedBy);
-
         Product product = productService.findCode(productCode);
         SaleItem item = findItem(sale, product.getId());
         if (item == null) {
@@ -184,21 +182,17 @@ public class SaleService {
         }
 
         sale.getItems().remove(item);
-        sale.setAuthorizedBy(authorizedBy);
         sale.setTotal(calculateTotal(sale));
         return saleRepository.save(sale);
     }
 
-    public Sale cancelSale(Sale sale, String reason, User authorizedBy) {
+    public Sale cancelSale(Sale sale) {
         if (sale.getStatus() == Sale.Status.FINALIZADA || sale.getStatus() == Sale.Status.CANCELADA) {
             throw new IllegalSaleStateException();
         }
-        requireManager(authorizedBy);
 
         sale.setStatus(Sale.Status.CANCELADA);
-        sale.setCancelReason(reason);
         sale.setCanceledAt(LocalDateTime.now());
-        sale.setAuthorizedBy(authorizedBy);
         return saleRepository.save(sale);
     }
 

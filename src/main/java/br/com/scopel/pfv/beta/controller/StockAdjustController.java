@@ -1,5 +1,6 @@
 package br.com.scopel.pfv.beta.controller;
 
+import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.controller.support.ManagerAuthorizedAction;
@@ -46,6 +47,7 @@ public class StockAdjustController {
 
     @FXML
     public void initialize() {
+        EnterToNextField.install(kindBox, codeField, quantityField, reasonField);
         kindBox.setItems(FXCollections.observableArrayList(ADJUSTMENT, RECTIFICATION));
         kindBox.setValue(ADJUSTMENT);
         kindBox.valueProperty().addListener((observable, previous, current) -> refreshKind());

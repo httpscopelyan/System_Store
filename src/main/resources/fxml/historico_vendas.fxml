@@ -11,7 +11,7 @@
 
     <top>
         <VBox styleClass="page-header">
-            <Label text="Histórico de Vendas — Mercado Scopel" styleClass="page-header-title"/>
+            <Label text="Histórico de Vendas — Mercado Maná" styleClass="page-header-title"/>
             <Label text="Vendas finalizadas (mais recentes primeiro)" styleClass="page-header-subtitle"/>
         </VBox>
     </top>

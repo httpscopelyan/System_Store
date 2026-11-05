@@ -12,6 +12,7 @@ import br.com.scopel.pfv.beta.service.SaleService;
 import javafx.scene.control.TextField;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public final class SaleAdjustments {
 
@@ -25,14 +26,11 @@ public final class SaleAdjustments {
     private final ManagerAuthorizedAction managerAction;
     private final TextField discountField;
     private final TextField customerIdField;
-    private final TextField cancelItemCodeField;
-    private final TextField cancelReasonField;
 
     public SaleAdjustments(ActiveSale activeSale, SaleView view, SaleService saleService,
                            CustomerService customerService, UserSession userSession,
                            ManagerAuthorizedAction managerAction, TextField discountField,
-                           TextField customerIdField, TextField cancelItemCodeField,
-                           TextField cancelReasonField) {
+                           TextField customerIdField) {
         this.activeSale = activeSale;
         this.view = view;
         this.saleService = saleService;
@@ -41,8 +39,6 @@ public final class SaleAdjustments {
         this.managerAction = managerAction;
         this.discountField = discountField;
         this.customerIdField = customerIdField;
-        this.cancelItemCodeField = cancelItemCodeField;
-        this.cancelReasonField = cancelReasonField;
     }
 
     public void applyDiscount() {
@@ -88,16 +84,14 @@ public final class SaleAdjustments {
         if (!requireSale()) {
             return;
         }
-        Sale sale = activeSale.current();
-        String productCode = cancelItemCodeField.getText().trim();
+        Optional<String> productCode = view.selectedProductCode();
+        if (productCode.isEmpty()) {
+            view.showStatus("Selecione na lista o item que deseja cancelar");
+            return;
+        }
         try {
-            Sale updated = managerAction.apply(authorizedBy -> saleService.cancelItem(sale, productCode, authorizedBy));
-            if (updated == null) {
-                view.showStatus("Cancelamento de item não autorizado");
-                return;
-            }
+            Sale updated = saleService.cancelItem(activeSale.current(), productCode.get());
             activeSale.set(updated);
-            cancelItemCodeField.clear();
             view.showSale(updated);
             view.showLastItem(view.lastItemOf(updated));
             view.showStatus("Item cancelado");
@@ -110,15 +104,8 @@ public final class SaleAdjustments {
         if (!requireSale()) {
             return;
         }
-        Sale sale = activeSale.current();
-        String reason = cancelReasonField.getText();
         try {
-            Sale canceled = managerAction.apply(authorizedBy -> saleService.cancelSale(sale, reason, authorizedBy));
-            if (canceled == null) {
-                view.showStatus("Cancelamento de venda não autorizado");
-                return;
-            }
-            cancelReasonField.clear();
+            saleService.cancelSale(activeSale.current());
             view.showStatus("Venda cancelada");
             activeSale.set(saleService.openSale(userSession.getLoggedUser(), userSession.getCaixaAtual()));
             view.showSale(activeSale.current());

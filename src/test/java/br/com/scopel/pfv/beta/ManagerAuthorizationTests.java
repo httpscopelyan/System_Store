@@ -186,34 +186,6 @@ class ManagerAuthorizationTests {
         assertNull(sale.getAuthorizedBy(), "nenhum autorizador deve ser registrado");
     }
 
-    // 7. cancelItem com null -> recusa E o item permanece na venda.
-    @Test
-    void cancelItemWithNullLeavesItemInSale() {
-        User op = repoUser(User.Role.OPERADOR);
-        Product p = product(new BigDecimal("10.00"));
-        Sale sale = openWithItem(op, p, new BigDecimal("3")); // 30.00
-
-        assertThrows(ManagerAuthorizationRequiredException.class,
-                () -> saleService.cancelItem(sale, p.getCode(), null));
-
-        assertEquals(1, sale.getItems().size(), "item não deve ser removido");
-        assertEquals(0, new BigDecimal("30.00").compareTo(sale.getTotal()), "total não deve mudar");
-    }
-
-    // 7. cancelSale com operador -> recusa E a venda permanece ABERTA.
-    @Test
-    void cancelSaleWithOperatorLeavesSaleOpen() {
-        User op = repoUser(User.Role.OPERADOR);
-        Product p = product(new BigDecimal("10.00"));
-        Sale sale = openWithItem(op, p, new BigDecimal("1"));
-
-        assertThrows(ManagerAuthorizationRequiredException.class,
-                () -> saleService.cancelSale(sale, "motivo", op));
-
-        assertEquals(Sale.Status.ABERTA, sale.getStatus(), "venda não deve ser cancelada");
-        assertNull(sale.getCancelReason());
-        assertNull(sale.getCanceledAt());
-    }
 
     // 8. Desconto dentro do teto com OPERADOR explícito -> aplica sem exigir gerente.
     @Test

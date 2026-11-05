@@ -65,8 +65,6 @@ public class SaleController {
     @FXML private TextArea receiptPreview;
     @FXML private TextField discountField;
     @FXML private TextField customerIdField;
-    @FXML private TextField cancelItemCodeField;
-    @FXML private TextField cancelReasonField;
 
     public SaleController(SaleService saleService, ProductService productService, UserSession userSession,
                           Navigator navigator, CustomerService customerService, ReceiptService receiptService,
@@ -97,10 +95,9 @@ public class SaleController {
         scanFlow.attachSuggestions();
         adjustments = new SaleAdjustments(activeSale, view, saleService, customerService, userSession,
                 new ManagerAuthorizedAction(managerAuthorizationController, userSession, view::window),
-                discountField, customerIdField, cancelItemCodeField, cancelReasonField);
+                discountField, customerIdField);
 
-        for (TextField field : new TextField[]{discountField, customerIdField, cancelItemCodeField,
-                cancelReasonField}) {
+        for (TextField field : new TextField[]{discountField, customerIdField}) {
             field.clear();
             field.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
                 if (event.getCode() == KeyCode.ESCAPE) {

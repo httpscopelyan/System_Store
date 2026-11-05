@@ -172,7 +172,7 @@ class ResumeOrOpenSaleTests {
         Product p = newProduct();
         Sale sale = saleService.openSale(op, caixa);
         sale = saleService.addItem(sale, p.getCode(), new BigDecimal("1"));
-        sale = saleService.cancelSale(sale, "teste", gerente); // CANCELADA
+        sale = saleService.cancelSale(sale); // CANCELADA
 
         Sale result = saleService.resumeOrOpenSale(op, caixa, sale);
 

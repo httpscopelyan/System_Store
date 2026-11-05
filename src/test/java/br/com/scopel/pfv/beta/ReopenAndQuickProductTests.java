@@ -171,7 +171,7 @@ class ReopenAndQuickProductTests {
         Sale sale = saleService.openSale(op, caixa);
         Product product = newProduct(new BigDecimal("5.00"), new BigDecimal("50.000"), Product.Unidade.UN);
         sale = saleService.addItem(sale, product.getCode(), new BigDecimal("1"));
-        final Sale canceled = saleService.cancelSale(sale, "teste", gerente);
+        final Sale canceled = saleService.cancelSale(sale);
 
         assertEquals(Sale.Status.CANCELADA, canceled.getStatus());
         assertThrows(IllegalSaleStateException.class, () -> saleService.reopenForEditing(canceled));
