@@ -1,10 +1,10 @@
 {
-  "version": "1.2.8",
+  "version": "1.2.9",
   "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "fix(cartao): modo manual da maquininha mostra o valor e pede o valor recebido em vez de aguardar; versão 1.2.8",
+  "changelog": "feat: aba Cobrar com calculadora para cobrança direta na maquininha (débito, crédito e PIX); versão 1.2.9",
   "mandatory": false,
-  "sha256": "d02bb3d9a0613e86a19ff06e2ebd4fcbecc0155634ea7b3099bf0a11193a2740",
-  "size": 59546855,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.8/scopel-store.jar"
+  "sha256": "443c0280bf30fc22df37e7491f6044f74487701695f72df01c4acc2c73ee4ba7",
+  "size": 59562224,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.9/scopel-store.jar"
 }
