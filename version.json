@@ -1,10 +1,10 @@
 {
-  "version": "1.2.9",
+  "version": "1.2.10",
   "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "feat: aba Cobrar com calculadora para cobrança direta na maquininha (débito, crédito e PIX); versão 1.2.9",
+  "changelog": "fix(venda): rolagem na tela de venda; feat(estoque): código do produto editável; versão 1.2.10",
   "mandatory": false,
-  "sha256": "443c0280bf30fc22df37e7491f6044f74487701695f72df01c4acc2c73ee4ba7",
-  "size": 59562224,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.9/scopel-store.jar"
+  "sha256": "3c5c3d3ca2bc5b3b7921cd1aa61b4be792eaba26725db93fc9c5d67dfa81009d",
+  "size": 59563064,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.10/scopel-store.jar"
 }
