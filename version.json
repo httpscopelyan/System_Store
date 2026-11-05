@@ -1,10 +1,10 @@
 {
-  "version": "1.2.7",
+  "version": "1.2.8",
   "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "feat(venda): desconto sem permissão ou código de gerente; versão 1.2.7",
+  "changelog": "fix(cartao): modo manual da maquininha mostra o valor e pede o valor recebido em vez de aguardar; versão 1.2.8",
   "mandatory": false,
-  "sha256": "850d57793ca81c5edb43d691b14a3854f173258f148b22e0d2717a51b322b446",
-  "size": 59543921,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.7/scopel-store.jar"
+  "sha256": "d02bb3d9a0613e86a19ff06e2ebd4fcbecc0155634ea7b3099bf0a11193a2740",
+  "size": 59546855,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.8/scopel-store.jar"
 }
