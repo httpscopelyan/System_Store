@@ -1,10 +1,10 @@
 {
-  "version": "1.2.1",
+  "version": "1.2.2",
   "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "feat: operadoras Dayana e Maria e nome Mercado Maná nas telas inicial e de login; versão 1.2.1",
+  "changelog": "feat(gaveta): atalho F12 abre a gaveta em qualquer tela, sem imprimir; versão 1.2.2",
   "mandatory": false,
-  "sha256": "131788475fc62422916892ae69db4e0831bec1b9851f6668cec73f567d68b4fd",
-  "size": 59525263,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.1/scopel-store.jar"
+  "sha256": "845cea49561b787636c5f0d7c3e7379e7984e43e1530b3035c327a9a8e1fc5e1",
+  "size": 59527299,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.2/scopel-store.jar"
 }
