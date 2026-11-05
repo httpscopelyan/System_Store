@@ -1,10 +1,10 @@
 {
-  "version": "1.2.6",
+  "version": "1.2.7",
   "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "feat: busca por nome nas telas de estoque, menu com cards principais e seta, venda em uma linha, edição de quantidade no estoque (Dayana/Joao) e Ana Clara sem cadastro; versão 1.2.6",
+  "changelog": "feat(venda): desconto sem permissão ou código de gerente; versão 1.2.7",
   "mandatory": false,
-  "sha256": "dd1ff4dce4d52c07e441e566ef0771ad35fed6c94e19096bcdb153f4b9ecbf0d",
-  "size": 59544865,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.6/scopel-store.jar"
+  "sha256": "850d57793ca81c5edb43d691b14a3854f173258f148b22e0d2717a51b322b446",
+  "size": 59543921,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.7/scopel-store.jar"
 }
