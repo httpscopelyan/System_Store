@@ -20,6 +20,7 @@ public enum Page {
     TABELAS_PRECO("/fxml/price_table_form.fxml"),
     CONFIG("/fxml/config_form.fxml"),
     MINHA_CONTA("/fxml/my_account.fxml"),
+    COBRAR("/fxml/direct_charge.fxml"),
     COMPRAS("/fxml/purchase_form.fxml"),
     ORCAMENTO("/fxml/quote_form.fxml"),
     CONTAS_RECEBER("/fxml/receivable_list.fxml"),

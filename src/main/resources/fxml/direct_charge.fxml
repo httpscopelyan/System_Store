@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="root" focusTraversable="true" styleClass="sale-root" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.scopel.pfv.beta.controller.DirectChargeController">
+
+    <top>
+        <VBox styleClass="page-header">
+            <Label styleClass="page-header-title" text="Cobrar na maquininha — Mercado Maná" />
+            <Label styleClass="page-header-subtitle" text="Cobrança direta, sem abrir nova venda" />
+        </VBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="14">
+            <padding><Insets bottom="20" left="40" right="40" top="20" /></padding>
+
+            <StackPane>
+                <VBox fx:id="inputPanel" alignment="CENTER" maxWidth="420" spacing="12">
+                    <Label fx:id="displayLabel" maxWidth="Infinity" styleClass="calc-display" text="R$ 0" />
+                    <GridPane hgap="10" vgap="10">
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="7" userData="7" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="8" userData="8" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="9" userData="9" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="4" userData="4" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="5" userData="5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="6" userData="6" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="1" userData="1" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="2" userData="2" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="3" userData="3" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="," userData="," GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="0" userData="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key" text="⌫" userData="⌫" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key, calc-clear" text="C" userData="C" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                        <Button focusTraversable="false" onAction="#onEnter" styleClass="calc-key, calc-enter" text="ENTER" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+                    </GridPane>
+                </VBox>
+
+                <VBox fx:id="choosePanel" alignment="CENTER" managed="false" maxWidth="420" spacing="14" visible="false">
+                    <Label styleClass="finalized-caption" text="Forma de pagamento" />
+                    <Label fx:id="chooseAmountLabel" styleClass="calc-display" text="R$ 0" />
+                    <Button focusTraversable="false" maxWidth="Infinity" onAction="#onDebit" styleClass="calc-key, calc-method" text="1 · Débito" />
+                    <Button focusTraversable="false" maxWidth="Infinity" onAction="#onCredit" styleClass="calc-key, calc-method" text="2 · Crédito" />
+                    <Button focusTraversable="false" maxWidth="Infinity" onAction="#onPix" styleClass="calc-key, calc-method" text="3 · PIX" />
+                    <Button focusTraversable="false" maxWidth="Infinity" onAction="#onBack" styleClass="danger-button" text="Voltar (ESC)" />
+                </VBox>
+
+                <VBox fx:id="chargingPanel" alignment="CENTER" managed="false" maxWidth="520" spacing="14" visible="false">
+                    <Label fx:id="chargingTitleLabel" styleClass="finalized-caption" text="" />
+                    <Label fx:id="chargingAmountLabel" styleClass="calc-display" text="R$ 0" />
+                    <Label fx:id="statusLabel" styleClass="sale-status" wrapText="true" />
+                    <Button focusTraversable="false" onAction="#onCancelCharge" styleClass="danger-button" text="Cancelar cobrança (ESC)" />
+                </VBox>
+            </StackPane>
+
+            <Label fx:id="messageLabel" styleClass="sale-status" wrapText="true" />
+        </VBox>
+    </center>
+</BorderPane>
