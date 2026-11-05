@@ -23,20 +23,17 @@ public final class SaleAdjustments {
     private final SaleService saleService;
     private final CustomerService customerService;
     private final UserSession userSession;
-    private final ManagerAuthorizedAction managerAction;
     private final TextField discountField;
     private final TextField customerIdField;
 
     public SaleAdjustments(ActiveSale activeSale, SaleView view, SaleService saleService,
                            CustomerService customerService, UserSession userSession,
-                           ManagerAuthorizedAction managerAction, TextField discountField,
-                           TextField customerIdField) {
+                           TextField discountField, TextField customerIdField) {
         this.activeSale = activeSale;
         this.view = view;
         this.saleService = saleService;
         this.customerService = customerService;
         this.userSession = userSession;
-        this.managerAction = managerAction;
         this.discountField = discountField;
         this.customerIdField = customerIdField;
     }
@@ -48,11 +45,7 @@ public final class SaleAdjustments {
         Sale sale = activeSale.current();
         try {
             BigDecimal discount = DecimalInput.parseRequired(discountField.getText());
-            Sale updated = managerAction.apply(authorizedBy -> saleService.applySaleDiscount(sale, discount, authorizedBy));
-            if (updated == null) {
-                view.showStatus("Desconto acima do limite: não autorizado");
-                return;
-            }
+            Sale updated = saleService.applySaleDiscount(sale, discount);
             activeSale.set(updated);
             view.showSale(updated);
             discountField.clear();

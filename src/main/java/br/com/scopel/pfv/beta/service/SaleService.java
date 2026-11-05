@@ -3,7 +3,6 @@ package br.com.scopel.pfv.beta.service;
 import br.com.scopel.pfv.beta.exception.IllegalSaleStateException;
 import br.com.scopel.pfv.beta.exception.InvalidDiscountException;
 import br.com.scopel.pfv.beta.exception.InvalidQuantityException;
-import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.SaleItemNotFoundException;
 import br.com.scopel.pfv.beta.model.*;
 import br.com.scopel.pfv.beta.repository.SaleRepository;
@@ -113,7 +112,7 @@ public class SaleService {
         return saleRepository.save(sale);
     }
 
-    public Sale applyItemDiscount(Sale sale, String productCode, BigDecimal discount, User authorizedBy) {
+    public Sale applyItemDiscount(Sale sale, String productCode, BigDecimal discount) {
         if (sale.getStatus() != Sale.Status.ABERTA) {
             throw new IllegalSaleStateException();
         }
@@ -129,18 +128,13 @@ public class SaleService {
         if (discount.compareTo(gross) > 0) {
             throw new InvalidDiscountException("maior que o valor do item");
         }
-        if (percent(discount, gross).compareTo(discountLimitPercent()) > 0) {
-            requireManager(authorizedBy);
-            sale.setAuthorizedBy(authorizedBy);
-        }
-
         item.setDiscount(discount.setScale(2, RoundingMode.HALF_UP));
         item.setTotalPrice(lineTotal(item));
         sale.setTotal(calculateTotal(sale));
         return saleRepository.save(sale);
     }
 
-    public Sale applySaleDiscount(Sale sale, BigDecimal discount, User authorizedBy) {
+    public Sale applySaleDiscount(Sale sale, BigDecimal discount) {
         if (sale.getStatus() != Sale.Status.ABERTA && sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
             throw new IllegalSaleStateException();
         }
@@ -150,11 +144,6 @@ public class SaleService {
         if (discount.compareTo(subtotal) > 0) {
             throw new InvalidDiscountException("maior que o subtotal da venda");
         }
-        if (percent(discount, subtotal).compareTo(discountLimitPercent()) > 0) {
-            requireManager(authorizedBy);
-            sale.setAuthorizedBy(authorizedBy);
-        }
-
         sale.setDiscount(discount.setScale(2, RoundingMode.HALF_UP));
         sale.setTotal(calculateTotal(sale));
         return saleRepository.save(sale);
@@ -334,12 +323,6 @@ public class SaleService {
         return null;
     }
 
-    private void requireManager(User authorizedBy) {
-        if (authorizedBy == null || authorizedBy.getRole() != User.Role.GERENTE) {
-            throw new ManagerAuthorizationRequiredException();
-        }
-    }
-
     private void requireNotClosed(Sale sale) {
         if (sale.getStatus() == Sale.Status.FINALIZADA || sale.getStatus() == Sale.Status.CANCELADA) {
             throw new IllegalSaleStateException();
@@ -350,11 +333,6 @@ public class SaleService {
         if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
             throw new InvalidDiscountException(detail);
         }
-    }
-
-    private BigDecimal discountLimitPercent() {
-        return appSettingService.getBigDecimal(
-                AppSettingService.SALE_DISCOUNT_LIMIT_PERCENT, new BigDecimal("10"));
     }
 
     private BigDecimal percent(BigDecimal part, BigDecimal whole) {

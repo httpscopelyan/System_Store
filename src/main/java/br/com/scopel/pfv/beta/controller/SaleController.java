@@ -4,7 +4,6 @@ import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.ActiveSale;
-import br.com.scopel.pfv.beta.controller.support.ManagerAuthorizedAction;
 import br.com.scopel.pfv.beta.controller.support.SaleAdjustments;
 import br.com.scopel.pfv.beta.controller.support.SaleFocusGuard;
 import br.com.scopel.pfv.beta.controller.support.SaleScanFlow;
@@ -41,7 +40,6 @@ public class SaleController {
     private final Navigator navigator;
     private final CustomerService customerService;
     private final ReceiptService receiptService;
-    private final ManagerAuthorizationController managerAuthorizationController;
     private final QuickProductController quickProductController;
 
     private ActiveSale activeSale;
@@ -68,7 +66,6 @@ public class SaleController {
 
     public SaleController(SaleService saleService, ProductService productService, UserSession userSession,
                           Navigator navigator, CustomerService customerService, ReceiptService receiptService,
-                          ManagerAuthorizationController managerAuthorizationController,
                           QuickProductController quickProductController) {
         this.saleService = saleService;
         this.productService = productService;
@@ -76,7 +73,6 @@ public class SaleController {
         this.navigator = navigator;
         this.customerService = customerService;
         this.receiptService = receiptService;
-        this.managerAuthorizationController = managerAuthorizationController;
         this.quickProductController = quickProductController;
     }
 
@@ -94,7 +90,6 @@ public class SaleController {
                 codeField, quantityField, quantityLabel, quantityPreviewLabel, focusGuard);
         scanFlow.attachSuggestions();
         adjustments = new SaleAdjustments(activeSale, view, saleService, customerService, userSession,
-                new ManagerAuthorizedAction(managerAuthorizationController, userSession, view::window),
                 discountField, customerIdField);
 
         for (TextField field : new TextField[]{discountField, customerIdField}) {

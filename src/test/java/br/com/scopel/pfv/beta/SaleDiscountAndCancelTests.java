@@ -63,45 +63,42 @@ class SaleDiscountAndCancelTests {
         Product p = product(new BigDecimal("10.00"));
         Sale sale = openWithItem(op, p, new BigDecimal("10")); // subtotal 100.00
 
-        sale = saleService.applySaleDiscount(sale, new BigDecimal("5.00"), null); // 5%
+        sale = saleService.applySaleDiscount(sale, new BigDecimal("5.00")); // 5%
 
         assertEquals(0, new BigDecimal("95.00").compareTo(sale.getTotal()));
     }
 
-    // Desconto acima do limite exige gerente: operador é recusado.
     @Test
-    void saleDiscountAboveLimitRequiresManager() {
+    void operatorAppliesAnyValidSaleDiscountWithoutManager() {
         User op = user(User.Role.OPERADOR);
-        Product p = product(new BigDecimal("10.00"));
-        Sale sale = openWithItem(op, p, new BigDecimal("10")); // subtotal 100.00
-
-        assertThrows(ManagerAuthorizationRequiredException.class,
-                () -> saleService.applySaleDiscount(sale, new BigDecimal("20.00"), op)); // 20% com operador
-    }
-
-    // Mesmo desconto, com gerente autorizando, passa.
-    @Test
-    void saleDiscountAboveLimitWithManagerSucceeds() {
-        User op = user(User.Role.OPERADOR);
-        User gerente = user(User.Role.GERENTE);
         Product p = product(new BigDecimal("10.00"));
         Sale sale = openWithItem(op, p, new BigDecimal("10"));
 
-        sale = saleService.applySaleDiscount(sale, new BigDecimal("20.00"), gerente);
+        sale = saleService.applySaleDiscount(sale, new BigDecimal("20.00"));
 
         assertEquals(0, new BigDecimal("80.00").compareTo(sale.getTotal()));
-        assertEquals(gerente.getId(), sale.getAuthorizedBy().getId());
+        assertNull(sale.getAuthorizedBy());
+    }
+
+    @Test
+    void operatorAppliesLargeItemDiscountWithoutManager() {
+        User op = user(User.Role.OPERADOR);
+        Product p = product(new BigDecimal("10.00"));
+        Sale sale = openWithItem(op, p, new BigDecimal("10"));
+
+        sale = saleService.applyItemDiscount(sale, p.getCode(), new BigDecimal("50.00"));
+
+        assertEquals(0, new BigDecimal("50.00").compareTo(sale.getTotal()));
     }
 
     @Test
     void discountGreaterThanSubtotalIsInvalid() {
         User op = user(User.Role.OPERADOR);
-        User gerente = user(User.Role.GERENTE);
         Product p = product(new BigDecimal("10.00"));
         Sale sale = openWithItem(op, p, new BigDecimal("10")); // subtotal 100.00
 
         assertThrows(InvalidDiscountException.class,
-                () -> saleService.applySaleDiscount(sale, new BigDecimal("150.00"), gerente));
+                () -> saleService.applySaleDiscount(sale, new BigDecimal("150.00")));
     }
 
     @Test
@@ -110,7 +107,7 @@ class SaleDiscountAndCancelTests {
         Product p = product(new BigDecimal("10.00"));
         Sale sale = openWithItem(op, p, new BigDecimal("10")); // item gross 100.00
 
-        sale = saleService.applyItemDiscount(sale, p.getCode(), new BigDecimal("8.00"), null); // 8%
+        sale = saleService.applyItemDiscount(sale, p.getCode(), new BigDecimal("8.00")); // 8%
 
         assertEquals(0, new BigDecimal("92.00").compareTo(sale.getTotal()));
         assertEquals(0, new BigDecimal("92.00").compareTo(sale.getItems().get(0).getTotalPrice()));
@@ -188,6 +185,6 @@ class SaleDiscountAndCancelTests {
         Sale inPayment = saleService.goToPayment(sale);
 
         assertThrows(IllegalSaleStateException.class,
-                () -> saleService.applyItemDiscount(inPayment, p.getCode(), new BigDecimal("1.00"), null));
+                () -> saleService.applyItemDiscount(inPayment, p.getCode(), new BigDecimal("1.00")));
     }
 }

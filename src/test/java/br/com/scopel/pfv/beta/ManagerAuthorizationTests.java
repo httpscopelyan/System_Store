@@ -171,21 +171,6 @@ class ManagerAuthorizationTests {
 
     // ---------- caminhos de venda (complementos a SaleDiscountAndCancelTests) ----------
 
-    // 7. applySaleDiscount acima do teto com null -> recusa E venda fica inalterada.
-    @Test
-    void saleDiscountAboveLimitWithNullLeavesSaleUnchanged() {
-        User op = repoUser(User.Role.OPERADOR);
-        Product p = product(new BigDecimal("10.00"));
-        Sale sale = openWithItem(op, p, new BigDecimal("10")); // subtotal 100.00
-
-        assertThrows(ManagerAuthorizationRequiredException.class,
-                () -> saleService.applySaleDiscount(sale, new BigDecimal("20.00"), null));
-
-        assertEquals(0, new BigDecimal("100.00").compareTo(sale.getTotal()), "total não deve mudar");
-        assertEquals(0, BigDecimal.ZERO.compareTo(sale.getDiscount()), "desconto não deve ser aplicado");
-        assertNull(sale.getAuthorizedBy(), "nenhum autorizador deve ser registrado");
-    }
-
 
     // 8. Desconto dentro do teto com OPERADOR explícito -> aplica sem exigir gerente.
     @Test
@@ -194,7 +179,7 @@ class ManagerAuthorizationTests {
         Product p = product(new BigDecimal("10.00"));
         Sale sale = openWithItem(op, p, new BigDecimal("10")); // subtotal 100.00
 
-        sale = saleService.applySaleDiscount(sale, new BigDecimal("5.00"), op); // 5% (<= 10%)
+        sale = saleService.applySaleDiscount(sale, new BigDecimal("5.00")); // 5% (<= 10%)
 
         assertEquals(0, new BigDecimal("95.00").compareTo(sale.getTotal()));
         assertNull(sale.getAuthorizedBy(), "desconto dentro do teto não registra autorizador");

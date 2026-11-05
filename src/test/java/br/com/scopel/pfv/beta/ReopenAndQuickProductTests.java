@@ -116,10 +116,7 @@ class ReopenAndQuickProductTests {
         Product product = newProduct(new BigDecimal("50.00"), new BigDecimal("100.000"), Product.Unidade.UN);
         sale = saleService.addItem(sale, product.getCode(), new BigDecimal("2")); // subtotal 100.00
 
-        // desconto de 20.00 (20% > limite 10%) exige gerente -> grava authorizedBy
-        sale = saleService.applySaleDiscount(sale, new BigDecimal("20.00"), gerente);
-        assertNotNull(sale.getAuthorizedBy());
-        Long authorizedId = sale.getAuthorizedBy().getId();
+        sale = saleService.applySaleDiscount(sale, new BigDecimal("20.00"));
         BigDecimal totalAntes = sale.getTotal();          // 100 - 20 = 80.00
         BigDecimal descontoAntes = sale.getDiscount();    // 20.00
 
@@ -133,8 +130,6 @@ class ReopenAndQuickProductTests {
         assertEquals(1, reopened.getItems().size());
         assertEquals(0, totalAntes.compareTo(reopened.getTotal()));
         assertEquals(0, descontoAntes.compareTo(reopened.getDiscount()));
-        assertNotNull(reopened.getAuthorizedBy());
-        assertEquals(authorizedId, reopened.getAuthorizedBy().getId());
     }
 
     // 2. ABERTA -> IllegalSaleStateException
