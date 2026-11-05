@@ -3,7 +3,9 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
+import br.com.scopel.pfv.beta.controller.support.DrawerShortcut;
 import br.com.scopel.pfv.beta.controller.support.UpdateNotice;
+import br.com.scopel.pfv.beta.hardware.PrinterPort;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.service.UpdateService;
@@ -55,9 +57,11 @@ public class MainController {
 
     private Timeline hintClear;
     private UpdateNotice updateNotice;
+    private final PrinterPort printer;
 
     public MainController(Navigator navigator, UserSession userSession, UpdateService updateService,
-                          StockAlertService stockAlertService) {
+                          StockAlertService stockAlertService, PrinterPort printer) {
+        this.printer = printer;
         this.navigator = navigator;
         this.userSession = userSession;
         this.updateService = updateService;
@@ -139,6 +143,7 @@ public class MainController {
     private void setupShortcuts() {
         root.sceneProperty().addListener((obs, oldScene, scene) -> {
             if (scene == null) return;
+            new DrawerShortcut(printer, this::showHint).install(scene);
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F1), this::onConsultaPreco);
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F2), this::onVender);
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F3), () -> navigator.navigate(Page.ESTOQUE));
