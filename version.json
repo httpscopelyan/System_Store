@@ -1,10 +1,10 @@
 {
-  "version": "1.2.0",
-  "releaseDate": "2026-11-01",
+  "version": "1.2.1",
+  "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "feat(config): botão para alternar a maquininha entre modo PDV e modo manual",
+  "changelog": "feat: operadoras Dayana e Maria e nome Mercado Maná nas telas inicial e de login; versão 1.2.1",
   "mandatory": false,
-  "sha256": "f6be429605cbca95bf77a1ae9e7e6c8d1b85b35de3d6f374612d723f0fb454a7",
-  "size": 59522212,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.0/scopel-store.jar"
+  "sha256": "131788475fc62422916892ae69db4e0831bec1b9851f6668cec73f567d68b4fd",
+  "size": 59525263,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.1/scopel-store.jar"
 }
