@@ -14,7 +14,19 @@ public final class EnterToNextField {
     }
 
     public static void install(Node... orderedFields) {
+        install(null, orderedFields);
+    }
+
+    public static void install(Runnable onLastField, Node... orderedFields) {
         List<Node> fields = List.of(orderedFields);
+        if (onLastField != null) {
+            fields.get(fields.size() - 1).addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                if (event.getCode() == KeyCode.ENTER) {
+                    event.consume();
+                    onLastField.run();
+                }
+            });
+        }
         for (int index = 0; index < fields.size() - 1; index++) {
             int current = index;
             fields.get(index).addEventFilter(KeyEvent.KEY_PRESSED, event -> {

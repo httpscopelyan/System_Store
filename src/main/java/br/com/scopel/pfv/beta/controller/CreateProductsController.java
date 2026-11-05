@@ -48,7 +48,7 @@ public class CreateProductsController {
 
     @FXML
     public void initialize() {
-        EnterToNextField.install(codeField, descriptionField, costField, marginField, priceField, quantityField,
+        EnterToNextField.install(this::onSave, codeField, descriptionField, costField, marginField, priceField, quantityField,
                 minStockField, unitBox, categoryField);
         unitBox.getItems().setAll(Product.Unidade.values());
         unitBox.setValue(Product.Unidade.UN);
