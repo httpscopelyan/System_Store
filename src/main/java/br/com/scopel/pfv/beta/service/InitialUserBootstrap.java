@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.List;
  * do .env em seguida, para a senha em texto puro não ficar em disco. Banco que já tem usuário: nada a fazer.
  */
 @Component
+@Order(1)
 @Slf4j
 public class InitialUserBootstrap implements ApplicationRunner {
 

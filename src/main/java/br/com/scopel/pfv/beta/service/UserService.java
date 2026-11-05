@@ -35,6 +35,19 @@ public class UserService {
         return repository.save(newUser);
     }
 
+    public boolean registerWithPasswordHash(String login, String name, String passwordHash, User.Role role) {
+        if (repository.findByLogin(login).isPresent()) {
+            return false;
+        }
+        User user = new User();
+        user.setLogin(login);
+        user.setName(name);
+        user.setPassword(passwordHash);
+        user.setRole(role);
+        repository.save(user);
+        return true;
+    }
+
     public boolean hasUsers() {
         return repository.count() > 0;
     }

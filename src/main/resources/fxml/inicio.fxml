@@ -9,7 +9,7 @@
            styleClass="center-area">
 
     <VBox alignment="CENTER" spacing="10">
-        <Label text="Mercado Scopel" styleClass="brand-title"/>
+        <Label text="Mercado Maná" styleClass="brand-title"/>
         <Label text="PDV — Ponto de Venda" styleClass="brand-subtitle"/>
         <Label fx:id="caixaStatusLabel" text="" styleClass="caixa-status"/>
     </VBox>

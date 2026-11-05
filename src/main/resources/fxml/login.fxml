@@ -13,7 +13,7 @@
     <VBox alignment="CENTER" spacing="26" maxWidth="420">
 
         <VBox alignment="CENTER" spacing="4">
-            <Label text="Mercado Scopel" styleClass="login-brand"/>
+            <Label text="Mercado Maná" styleClass="login-brand"/>
             <Label text="PDV — Ponto de Venda" styleClass="login-brand-subtitle"/>
         </VBox>
 
