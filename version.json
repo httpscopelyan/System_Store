@@ -1,10 +1,10 @@
 {
-  "version": "1.2.12",
+  "version": "1.2.14",
   "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "feat(estoque): Dayana altera preço de venda, Ana Clara só visualiza; remove rolagem global da 1.2.11; versão 1.2.12",
+  "changelog": "feat(estoque): Enter no último campo do cadastro de produto salva; versão 1.2.14",
   "mandatory": false,
-  "sha256": "92e9eb0279691ec693634c2366394e0ce05e176321684b2d32b3defe15169ddf",
-  "size": 59564909,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.12/scopel-store.jar"
+  "sha256": "5404d4fea390252f7a58e75267220d5ee16245550468bf39440f7fb6a0b240a0",
+  "size": 59566758,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.14/scopel-store.jar"
 }
