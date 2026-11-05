@@ -1,10 +1,10 @@
 {
-  "version": "1.2.10",
+  "version": "1.2.11",
   "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "fix(venda): rolagem na tela de venda; feat(estoque): código do produto editável; versão 1.2.10",
+  "changelog": "feat(ui): todas as páginas com rolagem quando a área é menor que 700px; versão 1.2.11",
   "mandatory": false,
-  "sha256": "3c5c3d3ca2bc5b3b7921cd1aa61b4be792eaba26725db93fc9c5d67dfa81009d",
-  "size": 59563064,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.10/scopel-store.jar"
+  "sha256": "c88dafccc30e38d595280fe307d6236cca10852dbf82c8bc8bef69099ba4bd14",
+  "size": 59563560,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.11/scopel-store.jar"
 }
