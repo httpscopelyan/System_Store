@@ -1,10 +1,10 @@
 {
-  "version": "1.2.3",
+  "version": "1.2.4",
   "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "feat: tela Minha conta (nome de acesso e senha) e atalho F11 de tela cheia; versão 1.2.3",
+  "changelog": "feat: blocos do menu maiores (ícone, nome e atalho), cancelar item/venda sem gerente, botões coloridos, Enter avança campo e nome Mercado Maná; versão 1.2.4",
   "mandatory": false,
-  "sha256": "84bae5c9c9e2220e1395ab4a38cf2b21da3fd2b0a415a1a2f47a45ccb544fc7c",
-  "size": 59532841,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.3/scopel-store.jar"
+  "sha256": "b868cac05eaddda2c35a30013c913b86fea09db5210c378037a105ca2d21825c",
+  "size": 59537202,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.4/scopel-store.jar"
 }
