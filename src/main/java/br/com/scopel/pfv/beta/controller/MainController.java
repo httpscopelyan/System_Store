@@ -48,7 +48,7 @@ public class MainController {
     @FXML private BorderPane root;
     @FXML private Button updateButton;
     @FXML private Button configButton;
-    @FXML private javafx.scene.layout.FlowPane blocksBar;
+    @FXML private javafx.scene.layout.TilePane blocksBar;
     @FXML private Button backButton;
     @FXML private Button shoppingListButton;
     @FXML private Label dateTimeLabel;

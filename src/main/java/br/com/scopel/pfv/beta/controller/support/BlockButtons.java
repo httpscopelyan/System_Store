@@ -27,7 +27,7 @@ public final class BlockButtons {
         if (lines.length < 2) {
             return;
         }
-        VBox content = new VBox(2);
+        VBox content = new VBox(1);
         content.setAlignment(Pos.CENTER);
         content.getChildren().add(label(lines[0], "block-icon"));
         content.getChildren().add(label(lines[1], "block-name"));

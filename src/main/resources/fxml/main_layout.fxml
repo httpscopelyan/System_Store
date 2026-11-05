@@ -12,7 +12,7 @@
                 <padding><Insets bottom="6" left="14" right="14" top="6" /></padding>
                 <Label styleClass="brand-bar-title" text="SCOPEL STORE" />
             </HBox>
-            <FlowPane fx:id="blocksBar" hgap="8" styleClass="top-bar" vgap="8">
+            <TilePane fx:id="blocksBar" hgap="6" prefColumns="9" styleClass="top-bar" tileAlignment="CENTER" vgap="6">
                 <Button fx:id="backButton" disable="true" onAction="#onBack" styleClass="block-button" text="◀&#10;Voltar&#10;Esc" />
                 <Button onAction="#onConsultaPreco" styleClass="block-button" text="🏷&#10;Preço&#10;F1" />
                 <Button onAction="#onVender" styleClass="block-button, block-primary" text="🛒&#10;Nova Venda&#10;F2" />
@@ -30,7 +30,7 @@
                 <Button onAction="#onNavigate" styleClass="block-button" text="📊&#10;Relatórios&#10;F8" userData="RELATORIOS" />
                 <Button onAction="#onNavigate" styleClass="block-button" text="👤&#10;Minha conta" userData="MINHA_CONTA" />
                 <Button fx:id="configButton" onAction="#onNavigate" styleClass="block-button" text="⚙&#10;Config" userData="CONFIG" />
-            </FlowPane>
+            </TilePane>
         </VBox>
     </top>
 

@@ -95,8 +95,8 @@ public class UpdateService {
             log.info("[Update] Verificação de atualizações desabilitada.");
             return;
         }
-        log.info("[Update] Versão atual: {} | manifesto: {} | intervalo: {} min",
-                config.getCurrentVersion(), config.getVersionUrl(), config.getCheckIntervalMinutes());
+        log.info("[Update] Versão atual: {} | manifesto: {} | intervalo: {} s",
+                config.getCurrentVersion(), config.getVersionUrl(), config.getCheckIntervalSeconds());
 
         try {
             ingestUpdaterResult();
@@ -109,9 +109,8 @@ public class UpdateService {
             t.setDaemon(true);
             return t;
         });
-        // Primeira verificação 15 s após o boot; depois a cada intervalo.
-        scheduler.scheduleWithFixedDelay(this::checkQuietly, 15,
-                Math.max(1, config.getCheckIntervalMinutes()) * 60L, TimeUnit.SECONDS);
+        long intervalSeconds = Math.max(1, config.getCheckIntervalSeconds());
+        scheduler.scheduleWithFixedDelay(this::checkQuietly, intervalSeconds, intervalSeconds, TimeUnit.SECONDS);
     }
 
     @PreDestroy

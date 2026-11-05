@@ -124,7 +124,7 @@ anexa `scopel-store.jar` + `.sha256` e só então publica o `version.json` na `m
 |---|---|---|
 | `enabled` | `true` | liga/desliga |
 | `version-url` | GitHub Raw `main/version.json` | manifesto |
-| `check-interval-minutes` | `60` | intervalo |
+| `check-interval-seconds` | `20` | intervalo |
 | `download-dir` | `updates` | estado do updater |
 | `backup-dir` | `backup` | backups |
 | `backups-to-keep` | `3` | retenção |

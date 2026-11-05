@@ -42,14 +42,17 @@
 .block-button {
     -fx-background-color: linear-gradient(to bottom, #ffffff, #e6edf7);
     -fx-border-color: #9fb3cc;
-    -fx-border-width: 2;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
-    -fx-min-width: 128;
-    -fx-pref-width: 128;
-    -fx-min-height: 104;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-min-width: 120;
+    -fx-pref-width: 120;
+    -fx-max-width: 120;
+    -fx-min-height: 74;
+    -fx-pref-height: 74;
+    -fx-max-height: 74;
     -fx-cursor: hand;
-    -fx-padding: 8 6 8 6;
+    -fx-padding: 4 4 4 4;
 }
 
 .block-button:hover {
@@ -72,11 +75,11 @@
 }
 
 .block-icon {
-    -fx-font-size: 34px;
+    -fx-font-size: 22px;
 }
 
 .block-name {
-    -fx-font-size: 15px;
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
     -fx-text-fill: #0f2a52;
     -fx-text-alignment: center;
@@ -84,12 +87,12 @@
 }
 
 .block-key {
-    -fx-font-size: 13px;
+    -fx-font-size: 10px;
     -fx-font-weight: bold;
     -fx-text-fill: #ffffff;
     -fx-background-color: #15325f;
     -fx-background-radius: 4;
-    -fx-padding: 1 8 1 8;
+    -fx-padding: 0 6 0 6;
 }
 
 .block-primary .block-name {
@@ -418,9 +421,9 @@
     -fx-font-size: 18px;
     -fx-font-weight: bold;
     -fx-border-color: #2e6cb5;
-    -fx-border-width: 2;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
     -fx-cursor: hand;
     -fx-padding: 16 24 16 24;
     -fx-alignment: center-left;
