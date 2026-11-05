@@ -1,10 +1,10 @@
 {
-  "version": "1.2.14",
+  "version": "1.2.15",
   "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "feat(estoque): Enter no último campo do cadastro de produto salva; versão 1.2.14",
+  "changelog": "feat(ui): remove o cabeçalho azul de título das páginas; versão 1.2.15",
   "mandatory": false,
-  "sha256": "5404d4fea390252f7a58e75267220d5ee16245550468bf39440f7fb6a0b240a0",
-  "size": 59566758,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.14/scopel-store.jar"
+  "sha256": "447a0ecb4381ccb9e7ade18f134a867aa10d72595a34886d2c8e4e8ba45c203a",
+  "size": 59564670,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.15/scopel-store.jar"
 }
