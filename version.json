@@ -1,10 +1,10 @@
 {
-  "version": "1.2.4",
+  "version": "1.2.5",
   "releaseDate": "2026-11-05",
   "minJavaVersion": 24,
-  "changelog": "feat: blocos do menu maiores (ícone, nome e atalho), cancelar item/venda sem gerente, botões coloridos, Enter avança campo e nome Mercado Maná; versão 1.2.4",
+  "changelog": "feat: cards do menu compactos em grade alinhada e verificação de atualização a cada 20 segundos; versão 1.2.5",
   "mandatory": false,
-  "sha256": "b868cac05eaddda2c35a30013c913b86fea09db5210c378037a105ca2d21825c",
-  "size": 59537202,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.4/scopel-store.jar"
+  "sha256": "8cc43106f3ebd192e3782e4973622be9d2df79ee8c19c99b6a1e566e38775996",
+  "size": 59537229,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.5/scopel-store.jar"
 }
