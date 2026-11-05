@@ -27,9 +27,8 @@
 
                 <HBox spacing="16">
                     <VBox spacing="6">
-                        <Label text="Código (não editável)" styleClass="form-label"/>
-                        <TextField fx:id="codeField" editable="false" disable="true"
-                                   styleClass="text-input"/>
+                        <Label text="Código de barras" styleClass="form-label"/>
+                        <TextField fx:id="codeField" styleClass="text-input"/>
                     </VBox>
                     <VBox spacing="6">
                         <Label text="Estoque atual" styleClass="form-label"/>

@@ -53,7 +53,7 @@ public class EditProductController {
 
     @FXML
     public void initialize() {
-        EnterToNextField.install(descriptionField, unitBox, categoryField, minStockField, costField, marginField,
+        EnterToNextField.install(codeField, descriptionField, unitBox, categoryField, minStockField, costField, marginField,
                 priceField);
         unitBox.getItems().setAll(Product.Unidade.values());
 
@@ -81,7 +81,7 @@ public class EditProductController {
         priceField.textProperty().addListener((observable, previous, current) -> refreshProfit());
         refreshProfit();
 
-        Platform.runLater(() -> descriptionField.requestFocus());
+        Platform.runLater(() -> codeField.requestFocus());
     }
 
     @FXML
@@ -93,6 +93,7 @@ public class EditProductController {
         try {
             productService.update(
                     productId,
+                    codeField.getText(),
                     descriptionField.getText(),
                     unitBox.getValue(),
                     DecimalInput.parseRequired(priceField.getText()),

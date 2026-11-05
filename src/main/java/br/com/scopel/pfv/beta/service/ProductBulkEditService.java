@@ -22,9 +22,11 @@ public class ProductBulkEditService {
     private final ProductRepository repository;
     private final PricingSuggestionService pricingSuggestionService;
     private final StockService stockService;
+    private final ProductService productService;
 
     public ProductBulkEditService(ProductRepository repository, PricingSuggestionService pricingSuggestionService,
-                                  StockService stockService) {
+                                  StockService stockService, ProductService productService) {
+        this.productService = productService;
         this.repository = repository;
         this.pricingSuggestionService = pricingSuggestionService;
         this.stockService = stockService;
@@ -77,6 +79,12 @@ public class ProductBulkEditService {
             product.setPrice(price);
             return true;
         });
+    }
+
+    @Transactional
+    public BulkResult applyCode(Long productId, String code) {
+        productService.changeCode(productId, code);
+        return new BulkResult(1, 0);
     }
 
     @Transactional

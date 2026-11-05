@@ -7,6 +7,7 @@ import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -103,6 +104,30 @@ public class ProductService {
         product.setCategory(normalizeCategory(category));
         product.setActive(active);
         return save(product);
+    }
+
+    @Transactional
+    public Product changeCode(Long id, String newCode) {
+        Product product = findById(id);
+        String normalized = normalizeCode(newCode);
+        if (normalized.equals(product.getCode())) {
+            return product;
+        }
+        boolean takenByAnother = repository.findByCodeIgnoreCase(normalized)
+                .filter(other -> !other.getId().equals(product.getId()))
+                .isPresent();
+        if (takenByAnother) {
+            throw new RegisterProductDuplicateException(normalized);
+        }
+        product.setCode(normalized);
+        return repository.save(product);
+    }
+
+    @Transactional
+    public Product update(Long id, String code, String description, Product.Unidade unit, BigDecimal price,
+                          BigDecimal costPrice, BigDecimal minStock, String category, boolean active) {
+        changeCode(id, code);
+        return update(id, description, unit, price, costPrice, minStock, category, active);
     }
 
     public Product update(Long id, String description, Product.Unidade unit, BigDecimal price,

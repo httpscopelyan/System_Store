@@ -1,5 +1,6 @@
 package br.com.scopel.pfv.beta;
 
+import br.com.scopel.pfv.beta.hardware.CardPaymentGateway;
 import br.com.scopel.pfv.beta.model.User;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -70,16 +71,21 @@ class DirectChargeScreenTests {
     }
 
     @Test
-    void enterWithoutPdvModeKeepsTheCalculatorAndExplainsWhy() throws Exception {
+    void enterGoesToPaymentChoiceOnlyWhenTheTerminalIsInPdvMode() throws Exception {
         screen = SaleScreenHarness.open(context, User.Role.OPERADOR);
         screen.showPage("direct_charge");
 
         screen.onFx(() -> {
             tap("9");
             ((Button) screen.root().lookup(".calc-enter")).fire();
-            assertTrue(screen.node("inputPanel").isVisible());
-            assertFalse(screen.node("choosePanel").isVisible());
-            assertTrue(((Label) screen.node("messageLabel")).getText().contains("modo PDV"));
+            if (context.getBean(CardPaymentGateway.class).isIntegrated()) {
+                assertTrue(screen.node("choosePanel").isVisible());
+                assertFalse(screen.node("inputPanel").isVisible());
+            } else {
+                assertTrue(screen.node("inputPanel").isVisible());
+                assertFalse(screen.node("choosePanel").isVisible());
+                assertTrue(((Label) screen.node("messageLabel")).getText().contains("modo PDV"));
+            }
         });
     }
 }

@@ -14,7 +14,8 @@
     </top>
 
     <center>
-        <VBox spacing="8">
+        <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="inicio-root">
+        <VBox minHeight="560" spacing="8">
             <padding>
                 <Insets bottom="10" left="24" right="24" top="10" />
             </padding>
@@ -35,7 +36,7 @@
                 <Label fx:id="lastItemLabel" focusTraversable="false" maxWidth="Infinity" styleClass="last-item-name" text="—" wrapText="true" />
             </VBox>
 
-            <TableView fx:id="itemsTable" minHeight="320" prefHeight="600" styleClass="items-table" VBox.vgrow="ALWAYS">
+            <TableView fx:id="itemsTable" minHeight="180" prefHeight="300" styleClass="items-table" VBox.vgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="descriptionCol" prefWidth="520.0" text="Descrição" />
                     <TableColumn fx:id="quantityCol" prefWidth="140.0" text="Qtd" />
@@ -59,6 +60,7 @@
                 <Button onAction="#onCancelSale" styleClass="danger-button, compact-button" text="Cancelar venda" />
             </HBox>
         </VBox>
+        </ScrollPane>
     </center>
 
     <right>

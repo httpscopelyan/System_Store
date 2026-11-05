@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 public final class ProductTablePresenter {
 
     public enum EditableColumn {
+        CODE,
         NAME,
         COST,
         MARGIN_PERCENT,
@@ -145,6 +146,7 @@ public final class ProductTablePresenter {
     }
 
     private void configureEditable() {
+        register(EditableColumn.CODE, columns.code());
         register(EditableColumn.NAME, columns.description());
         register(EditableColumn.COST, columns.cost());
         register(EditableColumn.MARGIN_PERCENT, columns.marginPercent());
@@ -154,8 +156,8 @@ public final class ProductTablePresenter {
             register(EditableColumn.STOCK, columns.stock());
         }
         List<TableColumn<Product, String>> readOnlyColumns = stockEditable
-                ? List.of(columns.code(), columns.profit(), columns.suggestedPrice())
-                : List.of(columns.code(), columns.profit(), columns.suggestedPrice(), columns.stock());
+                ? List.of(columns.profit(), columns.suggestedPrice())
+                : List.of(columns.profit(), columns.suggestedPrice(), columns.stock());
         readOnlyColumns.forEach(readOnly -> readOnly.setEditable(false));
     }
 

@@ -38,7 +38,7 @@ public final class BulkCellEditor {
     public Outcome commit(CellEdit edit) {
         List<Long> ids = targetIds(edit);
         BigDecimal number = null;
-        if (edit.column() != EditableColumn.NAME) {
+        if (edit.column() != EditableColumn.NAME && edit.column() != EditableColumn.CODE) {
             number = parseNumber(edit.text());
             if (number == null) {
                 return rejected("Valor inválido: " + edit.text(), ids, edit);
@@ -78,7 +78,8 @@ public final class BulkCellEditor {
     }
 
     private List<Long> targetIds(CellEdit edit) {
-        if (edit.column() == EditableColumn.NAME || edit.column() == EditableColumn.STOCK) {
+        if (edit.column() == EditableColumn.NAME || edit.column() == EditableColumn.CODE
+                || edit.column() == EditableColumn.STOCK) {
             return List.of(edit.product().getId());
         }
         List<Long> selected = selection.idsInColumn(edit.tableColumn());
@@ -88,6 +89,7 @@ public final class BulkCellEditor {
     private BulkResult apply(CellEdit edit, BigDecimal number, List<Long> ids) {
         return switch (edit.column()) {
             case NAME -> bulkEditService.applyDescription(ids, edit.text());
+            case CODE -> bulkEditService.applyCode(ids.get(0), edit.text());
             case MIN_STOCK -> bulkEditService.applyMinStock(ids, number);
             case STOCK -> managerAction.apply(actor -> bulkEditService.applyStockQuantity(ids, number, actor));
             case PRICE -> managerAction.apply(actor -> bulkEditService.applyPrice(ids, number, actor));
@@ -111,6 +113,7 @@ public final class BulkCellEditor {
             case MARGIN_PERCENT -> "Aplicar margem de " + MoneyFormat.quantity(number) + "% em " + target + "?";
             case STOCK -> "Ajustar o estoque para " + MoneyFormat.quantity(number) + "?";
             case MIN_STOCK -> "Aplicar estoque mínimo " + MoneyFormat.quantity(number) + " em " + target + "?";
+            case CODE -> "Alterar o código para \"" + rawText + "\"?";
             case NAME -> "Aplicar o nome \"" + rawText + "\" em " + target + "?";
         };
     }

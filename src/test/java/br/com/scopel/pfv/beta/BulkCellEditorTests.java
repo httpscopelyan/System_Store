@@ -305,7 +305,7 @@ class BulkCellEditorTests {
     @Test
     void stockQuantityColumnIsNeverEditable_RN26() {
         assertFalse(columns.stock().isEditable());
-        assertFalse(columns.code().isEditable());
+        assertTrue(columns.code().isEditable());
         assertTrue(columns.price().isEditable());
     }
 }
