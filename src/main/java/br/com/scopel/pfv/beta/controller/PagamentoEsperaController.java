@@ -46,7 +46,6 @@ public class PagamentoEsperaController {
 
     @FXML private Label totalLabel;
     @FXML private Label typeLabel;
-    @FXML private Label subtitleLabel;
     @FXML private Label statusLabel;
     @FXML private Button confirmButton;
     @FXML private VBox manualBox;
@@ -135,7 +134,6 @@ public class PagamentoEsperaController {
     }
 
     private void startManualCharge(BigDecimal total) {
-        subtitleLabel.setText("Maquininha em modo manual");
         manualBox.setVisible(true);
         manualBox.setManaged(true);
         statusLabel.setText("Digite R$ " + MONEY.format(total) + " na maquininha e cobre o cliente. "
@@ -144,7 +142,6 @@ public class PagamentoEsperaController {
     }
 
     private void startIntegratedCharge(BigDecimal total) {
-        subtitleLabel.setText("Cobrança automática na maquininha");
         confirmButton.setVisible(false);
         confirmButton.setManaged(false);
         statusLabel.setText("Enviando a cobrança para a maquininha...");

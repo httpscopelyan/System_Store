@@ -46,7 +46,6 @@ public class PagamentoPixController {
     private CardChargePoller poller;
 
     @FXML private Label totalLabel;
-    @FXML private Label subtitleLabel;
     @FXML private VBox copyPasteBox;
     @FXML private TextArea pixArea;
     @FXML private Label statusLabel;
@@ -114,7 +113,6 @@ public class PagamentoPixController {
     }
 
     private void startMachineCharge(BigDecimal total) {
-        subtitleLabel.setText("QR Code PIX na maquininha (confirmação automática)");
         copyPasteBox.setVisible(false);
         copyPasteBox.setManaged(false);
         confirmButton.setVisible(false);
