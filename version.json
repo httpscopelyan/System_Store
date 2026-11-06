@@ -1,10 +1,10 @@
 {
-  "version": "1.2.15",
-  "releaseDate": "2026-11-05",
+  "version": "1.2.16",
+  "releaseDate": "2026-11-06",
   "minJavaVersion": 24,
-  "changelog": "feat(ui): remove o cabeçalho azul de título das páginas; versão 1.2.15",
+  "changelog": "fix(pagamento): cartão e PIX não abriam após remover o cabeçalho (subtitleLabel nulo); versão 1.2.16",
   "mandatory": false,
-  "sha256": "447a0ecb4381ccb9e7ade18f134a867aa10d72595a34886d2c8e4e8ba45c203a",
-  "size": 59564670,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.15/scopel-store.jar"
+  "sha256": "e64468d292fc8c72291439aab3a7058a1072751a9f48e7e74d23885e171c7cc3",
+  "size": 59564528,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.16/scopel-store.jar"
 }
