@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Component
 public class Navigator {
@@ -26,6 +27,8 @@ public class Navigator {
 
     private BorderPane shell;
     private Page currentPage;
+    private String lockReason;
+    private Consumer<String> notice = message -> { };
 
     public Navigator(ApplicationContext context, ThemeManager themeManager) {
         this.context = context;
@@ -37,9 +40,41 @@ public class Navigator {
         navigationListeners.clear();
         history.clear();
         currentPage = null;
+        lockReason = null;
+    }
+
+    public void lock(String reason) {
+        lockReason = reason;
+    }
+
+    public void unlock() {
+        lockReason = null;
+    }
+
+    public boolean isLocked() {
+        return lockReason != null;
+    }
+
+    public void setNotice(Consumer<String> notice) {
+        this.notice = notice;
+    }
+
+    public void notice(String message) {
+        notice.accept(message);
+    }
+
+    private boolean blockedByLock() {
+        if (lockReason == null) {
+            return false;
+        }
+        notice.accept(lockReason);
+        return true;
     }
 
     public void navigate(Page page) {
+        if (blockedByLock()) {
+            return;
+        }
         if (currentPage != null && currentPage != page) {
             history.push(currentPage);
         }
@@ -47,6 +82,9 @@ public class Navigator {
     }
 
     public void back() {
+        if (blockedByLock()) {
+            return;
+        }
         Page target = history.back().orElse(Page.INICIO);
         show(target);
     }

@@ -5,8 +5,8 @@ import br.com.scopel.pfv.beta.model.CashMovement;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record CashMovementRow(LocalDateTime at, boolean entry, BigDecimal cash, BigDecimal credit,
-                              BigDecimal debit, BigDecimal total, Long saleId, String history,
+public record CashMovementRow(LocalDateTime at, boolean entry, BigDecimal cash, BigDecimal pix,
+                              BigDecimal credit, BigDecimal debit, BigDecimal total, Long saleId, String history,
                               CashMovement movement) {
 
     public boolean isRectifiable() {

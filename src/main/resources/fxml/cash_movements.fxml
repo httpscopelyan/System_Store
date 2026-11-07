@@ -12,7 +12,7 @@
             <TableColumn fx:id="colMovDate" text="Data/Hora" prefWidth="140"/>
             <TableColumn fx:id="colMovOp" text="Op." prefWidth="40"/>
             <TableColumn fx:id="colMovDinheiro" text="Dinheiro" prefWidth="95"/>
-            <TableColumn fx:id="colMovCheque" text="Cheque" prefWidth="85"/>
+            <TableColumn fx:id="colMovPix" text="PIX / QR" prefWidth="85"/>
             <TableColumn fx:id="colMovCredito" text="Cartão Crédito" prefWidth="110"/>
             <TableColumn fx:id="colMovDebito" text="Cartão Débito" prefWidth="105"/>
             <TableColumn fx:id="colMovTotal" text="Total" prefWidth="95"/>

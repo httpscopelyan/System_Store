@@ -16,6 +16,7 @@ import br.com.scopel.pfv.beta.service.ReceiptService;
 import br.com.scopel.pfv.beta.service.SaleService;
 import br.com.scopel.pfv.beta.service.cash.CashMovementRow;
 import br.com.scopel.pfv.beta.service.cash.CashOverview;
+import br.com.scopel.pfv.beta.service.cash.CashSummary;
 import br.com.scopel.pfv.beta.service.cash.CashSummaryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,9 @@ class CashSummaryServiceTests {
         if (method == PaymentMethod.CARTAO) {
             return saleService.payCard(sale, cardType);
         }
+        if (method == PaymentMethod.PIX) {
+            return saleService.payPix(sale);
+        }
         return saleService.pay(sale, PaymentMethod.DINHEIRO, new BigDecimal(received));
     }
 
@@ -99,6 +103,42 @@ class CashSummaryServiceTests {
         assertEquals(0, new BigDecimal("130.00").compareTo(overview.summary().totalIn()));
         assertEquals(0, new BigDecimal("135.00").compareTo(overview.summary().finalBalance()));
         assertEquals(4, overview.rows().size());
+    }
+
+    @Test
+    void pixSalesAppearInTheirOwnTotalAndNotInTheDrawer() {
+        finalizedSale("20.00", PaymentMethod.DINHEIRO, null, "20.00");
+        finalizedSale("30.00", PaymentMethod.PIX, null, null);
+
+        CashOverview overview = cashSummaryService.overview(register);
+        assertEquals(0, new BigDecimal("30.00").compareTo(overview.summary().pix()));
+        assertEquals(0, new BigDecimal("20.00").compareTo(overview.summary().cashIn()));
+        assertEquals(0, new BigDecimal("50.00").compareTo(overview.summary().totalIn()));
+        assertEquals(0, new BigDecimal("120.00").compareTo(overview.summary().finalBalance()));
+    }
+
+    @Test
+    void fullDayWithEveryFormOfPaymentKeepsEachColumnAndTheDrawerCorrect() {
+        finalizedSale("20.00", PaymentMethod.DINHEIRO, null, "50.00");
+        finalizedSale("30.00", PaymentMethod.PIX, null, null);
+        finalizedSale("12.50", PaymentMethod.PIX, null, null);
+        finalizedSale("40.00", PaymentMethod.CARTAO, CardType.DEBITO, null);
+        finalizedSale("55.00", PaymentMethod.CARTAO, CardType.CREDITO, null);
+        cashRegisterService.supplement(register.getId(), new BigDecimal("10"), "troco");
+        cashRegisterService.withdrawal(register.getId(), new BigDecimal("5"), "sangria");
+
+        CashOverview overview = cashSummaryService.overview(register);
+        CashSummary summary = overview.summary();
+
+        assertEquals(0, new BigDecimal("30.00").compareTo(summary.cashIn()));
+        assertEquals(0, new BigDecimal("42.50").compareTo(summary.pix()));
+        assertEquals(0, new BigDecimal("40.00").compareTo(summary.debit()));
+        assertEquals(0, new BigDecimal("55.00").compareTo(summary.credit()));
+        assertEquals(0, new BigDecimal("167.50").compareTo(summary.totalIn()));
+        assertEquals(0, new BigDecimal("125.00").compareTo(summary.finalBalance()));
+        BigDecimal pixOnRows = overview.rows().stream().map(CashMovementRow::pix)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(0, new BigDecimal("42.50").compareTo(pixOnRows));
     }
 
     @Test

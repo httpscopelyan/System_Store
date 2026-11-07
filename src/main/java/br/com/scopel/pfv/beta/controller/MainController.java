@@ -77,6 +77,7 @@ public class MainController {
     @FXML
     public void initialize() {
         navigator.bind(root);
+        navigator.setNotice(this::showHint);
         navigator.addNavigationListener(this::refreshBackButton);
         navigator.addNavigationListener(this::refreshShoppingListCount);
         BlockButtons.apply(blocksBar);

@@ -31,6 +31,7 @@ public class CashSummaryService {
         Map<Long, SaleReceiptTotals> totalsBySale = receiptTotalsBySale(cashRegister);
         List<CashMovementRow> rows = new ArrayList<>();
         BigDecimal salesCash = BigDecimal.ZERO;
+        BigDecimal pix = BigDecimal.ZERO;
         BigDecimal credit = BigDecimal.ZERO;
         BigDecimal debit = BigDecimal.ZERO;
 
@@ -40,10 +41,11 @@ public class CashSummaryService {
             }
             SaleReceiptTotals totals = totalsBySale.getOrDefault(sale.getId(), new SaleReceiptTotals());
             salesCash = salesCash.add(totals.cash);
+            pix = pix.add(totals.pix);
             credit = credit.add(totals.credit);
             debit = debit.add(totals.debit);
-            rows.add(new CashMovementRow(sale.getCreatedAt(), true, totals.cash, totals.credit, totals.debit,
-                    sale.getTotal(), sale.getId(),
+            rows.add(new CashMovementRow(sale.getCreatedAt(), true, totals.cash, totals.pix, totals.credit,
+                    totals.debit, sale.getTotal(), sale.getId(),
                     sale.getCustomer() != null ? sale.getCustomer().getName() : ANONYMOUS_CUSTOMER, null));
         }
 
@@ -63,18 +65,18 @@ public class CashSummaryService {
                 }
             }
             rows.add(new CashMovementRow(movement.getCreatedAt(), entry, movement.getAmount(), BigDecimal.ZERO,
-                    BigDecimal.ZERO, movement.getAmount(), null, describe(movement), movement));
+                    BigDecimal.ZERO, BigDecimal.ZERO, movement.getAmount(), null, describe(movement), movement));
         }
 
         rows.sort(Comparator.comparing(CashMovementRow::at));
-        return new CashOverview(rows, summarize(cashRegister, salesCash.add(supplements), credit, debit, withdrawals));
+        return new CashOverview(rows, summarize(cashRegister, salesCash.add(supplements), pix, credit, debit, withdrawals));
     }
 
-    private CashSummary summarize(CashRegister cashRegister, BigDecimal cashIn, BigDecimal credit,
-                                  BigDecimal debit, BigDecimal cashOut) {
+    private CashSummary summarize(CashRegister cashRegister, BigDecimal cashIn, BigDecimal pix,
+                                  BigDecimal credit, BigDecimal debit, BigDecimal cashOut) {
         BigDecimal opening = cashRegister.getOpeningAmount() == null ? BigDecimal.ZERO : cashRegister.getOpeningAmount();
-        BigDecimal totalIn = cashIn.add(credit).add(debit);
-        return new CashSummary(opening, cashIn, credit, debit, totalIn, cashOut,
+        BigDecimal totalIn = cashIn.add(pix).add(credit).add(debit);
+        return new CashSummary(opening, cashIn, pix, credit, debit, totalIn, cashOut,
                 opening.add(cashIn).subtract(cashOut));
     }
 
@@ -103,6 +105,8 @@ public class CashSummaryService {
                     key -> new SaleReceiptTotals());
             if (payment.getMethod() == PaymentMethod.DINHEIRO) {
                 totals.cash = totals.cash.add(net);
+            } else if (payment.getMethod() == PaymentMethod.PIX) {
+                totals.pix = totals.pix.add(net);
             } else if (payment.getMethod() == PaymentMethod.CARTAO) {
                 if (payment.getCardType() == CardType.DEBITO) {
                     totals.debit = totals.debit.add(net);
@@ -120,6 +124,7 @@ public class CashSummaryService {
 
     private static final class SaleReceiptTotals {
         private BigDecimal cash = BigDecimal.ZERO;
+        private BigDecimal pix = BigDecimal.ZERO;
         private BigDecimal credit = BigDecimal.ZERO;
         private BigDecimal debit = BigDecimal.ZERO;
     }

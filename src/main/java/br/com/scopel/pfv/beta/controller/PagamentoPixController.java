@@ -3,7 +3,11 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
+import br.com.scopel.pfv.beta.controller.support.BackgroundPrinting;
+import br.com.scopel.pfv.beta.controller.support.ChargeCancellation;
 import br.com.scopel.pfv.beta.controller.support.CardChargePoller;
+import br.com.scopel.pfv.beta.controller.support.ChargeScreen;
+import br.com.scopel.pfv.beta.service.ReceiptPayment;
 import br.com.scopel.pfv.beta.exception.PixNotConfiguredException;
 import br.com.scopel.pfv.beta.hardware.CardPaymentGateway;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
@@ -11,7 +15,6 @@ import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.service.PixService;
 import br.com.scopel.pfv.beta.service.ReceiptService;
 import br.com.scopel.pfv.beta.service.SaleService;
-import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -20,7 +23,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
-import javafx.util.Duration;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -42,8 +44,10 @@ public class PagamentoPixController {
     private final CardPaymentGateway gateway;
 
     private Sale vendaAtual;
-    private boolean done;
+    private boolean done, ended, awaitingRegistration;
     private CardChargePoller poller;
+    private ChargeCancellation cancellation = new ChargeCancellation();
+    private ChargeScreen screen;
 
     @FXML private Label totalLabel;
     @FXML private VBox copyPasteBox;
@@ -64,8 +68,11 @@ public class PagamentoPixController {
 
     @FXML
     public void initialize() {
+        screen = new ChargeScreen(statusLabel, confirmButton);
         vendaAtual = userSession.getVendaAtual();
         done = false;
+        ended = false;
+        awaitingRegistration = false;
         poller = null;
         BigDecimal total = vendaAtual == null ? BigDecimal.ZERO : vendaAtual.getTotal();
         totalLabel.setText("R$ " + MONEY.format(total));
@@ -85,28 +92,43 @@ public class PagamentoPixController {
         if (e.getCode() == KeyCode.ESCAPE) {
             onVoltar();
             e.consume();
+        } else if (e.getCode() == KeyCode.ENTER && (ended || awaitingRegistration)) {
+            onConfirm();
+            e.consume();
         }
     }
 
     @FXML
     public void onVoltar() {
-        if (done) {
+        if (ended) {
+            leaveTo(Page.PAGAMENTO);
+            return;
+        }
+        if (done || awaitingRegistration) {
             return;
         }
         if (poller == null) {
-            navigator.navigate(Page.PAGAMENTO);
+            leaveTo(Page.PAGAMENTO);
             return;
         }
-        statusLabel.setText("Cancelando a cobrança na maquininha...");
-        poller.cancel(() -> {
+        cancellation.request(poller, () -> done, statusLabel::setText, () -> {
             done = true;
-            navigator.navigate(Page.PAGAMENTO);
-        }, statusLabel::setText);
+            leaveTo(Page.PAGAMENTO);
+        });
+    }
+
+    private void leaveTo(Page page) {
+        navigator.unlock();
+        navigator.navigate(page);
     }
 
     @FXML
     public void onConfirm() {
-        if (vendaAtual == null || poller != null) {
+        if (ended) {
+            leaveTo(Page.PAGAMENTO);
+            return;
+        }
+        if (vendaAtual == null || (poller != null && !awaitingRegistration)) {
             return;
         }
         approve();
@@ -115,13 +137,14 @@ public class PagamentoPixController {
     private void startMachineCharge(BigDecimal total) {
         copyPasteBox.setVisible(false);
         copyPasteBox.setManaged(false);
-        confirmButton.setVisible(false);
-        confirmButton.setManaged(false);
+        screen.hideConfirm();
+        navigator.lock("Cobrança PIX em andamento na maquininha. Use ESC para cancelar antes de sair desta tela.");
         statusLabel.setText("Enviando a cobrança PIX para a maquininha...");
         poller = new CardChargePoller(gateway, statusLabel::setText, this::approve, this::backToSelection);
         statusLabel.sceneProperty().addListener((observable, oldScene, newScene) -> {
             if (newScene == null && poller != null) {
                 poller.stop();
+                navigator.unlock();
             }
         });
         poller.start(() -> gateway.createPixCharge(total));
@@ -148,24 +171,29 @@ public class PagamentoPixController {
             return;
         }
         done = true;
-        Sale finalizada = saleService.payPix(vendaAtual);
+        cancellation.dismiss();
+        Sale finalizada;
         try {
-            receiptService.printSaleReceipt(finalizada);
-        } catch (Exception e) {
-            statusLabel.setText("Venda gravada. Aviso: impressão falhou (" + e.getMessage() + ")");
+            finalizada = saleService.payPix(vendaAtual);
+        } catch (RuntimeException failure) {
+            done = false;
+            awaitingRegistration = true;
+            screen.showRegistrationFailure(failure.getMessage());
+            return;
         }
+        BackgroundPrinting.run(() -> receiptService.printSaleReceipt(finalizada, ReceiptPayment.pix()),
+                message -> navigator.notice("Venda gravada. Aviso: impressão falhou (" + message + ")"));
         userSession.setUltimaVenda(finalizada);
         userSession.setUltimaForma(PaymentMethod.PIX);
         userSession.setUltimoTroco(null);
         userSession.setVendaAtual(null);
-        navigator.navigate(Page.VENDA_FINALIZADA);
+        leaveTo(Page.VENDA_FINALIZADA);
     }
 
     private void backToSelection(String message) {
         done = true;
-        statusLabel.setText(message);
-        PauseTransition pause = new PauseTransition(Duration.seconds(2.5));
-        pause.setOnFinished(e -> navigator.navigate(Page.PAGAMENTO));
-        pause.play();
+        ended = true;
+        navigator.unlock();
+        screen.showEnded(message);
     }
 }

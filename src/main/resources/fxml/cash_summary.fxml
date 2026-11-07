@@ -16,8 +16,8 @@
     <Label text="(+) Totais das Entradas" styleClass="section-plus"/>
     <Label text="Dinheiro" styleClass="win-label"/>
     <TextField fx:id="resEntDinheiro" text="R$ 0,00" editable="false" styleClass="money-field"/>
-    <Label text="Cheque" styleClass="win-label"/>
-    <TextField fx:id="resEntCheque" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <Label text="PIX / QR Code" styleClass="win-label"/>
+    <TextField fx:id="resEntPix" text="R$ 0,00" editable="false" styleClass="money-field"/>
     <Label text="Cartão de Crédito" styleClass="win-label"/>
     <TextField fx:id="resEntCredito" text="R$ 0,00" editable="false" styleClass="money-field"/>
     <Label text="Cartão de Débito" styleClass="win-label"/>

@@ -6,14 +6,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-
 @Component
 public class CashSummaryController {
 
     @FXML private TextField resSaldoInicial;
     @FXML private TextField resEntDinheiro;
-    @FXML private TextField resEntCheque;
+    @FXML private TextField resEntPix;
     @FXML private TextField resEntCredito;
     @FXML private TextField resEntDebito;
     @FXML private TextField resEntTotal;
@@ -24,7 +22,7 @@ public class CashSummaryController {
     public void show(CashSummary summary) {
         resSaldoInicial.setText(MoneyFormat.format(summary.opening()));
         resEntDinheiro.setText(MoneyFormat.format(summary.cashIn()));
-        resEntCheque.setText(MoneyFormat.format(BigDecimal.ZERO));
+        resEntPix.setText(MoneyFormat.format(summary.pix()));
         resEntCredito.setText(MoneyFormat.format(summary.credit()));
         resEntDebito.setText(MoneyFormat.format(summary.debit()));
         resEntTotal.setText(MoneyFormat.format(summary.totalIn()));

@@ -3,9 +3,11 @@ package br.com.scopel.pfv.beta.controller.support;
 import br.com.scopel.pfv.beta.exception.CardGatewayException;
 import br.com.scopel.pfv.beta.hardware.CardPaymentGateway;
 import br.com.scopel.pfv.beta.hardware.CardChargeResult;
+import br.com.scopel.pfv.beta.hardware.CardPaymentStatus;
 import javafx.application.Platform;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -27,6 +29,7 @@ public final class CardChargePoller {
 
     private volatile String chargeId;
     private volatile boolean finished;
+    private CardPaymentStatus lastEndingStatus;
 
     public CardChargePoller(CardPaymentGateway gateway, Consumer<String> onMessage, Runnable onApproved,
                             Consumer<String> onEnded) {
@@ -49,21 +52,44 @@ public final class CardChargePoller {
     }
 
     public void cancel(Runnable onCanceled, Consumer<String> onError) {
-        executor.execute(() -> {
-            if (finished) {
+        try {
+            executor.execute(() -> cancelNow(onCanceled, onError));
+        } catch (RejectedExecutionException alreadyFinished) {
+            post(onError, "A cobrança já foi encerrada.");
+        }
+    }
+
+    private void cancelNow(Runnable onCanceled, Consumer<String> onError) {
+        if (finished) {
+            return;
+        }
+        try {
+            if (chargeId != null) {
+                gateway.cancel(chargeId);
+            }
+            finished = true;
+            Platform.runLater(onCanceled);
+            executor.shutdownNow();
+        } catch (CardGatewayException failure) {
+            if (alreadyPaid()) {
                 return;
             }
-            try {
-                if (chargeId != null) {
-                    gateway.cancel(chargeId);
-                }
+            post(onError, failure.getMessage() + " Cancele também na maquininha.");
+        }
+    }
+
+    private boolean alreadyPaid() {
+        try {
+            if (chargeId != null && gateway.getStatus(chargeId) == CardPaymentStatus.APPROVED) {
                 finished = true;
-                Platform.runLater(onCanceled);
-                executor.shutdownNow();
-            } catch (CardGatewayException failure) {
-                post(onError, failure.getMessage() + " Cancele também na maquininha.");
+                Platform.runLater(onApproved);
+                executor.shutdown();
+                return true;
             }
-        });
+        } catch (CardGatewayException ignored) {
+            return false;
+        }
+        return false;
     }
 
     public void stop() {
@@ -84,15 +110,18 @@ public final class CardChargePoller {
                     return;
                 }
                 case DECLINED -> {
-                    end("Pagamento recusado pela maquininha.");
-                    return;
+                    if (confirmedEnd(CardPaymentStatus.DECLINED)) {
+                        end("Pagamento recusado pela maquininha.");
+                        return;
+                    }
                 }
                 case CANCELED -> {
-                    end("Cobrança cancelada.");
-                    return;
+                    if (confirmedEnd(CardPaymentStatus.CANCELED)) {
+                        end("Cobrança cancelada na maquininha.");
+                        return;
+                    }
                 }
-                case PENDING -> {
-                }
+                case PENDING -> lastEndingStatus = null;
             }
         } catch (CardGatewayException failure) {
             post(onMessage, failure.getMessage() + " Tentando de novo...");
@@ -100,6 +129,12 @@ public final class CardChargePoller {
         if (!finished) {
             executor.schedule(this::poll, POLL_INTERVAL_SECONDS, TimeUnit.SECONDS);
         }
+    }
+
+    private boolean confirmedEnd(CardPaymentStatus status) {
+        boolean confirmed = lastEndingStatus == status;
+        lastEndingStatus = status;
+        return confirmed;
     }
 
     private void end(String message) {

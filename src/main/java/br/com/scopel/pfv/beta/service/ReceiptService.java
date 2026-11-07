@@ -1,8 +1,10 @@
 package br.com.scopel.pfv.beta.service;
 
 import br.com.scopel.pfv.beta.hardware.PrinterPort;
+import br.com.scopel.pfv.beta.model.CardType;
 import br.com.scopel.pfv.beta.model.CashMovement;
 import br.com.scopel.pfv.beta.model.CashRegister;
+import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.SaleItem;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,10 @@ public class ReceiptService {
     }
 
     public String buildSaleReceipt(Sale sale) {
+        return buildSaleReceipt(sale, null);
+    }
+
+    public String buildSaleReceipt(Sale sale, ReceiptPayment payment) {
         String store = appSettingService.getString("store.name", "MERCADO");
         StringBuilder sb = new StringBuilder();
         sb.append(center(store)).append('\n');
@@ -53,6 +59,7 @@ public class ReceiptService {
             sb.append(leftRight("Acrescimo", "+" + money(sale.getSurcharge()))).append('\n');
         }
         sb.append(leftRight("TOTAL", money(sale.getTotal()))).append('\n');
+        appendPayment(sb, payment);
         sb.append(line()).append('\n');
         sb.append(center("*** NAO E DOCUMENTO FISCAL ***"));
         return sb.toString();
@@ -60,6 +67,31 @@ public class ReceiptService {
 
     public void printSaleReceipt(Sale sale) {
         printer.print(buildSaleReceipt(sale));
+    }
+
+    public void printSaleReceipt(Sale sale, ReceiptPayment payment) {
+        printer.print(buildSaleReceipt(sale, payment));
+    }
+
+    private void appendPayment(StringBuilder sb, ReceiptPayment payment) {
+        if (payment == null || payment.method() == null) {
+            return;
+        }
+        sb.append(leftRight("Pagamento", paymentName(payment))).append('\n');
+        if (payment.method() == PaymentMethod.DINHEIRO && payment.received() != null) {
+            sb.append(leftRight("Recebido", money(payment.received()))).append('\n');
+            sb.append(leftRight("Troco", money(payment.change()))).append('\n');
+        }
+    }
+
+    private String paymentName(ReceiptPayment payment) {
+        return switch (payment.method()) {
+            case DINHEIRO -> "Dinheiro";
+            case PIX -> "PIX";
+            case PRAZO -> "A Prazo";
+            case CARTAO -> payment.cardType() == CardType.DEBITO ? "Cartao de Debito"
+                    : payment.cardType() == CardType.CREDITO ? "Cartao de Credito" : "Cartao";
+        };
     }
 
     public String buildCashCloseReceipt(CashRegister cr) {

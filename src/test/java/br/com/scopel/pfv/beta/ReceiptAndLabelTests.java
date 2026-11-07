@@ -6,6 +6,8 @@ import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.SaleItem;
 import br.com.scopel.pfv.beta.service.AppSettingService;
 import br.com.scopel.pfv.beta.service.LabelService;
+import br.com.scopel.pfv.beta.model.CardType;
+import br.com.scopel.pfv.beta.service.ReceiptPayment;
 import br.com.scopel.pfv.beta.service.ReceiptService;
 import org.junit.jupiter.api.Test;
 
@@ -67,6 +69,36 @@ class ReceiptAndLabelTests {
         assertTrue(receipt.contains("Arroz 5kg"), "item");
         assertTrue(receipt.contains("TOTAL"), "linha de total");
         assertTrue(receipt.contains("51,00"), "valor total");
+    }
+
+    @Test
+    void receiptNamesTheCashPaymentWithReceivedAndChange() {
+        ReceiptService rs = new ReceiptService(settingsStub, noopPrinter);
+
+        String receipt = rs.buildSaleReceipt(saleWithOneItem(),
+                ReceiptPayment.cash(new BigDecimal("60.00"), new BigDecimal("9.00")));
+
+        assertTrue(receipt.contains("Pagamento") && receipt.contains("Dinheiro"));
+        assertTrue(receipt.contains("Recebido") && receipt.contains("60,00"));
+        assertTrue(receipt.contains("Troco") && receipt.contains("9,00"));
+    }
+
+    @Test
+    void receiptNamesCardTypeAndPix() {
+        ReceiptService rs = new ReceiptService(settingsStub, noopPrinter);
+
+        assertTrue(rs.buildSaleReceipt(saleWithOneItem(), ReceiptPayment.card(CardType.DEBITO))
+                .contains("Cartao de Debito"));
+        assertTrue(rs.buildSaleReceipt(saleWithOneItem(), ReceiptPayment.card(CardType.CREDITO))
+                .contains("Cartao de Credito"));
+        assertTrue(rs.buildSaleReceipt(saleWithOneItem(), ReceiptPayment.pix()).contains("PIX"));
+    }
+
+    @Test
+    void receiptWithoutPaymentKeepsThePreviewFormat() {
+        ReceiptService rs = new ReceiptService(settingsStub, noopPrinter);
+
+        assertFalse(rs.buildSaleReceipt(saleWithOneItem()).contains("Pagamento"));
     }
 
     @Test

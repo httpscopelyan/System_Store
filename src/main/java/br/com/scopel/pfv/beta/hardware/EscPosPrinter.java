@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import javax.print.PrintService;
+import javax.print.attribute.standard.PrinterIsAcceptingJobs;
+import javax.print.attribute.standard.QueuedJobCount;
 import java.io.IOException;
 
 /**
@@ -20,6 +22,8 @@ import java.io.IOException;
 @Component
 @ConditionalOnProperty(name = "pdv.printer.enabled", havingValue = "true")
 public class EscPosPrinter implements PrinterPort {
+
+    private static final int MAX_QUEUED_JOBS_FOR_DRAWER = 1;
 
     private final String printerName;
     private final int drawerPin;
@@ -45,6 +49,7 @@ public class EscPosPrinter implements PrinterPort {
 
     @Override
     public void openDrawer() {
+        requireHealthyQueue();
         try (EscPos escpos = open()) {
             EscPos.PinConnector pin = (drawerPin == 5)
                     ? EscPos.PinConnector.Pin_5
@@ -55,7 +60,20 @@ public class EscPosPrinter implements PrinterPort {
         }
     }
 
-    private EscPos open() throws IOException {
+    private void requireHealthyQueue() {
+        PrintService service = findService();
+        PrinterIsAcceptingJobs accepting = service.getAttribute(PrinterIsAcceptingJobs.class);
+        if (accepting != null && accepting == PrinterIsAcceptingJobs.NOT_ACCEPTING_JOBS) {
+            throw new PrinterException("A impressora não está aceitando trabalhos (desligada ou offline).", null);
+        }
+        QueuedJobCount queued = service.getAttribute(QueuedJobCount.class);
+        if (queued != null && queued.getValue() > MAX_QUEUED_JOBS_FOR_DRAWER) {
+            throw new PrinterException("A fila da impressora está travada (" + queued.getValue()
+                    + " trabalhos pendentes). Reinicie a impressora; a gaveta não foi acionada para evitar acionamentos atrasados.", null);
+        }
+    }
+
+    private PrintService findService() {
         if (printerName == null || printerName.isBlank()) {
             throw new PrinterException("Nome da impressora não configurado (pdv.printer.name).", null);
         }
@@ -63,6 +81,11 @@ public class EscPosPrinter implements PrinterPort {
         if (service == null) {
             throw new PrinterException("Impressora não encontrada no Windows: " + printerName, null);
         }
+        return service;
+    }
+
+    private EscPos open() throws IOException {
+        PrintService service = findService();
         return new EscPos(new PrinterOutputStream(service));
     }
 
