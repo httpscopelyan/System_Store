@@ -1,10 +1,10 @@
 {
-  "version": "1.2.18",
+  "version": "1.2.19",
   "releaseDate": "2026-11-07",
   "minJavaVersion": 24,
-  "changelog": "feat(config): botão \"Imprimir página de teste\" na seção Impressora; versão 1.2.18",
+  "changelog": "feat(venda): botão \"Emitir nova via\" na tela de venda finalizada; versão 1.2.19",
   "mandatory": false,
-  "sha256": "7c7208ac6f1f34b4f542632890ea9a5954e01ddd680d349f72a323990ee7d687",
-  "size": 59582143,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.18/scopel-store.jar"
+  "sha256": "e6040d8479be6bc82e3b109ceda42cd037d7b7f24c6eae051b526d04cbe77323",
+  "size": 59583309,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.19/scopel-store.jar"
 }
