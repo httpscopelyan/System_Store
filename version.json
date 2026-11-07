@@ -1,10 +1,10 @@
 {
-  "version": "1.2.17",
+  "version": "1.2.18",
   "releaseDate": "2026-11-07",
   "minJavaVersion": 24,
-  "changelog": "fix(pagamento): cobrança protegida contra saída acidental; PIX no caixa; forma de pagamento no cupom; F12 sem acionamentos atrasados; versão 1.2.17",
+  "changelog": "feat(config): botão \"Imprimir página de teste\" na seção Impressora; versão 1.2.18",
   "mandatory": false,
-  "sha256": "00ad4e2a78d8c203266f35de0675610dfbe11495333a693fc58c2dc57ee4dbfb",
-  "size": 59578989,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.17/scopel-store.jar"
+  "sha256": "7c7208ac6f1f34b4f542632890ea9a5954e01ddd680d349f72a323990ee7d687",
+  "size": 59582143,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.18/scopel-store.jar"
 }
