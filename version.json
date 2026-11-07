@@ -1,10 +1,10 @@
 {
-  "version": "1.2.16",
-  "releaseDate": "2026-11-06",
+  "version": "1.2.17",
+  "releaseDate": "2026-11-07",
   "minJavaVersion": 24,
-  "changelog": "fix(pagamento): cartão e PIX não abriam após remover o cabeçalho (subtitleLabel nulo); versão 1.2.16",
+  "changelog": "fix(pagamento): cobrança protegida contra saída acidental; PIX no caixa; forma de pagamento no cupom; F12 sem acionamentos atrasados; versão 1.2.17",
   "mandatory": false,
-  "sha256": "e64468d292fc8c72291439aab3a7058a1072751a9f48e7e74d23885e171c7cc3",
-  "size": 59564528,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.16/scopel-store.jar"
+  "sha256": "00ad4e2a78d8c203266f35de0675610dfbe11495333a693fc58c2dc57ee4dbfb",
+  "size": 59578989,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.17/scopel-store.jar"
 }
