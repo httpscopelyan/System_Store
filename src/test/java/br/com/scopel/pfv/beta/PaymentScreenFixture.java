@@ -173,6 +173,17 @@ final class PaymentScreenFixture {
         return condition.getAsBoolean();
     }
 
+    boolean statusContainsIn(String labelId, String text, int seconds) throws Exception {
+        long limit = System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds);
+        while (System.nanoTime() < limit) {
+            if (onFx(() -> ((Label) namespace.get(labelId)).getText()).contains(text)) {
+                return true;
+            }
+            Thread.sleep(100);
+        }
+        return false;
+    }
+
     boolean statusContains(String text, int seconds) throws Exception {
         long limit = System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds);
         while (System.nanoTime() < limit) {

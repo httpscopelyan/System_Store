@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.ConfigPrinterController"
+      styleClass="form-card" spacing="12" maxWidth="Infinity">
+    <Label text="Impressora de cupom" styleClass="form-section-title"/>
+    <Label text="Imprime uma página curta de teste para conferir se a impressora está ligada, com papel e escrevendo corretamente."
+           styleClass="form-label" wrapText="true"/>
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Button fx:id="testButton" text="Imprimir página de teste" onAction="#onPrintTest" styleClass="win-button"/>
+    </HBox>
+    <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+</VBox>

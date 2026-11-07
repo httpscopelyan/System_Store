@@ -65,6 +65,28 @@ public class ReceiptService {
         return sb.toString();
     }
 
+    public String buildPrinterTest() {
+        String store = appSettingService.getString("store.name", "MERCADO");
+        StringBuilder sb = new StringBuilder();
+        sb.append(center(store)).append('\n');
+        sb.append(center("TESTE DE IMPRESSAO")).append('\n');
+        sb.append(DT.format(java.time.LocalDateTime.now())).append('\n');
+        sb.append(line()).append('\n');
+        sb.append("1234567890123456789012345678901234567890").append('\n');
+        sb.append("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklm").append('\n');
+        sb.append(leftRight("Item de exemplo", money(new BigDecimal("12.50")))).append('\n');
+        sb.append(leftRight("TOTAL", money(new BigDecimal("12.50")))).append('\n');
+        sb.append(line()).append('\n');
+        sb.append(center("Se voce le isto, a impressora")).append('\n');
+        sb.append(center("esta funcionando.")).append('\n');
+        sb.append(center("*** NAO E DOCUMENTO FISCAL ***"));
+        return sb.toString();
+    }
+
+    public void printPrinterTest() {
+        printer.print(buildPrinterTest());
+    }
+
     public void printSaleReceipt(Sale sale) {
         printer.print(buildSaleReceipt(sale));
     }
