@@ -34,10 +34,25 @@ public class ReceiptService {
     }
 
     public String buildSaleReceipt(Sale sale, ReceiptPayment payment) {
+        return buildSaleReceipt(sale, payment, false);
+    }
+
+    public String buildSaleReceiptCopy(Sale sale, ReceiptPayment payment) {
+        return buildSaleReceipt(sale, payment, true);
+    }
+
+    public void printSaleReceiptCopy(Sale sale, ReceiptPayment payment) {
+        printer.print(buildSaleReceiptCopy(sale, payment));
+    }
+
+    private String buildSaleReceipt(Sale sale, ReceiptPayment payment, boolean copy) {
         String store = appSettingService.getString("store.name", "MERCADO");
         StringBuilder sb = new StringBuilder();
         sb.append(center(store)).append('\n');
         sb.append(center("CUPOM NAO FISCAL")).append('\n');
+        if (copy) {
+            sb.append(center("*** 2a VIA ***")).append('\n');
+        }
         if (sale.getCreatedAt() != null) {
             sb.append(DT.format(sale.getCreatedAt())).append('\n');
         }

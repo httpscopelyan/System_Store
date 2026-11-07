@@ -38,8 +38,11 @@
             <HBox spacing="18" alignment="CENTER">
                 <Button fx:id="novaVendaButton" text="Nova venda (Enter)" onAction="#onNovaVenda"
                         styleClass="finalize-button"/>
+                <Button fx:id="novaViaButton" text="Emitir nova via" onAction="#onEmitirNovaVia"
+                        styleClass="secondary-button"/>
                 <Button text="Início" onAction="#onInicio" styleClass="secondary-button"/>
             </HBox>
+            <Label fx:id="copyStatusLabel" styleClass="sale-status" wrapText="true"/>
         </VBox>
     </center>
 

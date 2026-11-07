@@ -3,8 +3,11 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
+import br.com.scopel.pfv.beta.controller.support.BackgroundPrinting;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.Sale;
+import br.com.scopel.pfv.beta.service.ReceiptPayment;
+import br.com.scopel.pfv.beta.service.ReceiptService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -17,16 +20,12 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-/**
- * Tela de confirmação "Venda finalizada" (Item 3). Lê os holders da sessão
- * (última venda, forma e troco) preenchidos pelo controller de pagamento.
- * Enter / "Nova venda" abre nova venda; "Início" volta ao menu.
- */
 @Component
 public class VendaFinalizadaController {
 
     private final UserSession userSession;
     private final Navigator navigator;
+    private final ReceiptService receiptService;
 
     private static final DecimalFormat MONEY =
             new DecimalFormat("#,##0.00", new DecimalFormatSymbols(new Locale("pt", "BR")));
@@ -35,11 +34,13 @@ public class VendaFinalizadaController {
     @FXML private Label methodLabel;
     @FXML private Label changeCaption;
     @FXML private Label changeLabel;
+    @FXML private Label copyStatusLabel;
     @FXML private Node novaVendaButton;
 
-    public VendaFinalizadaController(UserSession userSession, Navigator navigator) {
+    public VendaFinalizadaController(UserSession userSession, Navigator navigator, ReceiptService receiptService) {
         this.userSession = userSession;
         this.navigator = navigator;
+        this.receiptService = receiptService;
     }
 
     @FXML
@@ -83,6 +84,36 @@ public class VendaFinalizadaController {
     @FXML
     public void onInicio() {
         navigator.navigate(Page.INICIO);
+    }
+
+    @FXML
+    public void onEmitirNovaVia() {
+        Sale venda = userSession.getUltimaVenda();
+        if (venda == null) {
+            copyStatusLabel.setText("Não há venda recente para emitir a via.");
+            return;
+        }
+        ReceiptPayment payment = paymentOf(venda);
+        copyStatusLabel.setText("Enviando a 2ª via para a impressora...");
+        BackgroundPrinting.run(() -> receiptService.printSaleReceiptCopy(venda, payment),
+                message -> copyStatusLabel.setText("Falha ao imprimir a 2ª via: " + message));
+        copyStatusLabel.setText("2ª via enviada para a impressora.");
+    }
+
+    private ReceiptPayment paymentOf(Sale venda) {
+        PaymentMethod forma = userSession.getUltimaForma();
+        if (forma == null) {
+            return null;
+        }
+        return switch (forma) {
+            case DINHEIRO -> {
+                BigDecimal troco = userSession.getUltimoTroco() == null ? BigDecimal.ZERO : userSession.getUltimoTroco();
+                yield ReceiptPayment.cash(venda.getTotal().add(troco), troco);
+            }
+            case CARTAO -> ReceiptPayment.card(userSession.getCardTypeSelecionado());
+            case PIX -> ReceiptPayment.pix();
+            case PRAZO -> new ReceiptPayment(PaymentMethod.PRAZO, null, null, null);
+        };
     }
 
     private String formaLabel(PaymentMethod forma) {
