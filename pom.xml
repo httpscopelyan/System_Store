@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>br.com.scopel.pfv</groupId>
 	<artifactId>beta</artifactId>
-	<version>1.2.19</version>
+	<version>1.2.20</version>
 	<name>Scopel Store PDV</name>
 	<description>Sistema PDV para lojas Scopel com atualização remota via GitHub</description>
 	<url/>
