@@ -1,10 +1,10 @@
 {
-  "version": "1.2.19",
-  "releaseDate": "2026-11-07",
+  "version": "1.2.20",
+  "releaseDate": "2026-11-08",
   "minJavaVersion": 24,
-  "changelog": "feat(venda): botão \"Emitir nova via\" na tela de venda finalizada; versão 1.2.19",
+  "changelog": "feat(usuarios): cria o operador Ligia na primeira abertura; versão 1.2.20",
   "mandatory": false,
-  "sha256": "e6040d8479be6bc82e3b109ceda42cd037d7b7f24c6eae051b526d04cbe77323",
-  "size": 59583309,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.19/scopel-store.jar"
+  "sha256": "1a002d63a3d9d67cf9772b891b23600dd49f61841b14400cd11e44f95c7eb71a",
+  "size": 59584805,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.20/scopel-store.jar"
 }
