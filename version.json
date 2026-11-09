@@ -1,10 +1,10 @@
 {
-  "version": "1.2.20",
-  "releaseDate": "2026-11-08",
+  "version": "1.2.21",
+  "releaseDate": "2026-11-09",
   "minJavaVersion": 24,
-  "changelog": "feat(usuarios): cria o operador Ligia na primeira abertura; versão 1.2.20",
+  "changelog": "feat(caixa): fechamento conferido por forma de pagamento e reabertura do caixa da Dayana; versão 1.2.21",
   "mandatory": false,
-  "sha256": "1a002d63a3d9d67cf9772b891b23600dd49f61841b14400cd11e44f95c7eb71a",
-  "size": 59584805,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.20/scopel-store.jar"
+  "sha256": "acda161b5d979444c9453d91893199a50bd54e9da97bad79477a6edac7011dfd",
+  "size": 59602607,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.2.21/scopel-store.jar"
 }
