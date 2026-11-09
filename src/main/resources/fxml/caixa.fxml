@@ -58,7 +58,10 @@
     <right>
         <ScrollPane fitToWidth="true" prefWidth="292" styleClass="group-box"
                     hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-            <fx:include fx:id="cashSummary" source="cash_summary.fxml"/>
+            <VBox>
+                <fx:include fx:id="cashSummary" source="cash_summary.fxml"/>
+                <fx:include fx:id="cashClosing" source="cash_closing.fxml"/>
+            </VBox>
         </ScrollPane>
     </right>
 
@@ -74,10 +77,7 @@
                 <Button text="💲 Suprimento" onAction="#onSupplement" styleClass="win-button"/>
                 <Button text="💲 Sangria (F9)" onAction="#onWithdrawal" styleClass="win-button"/>
                 <Button text="🧮 Retificar" onAction="#onRectify" styleClass="win-button"/>
-                <TextField fx:id="countedAmountField" promptText="Contado" styleClass="win-input" prefWidth="90"/>
-                <Button text="🔒 Fechar Caixa" onAction="#onClose" styleClass="win-button"/>
                 <Button text="🖨 Imprimir Movimentação (F7)" onAction="#onPrintMovimentacao" styleClass="win-button"/>
-                <Button text="🖨 Imprimir Fechamento (F8)" onAction="#onPrintFechamento" styleClass="win-button"/>
                 <Button text="🔄 Atualizar (F5)" onAction="#onRefresh" styleClass="win-button"/>
             </FlowPane>
         </VBox>

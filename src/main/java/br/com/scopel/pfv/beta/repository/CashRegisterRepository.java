@@ -12,6 +12,8 @@ public interface CashRegisterRepository extends JpaRepository<CashRegister, Long
 
     Optional<CashRegister> findByOperatorAndStatus(User operator, CashRegister.Status status);
 
+    Optional<CashRegister> findFirstByOperatorAndStatusOrderByClosedAtDesc(User operator, CashRegister.Status status);
+
     List<CashRegister> findTop20ByOperatorOrderByOpenedAtDesc(User operator);
 
 }

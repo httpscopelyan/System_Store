@@ -23,6 +23,14 @@ Plano de 2026-10-31 (`TASKs/IMPLEMENTATION-PLAN.md`).
 **Caixa**
 - Sangria e suprimento exigem motivo. Para corrigir um erro use *Retificar* (pede gerente e motivo; o registro
   original continua visível).
+- **Fechamento (1.2.21):** não há mais botão único. No painel *Conferência do Fechamento* (role a coluna da
+  direita) o sistema mostra o *Esperado* de Dinheiro, PIX, Crédito e Débito; o operador digita o *Contado* de cada
+  um (0 se não houve) e vê a diferença na hora, em vermelho quando não confere. Só então clica em *Fechar Caixa*.
+  O cupom do fechamento sai sozinho, com esperado | contado | diferença por forma. *Imprimir Movimentação (F7)*
+  imprime todas as entradas e saídas do caixa mostrado.
+- **Reabertura da Dayana (1.2.21):** na primeira abertura da 1.2.21 o último caixa fechado da Dayana é reaberto com
+  todas as movimentações. O fechamento anterior fica salvo em `backups/caixa-<id>-fechamento-com-erro-*.txt` (pasta do
+  programa) e na tabela `cash_register_reopening`. Roda uma única vez.
 
 **Testes**
 - `mvn test` precisa do Docker `db_scopel` e de uma sessão com tela (os testes de tela usam JavaFX real). Em

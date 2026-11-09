@@ -29,7 +29,7 @@ public final class CashStatusPanel {
                 + (register.getOperator() != null ? "\n" + register.getOperator().getName().toUpperCase() : ""));
         closingInfoLabel.setText(register.getClosedAt() == null ? "-"
                 : DATE_TIME.format(register.getClosedAt()) + "\nDiferença: "
-                + MoneyFormat.format(register.getDifference()));
+                + MoneyFormat.format(register.totalDifference()));
         periodLabel.setText("Movimentação do Caixa - Abertura: " + DATE_TIME.format(register.getOpenedAt()));
     }
 

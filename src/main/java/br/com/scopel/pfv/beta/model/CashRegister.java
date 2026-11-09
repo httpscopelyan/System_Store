@@ -44,6 +44,38 @@ public class CashRegister {
     @Column
     private LocalDateTime closedAt;
 
+    @Column(precision = 10, scale = 2)
+    private BigDecimal expectedPix;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal countedPix;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal expectedCredit;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal countedCredit;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal expectedDebit;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal countedDebit;
+
+    public BigDecimal totalDifference() {
+        BigDecimal total = difference == null ? BigDecimal.ZERO : difference;
+        if (expectedPix != null) {
+            total = total.add(nz(countedPix).subtract(expectedPix));
+            total = total.add(nz(countedCredit).subtract(nz(expectedCredit)));
+            total = total.add(nz(countedDebit).subtract(nz(expectedDebit)));
+        }
+        return total;
+    }
+
+    private static BigDecimal nz(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
+    }
+
     //getters
 
 
@@ -120,5 +152,53 @@ public class CashRegister {
 
     public void setClosedAt(LocalDateTime closedAt) {
         this.closedAt = closedAt;
+    }
+
+    public BigDecimal getExpectedPix() {
+        return expectedPix;
+    }
+
+    public void setExpectedPix(BigDecimal expectedPix) {
+        this.expectedPix = expectedPix;
+    }
+
+    public BigDecimal getCountedPix() {
+        return countedPix;
+    }
+
+    public void setCountedPix(BigDecimal countedPix) {
+        this.countedPix = countedPix;
+    }
+
+    public BigDecimal getExpectedCredit() {
+        return expectedCredit;
+    }
+
+    public void setExpectedCredit(BigDecimal expectedCredit) {
+        this.expectedCredit = expectedCredit;
+    }
+
+    public BigDecimal getCountedCredit() {
+        return countedCredit;
+    }
+
+    public void setCountedCredit(BigDecimal countedCredit) {
+        this.countedCredit = countedCredit;
+    }
+
+    public BigDecimal getExpectedDebit() {
+        return expectedDebit;
+    }
+
+    public void setExpectedDebit(BigDecimal expectedDebit) {
+        this.expectedDebit = expectedDebit;
+    }
+
+    public BigDecimal getCountedDebit() {
+        return countedDebit;
+    }
+
+    public void setCountedDebit(BigDecimal countedDebit) {
+        this.countedDebit = countedDebit;
     }
 }

@@ -7,6 +7,9 @@ import br.com.scopel.pfv.beta.model.CashRegister;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.SaleItem;
+import br.com.scopel.pfv.beta.service.cash.CashMovementRow;
+import br.com.scopel.pfv.beta.service.cash.CashOverview;
+import br.com.scopel.pfv.beta.service.cash.CashSummary;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -156,9 +159,82 @@ public class ReceiptService {
         sb.append(leftRight("Valor contado", money(cr.getClosingAmount()))).append('\n');
         sb.append(leftRight("Diferenca", money(cr.getDifference()))).append('\n');
         sb.append(line()).append('\n');
+        appendClosingComparison(sb, cr);
         appendMovements(sb, movements);
         sb.append(center("*** NAO E DOCUMENTO FISCAL ***"));
         return sb.toString();
+    }
+
+    public String buildCashMovementsReceipt(CashRegister cr, CashOverview overview) {
+        String store = appSettingService.getString("store.name", "MERCADO");
+        StringBuilder sb = new StringBuilder();
+        sb.append(center(store)).append('\n');
+        sb.append(center("MOVIMENTACAO DO CAIXA")).append('\n');
+        sb.append("Caixa #").append(cr.getId() == null ? "-" : cr.getId()).append('\n');
+        if (cr.getOperator() != null) {
+            sb.append("Operador: ").append(clip(cr.getOperator().getName(), WIDTH - 10)).append('\n');
+        }
+        if (cr.getOpenedAt() != null) {
+            sb.append("Abertura:   ").append(DT.format(cr.getOpenedAt())).append('\n');
+        }
+        sb.append("Impresso:   ").append(DT.format(java.time.LocalDateTime.now())).append('\n');
+        sb.append(line()).append('\n');
+        for (CashMovementRow row : overview.rows()) {
+            String when = row.at() == null ? "" : TIME.format(row.at()) + " ";
+            String what = row.saleId() != null ? "Venda #" + row.saleId() : row.history();
+            sb.append(leftRight(when + clip(what, 22), (row.entry() ? "+" : "-") + money(row.total()))).append('\n');
+        }
+        sb.append(line()).append('\n');
+        CashSummary summary = overview.summary();
+        sb.append(leftRight("Saldo inicial", money(summary.opening()))).append('\n');
+        sb.append(leftRight("Entrada dinheiro", money(summary.cashIn()))).append('\n');
+        sb.append(leftRight("Entrada PIX", money(summary.pix()))).append('\n');
+        sb.append(leftRight("Entrada credito", money(summary.credit()))).append('\n');
+        sb.append(leftRight("Entrada debito", money(summary.debit()))).append('\n');
+        sb.append(leftRight("Saidas dinheiro", money(summary.cashOut()))).append('\n');
+        sb.append(leftRight("Saldo em dinheiro", money(summary.finalBalance()))).append('\n');
+        sb.append(line()).append('\n');
+        sb.append(center("*** NAO E DOCUMENTO FISCAL ***"));
+        return sb.toString();
+    }
+
+    public void printCashMovementsReceipt(CashRegister cr, CashOverview overview) {
+        printer.print(buildCashMovementsReceipt(cr, overview));
+    }
+
+    private void appendClosingComparison(StringBuilder sb, CashRegister cr) {
+        if (cr.getExpectedPix() == null) {
+            return;
+        }
+        sb.append(center("CONFERENCIA POR FORMA")).append('\n');
+        sb.append(columns("", "Esperado", "Contado", "Difer.")).append('\n');
+        BigDecimal total = appendComparisonRow(sb, "Dinheiro", cr.getExpectedAmount(), cr.getClosingAmount());
+        total = total.add(appendComparisonRow(sb, "PIX", cr.getExpectedPix(), cr.getCountedPix()));
+        total = total.add(appendComparisonRow(sb, "Credito", cr.getExpectedCredit(), cr.getCountedCredit()));
+        total = total.add(appendComparisonRow(sb, "Debito", cr.getExpectedDebit(), cr.getCountedDebit()));
+        sb.append(line()).append('\n');
+        String verdict = total.signum() == 0 ? "CAIXA CONFERE"
+                : total.signum() < 0 ? "FALTA " + money(total.negate()) : "SOBRA " + money(total);
+        sb.append(leftRight("DIFERENCA TOTAL", money(total))).append('\n');
+        sb.append(center(verdict)).append('\n');
+        sb.append(line()).append('\n');
+    }
+
+    private BigDecimal appendComparisonRow(StringBuilder sb, String label, BigDecimal expected, BigDecimal counted) {
+        BigDecimal difference = (counted == null ? BigDecimal.ZERO : counted)
+                .subtract(expected == null ? BigDecimal.ZERO : expected);
+        sb.append(columns(label, number(expected), number(counted), number(difference))).append('\n');
+        return difference;
+    }
+
+    private String columns(String label, String expected, String counted, String difference) {
+        return String.format("%-9s%10s%10s%10s", clip(label, 9), clip(expected, 10), clip(counted, 10),
+                clip(difference, 10));
+    }
+
+    private String number(BigDecimal value) {
+        return (value == null ? BigDecimal.ZERO : value).setScale(2, RoundingMode.HALF_UP)
+                .toPlainString().replace('.', ',');
     }
 
     public void printCashCloseReceipt(CashRegister cr) {

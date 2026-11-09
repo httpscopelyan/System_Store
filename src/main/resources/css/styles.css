@@ -835,3 +835,6 @@
 .page-scroll .scroll-bar:vertical {
     -fx-pref-width: 14;
 }
+
+.diff-bad { -fx-text-fill: #c00000; -fx-font-weight: bold; }
+.diff-ok { -fx-text-fill: #008000; -fx-font-weight: bold; }

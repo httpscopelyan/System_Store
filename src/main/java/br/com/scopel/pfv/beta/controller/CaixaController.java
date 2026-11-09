@@ -16,6 +16,7 @@ import br.com.scopel.pfv.beta.service.ReceiptService;
 import br.com.scopel.pfv.beta.service.cash.CashMovementRow;
 import br.com.scopel.pfv.beta.service.cash.CashOverview;
 import br.com.scopel.pfv.beta.service.cash.CashSummary;
+import br.com.scopel.pfv.beta.service.cash.CashClosingService;
 import br.com.scopel.pfv.beta.service.cash.CashSummaryService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -40,6 +41,7 @@ public class CaixaController {
 
     private final CashRegisterService cashRegisterService;
     private final CashSummaryService cashSummaryService;
+    private final CashClosingService cashClosingService;
     private final UserSession userSession;
     private final ReceiptService receiptService;
     private final ManagerAuthorizationController managerAuthorizationController;
@@ -60,18 +62,19 @@ public class CaixaController {
     @FXML private Label closingInfoLabel;
     @FXML private CashMovementsController cashMovementsController;
     @FXML private CashSummaryController cashSummaryController;
+    @FXML private CashClosingController cashClosingController;
     @FXML private TextField openingAmountField;
     @FXML private Label periodLabel;
     @FXML private TextField movementAmountField;
     @FXML private ComboBox<String> movementReasonBox;
-    @FXML private TextField countedAmountField;
     @FXML private Label statusLabel;
 
     public CaixaController(CashRegisterService cashRegisterService, CashSummaryService cashSummaryService,
-                           UserSession userSession, ReceiptService receiptService,
+                           CashClosingService cashClosingService, UserSession userSession, ReceiptService receiptService,
                            ManagerAuthorizationController managerAuthorizationController) {
         this.cashRegisterService = cashRegisterService;
         this.cashSummaryService = cashSummaryService;
+        this.cashClosingService = cashClosingService;
         this.userSession = userSession;
         this.receiptService = receiptService;
         this.managerAuthorizationController = managerAuthorizationController;
@@ -83,7 +86,8 @@ public class CaixaController {
         terminalBox.setValue("CAIXA 01");
         history = new CashHistoryPresenter(historyTable, colHistDate, colHistBalance);
         statusPanel = new CashStatusPanel(statusBigLabel, openingInfoLabel, closingInfoLabel, periodLabel);
-        closingFlow = new CashClosingFlow(cashRegisterService, receiptService, userSession);
+        closingFlow = new CashClosingFlow(cashClosingService, cashRegisterService, receiptService, userSession);
+        cashClosingController.bind(closingFlow, this::finishClosing);
         movementActions = new CashMovementActions(cashRegisterService,
                 new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window), this::window);
         movementReasonBox.setItems(FXCollections.observableArrayList(REASONS));
@@ -111,12 +115,14 @@ public class CaixaController {
             statusPanel.showEmpty();
             cashMovementsController.show(List.of());
             cashSummaryController.show(CashSummary.empty());
+            cashClosingController.show(null, CashSummary.empty());
             return;
         }
         statusPanel.show(displayed);
         CashOverview overview = cashSummaryService.overview(displayed);
         cashMovementsController.show(overview.rows());
         cashSummaryController.show(overview.summary());
+        cashClosingController.show(displayed, overview.summary());
     }
 
     @FXML
@@ -156,23 +162,14 @@ public class CaixaController {
     }
 
     @FXML
-    public void onClose() {
-        String message = closingFlow.close(openRegister(), countedAmountField.getText());
-        if (message.startsWith("Caixa FECHADO")) {
-            countedAmountField.clear();
-        }
+    public void onPrintMovimentacao() {
+        statusLabel.setText(closingFlow.printMovements(displayed,
+                displayed == null ? null : cashSummaryService.overview(displayed)));
+    }
+
+    private void finishClosing(String message) {
         statusLabel.setText(message);
         onRefresh();
-    }
-
-    @FXML
-    public void onPrintMovimentacao() {
-        statusLabel.setText("Impressão da movimentação: use a impressora configurada (em ajuste).");
-    }
-
-    @FXML
-    public void onPrintFechamento() {
-        statusLabel.setText(closingFlow.printClosing(displayed));
     }
 
     private void registerMovement(boolean supplement) {

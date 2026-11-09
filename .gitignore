@@ -54,3 +54,4 @@ backup/
 
 # Saída do jpackage/instalador (privado)
 dist/
+backups/
