@@ -18,6 +18,7 @@
             <TableColumn fx:id="colMovExtra" text="Extra" prefWidth="85"/>
             <TableColumn fx:id="colMovTotal" text="Total" prefWidth="95"/>
             <TableColumn fx:id="colMovVenda" text="Venda" prefWidth="70"/>
+            <TableColumn fx:id="colMovOperator" text="Operador" prefWidth="120"/>
             <TableColumn fx:id="colMovHist" text="Histórico" prefWidth="260"/>
         </columns>
         <columnResizePolicy>

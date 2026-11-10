@@ -67,7 +67,7 @@ class CashClosingByMethodTests {
         sell("20.00", PaymentMethod.PIX, null, null);
         sell("30.00", PaymentMethod.CARTAO, CardType.CREDITO, null);
         sell("40.00", PaymentMethod.CARTAO, CardType.DEBITO, null);
-        cashRegisterService.withdrawal(register.getId(), new BigDecimal("5.00"), "Pagamento a fornecedor");
+        cashRegisterService.withdrawal(register.getId(), new BigDecimal("5.00"), "Pagamento a fornecedor", register.getOperator());
     }
 
     private void sell(String price, PaymentMethod method, CardType cardType, String received) {

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 public record CashMovementRow(LocalDateTime at, boolean entry, BigDecimal cash, BigDecimal pix,
                               BigDecimal credit, BigDecimal debit, BigDecimal extra, BigDecimal total,
-                              Long saleId, String history, CashMovement movement) {
+                              Long saleId, String history, String operatorName, CashMovement movement) {
 
     public boolean isRectifiable() {
         return movement != null && movement.getType() != CashMovement.Type.RETIFICACAO;

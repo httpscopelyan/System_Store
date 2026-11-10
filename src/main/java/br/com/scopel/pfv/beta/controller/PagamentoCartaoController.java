@@ -40,6 +40,7 @@ public class PagamentoCartaoController {
 
     @FXML
     public void initialize() {
+        navigator.setPageBackHandler(this::onVoltar);
         Sale venda = userSession.getVendaAtual();
         totalLabel.setText("R$ " + MONEY.format(venda == null ? BigDecimal.ZERO : venda.getTotal()));
         Platform.runLater(() -> {

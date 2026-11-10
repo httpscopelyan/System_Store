@@ -76,6 +76,7 @@ class CashCloseReceiptTests {
         String receipt = rs.buildCashCloseReceipt(closedCashRegister());
 
         assertTrue(receipt.contains("NAO E DOCUMENTO FISCAL"), "aviso RNF15");
-        assertTrue(receipt.contains("Operador Teste"), "nome do operador");
+        assertTrue(receipt.contains("Abertura por: Operador Teste"), "quem abriu o caixa");
+        assertFalse(receipt.contains("Operador:"), "o caixa pode ser compartilhado; não rotular como operador");
     }
 }

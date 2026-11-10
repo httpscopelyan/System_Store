@@ -81,6 +81,9 @@ public class ReceiptService {
             sb.append(DT.format(sale.getCreatedAt())).append('\n');
         }
         sb.append("Venda #").append(sale.getId() == null ? "-" : sale.getId()).append('\n');
+        if (sale.getOperator() != null) {
+            sb.append("Operador: ").append(clip(sale.getOperator().getName(), WIDTH - 10)).append('\n');
+        }
         sb.append(line()).append('\n');
 
         for (SaleItem item : sale.getItems()) {
@@ -188,7 +191,7 @@ public class ReceiptService {
         sb.append(center("FECHAMENTO DE CAIXA")).append('\n');
         sb.append("Caixa #").append(cr.getId() == null ? "-" : cr.getId()).append('\n');
         if (cr.getOperator() != null) {
-            sb.append("Operador: ").append(clip(cr.getOperator().getName(), WIDTH - 10)).append('\n');
+            sb.append("Abertura por: ").append(clip(cr.getOperator().getName(), WIDTH - 14)).append('\n');
         }
         if (cr.getOpenedAt() != null) {
             sb.append("Abertura:   ").append(DT.format(cr.getOpenedAt())).append('\n');
@@ -215,7 +218,7 @@ public class ReceiptService {
         sb.append(center("MOVIMENTACAO DO CAIXA")).append('\n');
         sb.append("Caixa #").append(cr.getId() == null ? "-" : cr.getId()).append('\n');
         if (cr.getOperator() != null) {
-            sb.append("Operador: ").append(clip(cr.getOperator().getName(), WIDTH - 10)).append('\n');
+            sb.append("Abertura por: ").append(clip(cr.getOperator().getName(), WIDTH - 14)).append('\n');
         }
         if (cr.getOpenedAt() != null) {
             sb.append("Abertura:   ").append(DT.format(cr.getOpenedAt())).append('\n');

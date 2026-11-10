@@ -3,6 +3,7 @@ package br.com.scopel.pfv.beta.controller.support;
 import br.com.scopel.pfv.beta.exception.InsufficientCashException;
 import br.com.scopel.pfv.beta.model.CashMovement;
 import br.com.scopel.pfv.beta.model.CashRegister;
+import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.service.CashRegisterService;
 import br.com.scopel.pfv.beta.service.cash.CashMovementRow;
 import javafx.stage.Window;
@@ -27,16 +28,17 @@ public final class CashMovementActions {
         this.ownerWindow = ownerWindow;
     }
 
-    public Result register(CashRegister open, boolean supplement, String amountText, String reason) {
+    public Result register(CashRegister open, boolean supplement, String amountText, String reason,
+                           User operator) {
         if (open == null) {
             return new Result(false, "Abra um caixa primeiro.");
         }
         try {
             BigDecimal amount = DecimalInput.parseRequired(amountText);
             if (supplement) {
-                cashRegisterService.supplement(open.getId(), amount, reason);
+                cashRegisterService.supplement(open.getId(), amount, reason, operator);
             } else {
-                cashRegisterService.withdrawal(open.getId(), amount, reason);
+                cashRegisterService.withdrawal(open.getId(), amount, reason, operator);
             }
             return new Result(true, supplement ? "Suprimento registrado!" : "Sangria registrada!");
         } catch (NumberFormatException invalidNumber) {

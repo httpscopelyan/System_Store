@@ -28,6 +28,7 @@ public class Navigator {
     private BorderPane shell;
     private Page currentPage;
     private String lockReason;
+    private Runnable pageBackHandler;
     private Consumer<String> notice = message -> { };
 
     public Navigator(ApplicationContext context, ThemeManager themeManager) {
@@ -41,6 +42,11 @@ public class Navigator {
         history.clear();
         currentPage = null;
         lockReason = null;
+        pageBackHandler = null;
+    }
+
+    public void setPageBackHandler(Runnable pageBackHandler) {
+        this.pageBackHandler = pageBackHandler;
     }
 
     public void lock(String reason) {
@@ -85,12 +91,16 @@ public class Navigator {
         if (blockedByLock()) {
             return;
         }
+        if (pageBackHandler != null) {
+            pageBackHandler.run();
+            return;
+        }
         Page target = history.back().orElse(Page.INICIO);
         show(target);
     }
 
     public boolean canGoBack() {
-        return history.canGoBack();
+        return pageBackHandler != null || history.canGoBack();
     }
 
     public Page getCurrentPage() {
@@ -138,6 +148,7 @@ public class Navigator {
     }
 
     private void show(Page page) {
+        pageBackHandler = null;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(page.getPath()));
             loader.setControllerFactory(context::getBean);

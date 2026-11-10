@@ -26,7 +26,7 @@ public final class CashStatusPanel {
         statusLabel.setText(open ? "ABERTO" : "FECHADO");
         statusLabel.getStyleClass().setAll(open ? "status-open" : "status-closed");
         openingInfoLabel.setText(DATE_TIME.format(register.getOpenedAt())
-                + (register.getOperator() != null ? "\n" + register.getOperator().getName().toUpperCase() : ""));
+                + (register.getOperator() != null ? "\nAbertura por: " + register.getOperator().getName().toUpperCase() : ""));
         closingInfoLabel.setText(register.getClosedAt() == null ? "-"
                 : DATE_TIME.format(register.getClosedAt()) + "\nDiferença: "
                 + MoneyFormat.format(register.totalDifference()));

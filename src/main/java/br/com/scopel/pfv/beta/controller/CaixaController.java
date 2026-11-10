@@ -87,6 +87,7 @@ public class CaixaController {
         statusPanel = new CashStatusPanel(statusBigLabel, openingInfoLabel, closingInfoLabel, periodLabel);
         closingFlow = new CashClosingFlow(cashClosingService, cashRegisterService, receiptService, userSession);
         cashSummaryController.bind(closingFlow, this::finishClosing);
+        cashMovementsController.onMessage(statusLabel::setText);
         movementActions = new CashMovementActions(cashRegisterService,
                 new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window), this::window);
         movementReasonBox.setItems(FXCollections.observableArrayList(REASONS));
@@ -159,6 +160,11 @@ public class CaixaController {
     }
 
     @FXML
+    public void onViewItems() {
+        cashMovementsController.showItemsOfSelected();
+    }
+
+    @FXML
     public void onPrintMovimentacao() {
         statusLabel.setText(closingFlow.printMovements(displayed,
                 displayed == null ? null : cashSummaryService.overview(displayed)));
@@ -171,7 +177,7 @@ public class CaixaController {
 
     private void registerMovement(boolean supplement) {
         CashMovementActions.Result result = movementActions.register(openRegister(), supplement,
-                movementAmountField.getText(), movementReasonBox.getEditor().getText());
+                movementAmountField.getText(), movementReasonBox.getEditor().getText(), userSession.getLoggedUser());
         statusLabel.setText(result.message());
         if (result.success()) {
             movementAmountField.clear();

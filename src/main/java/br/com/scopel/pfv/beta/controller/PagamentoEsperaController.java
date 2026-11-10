@@ -66,12 +66,11 @@ public class PagamentoEsperaController {
 
     @FXML
     public void initialize() {
+        navigator.setPageBackHandler(this::onCancel);
         screen = new ChargeScreen(statusLabel, confirmButton);
         vendaAtual = userSession.getVendaAtual();
         cardType = userSession.getCardTypeSelecionado();
-        done = false;
-        ended = false;
-        awaitingRegistration = false;
+        done = ended = awaitingRegistration = false;
         poller = null;
         BigDecimal total = vendaAtual == null ? BigDecimal.ZERO : vendaAtual.getTotal();
         totalLabel.setText("R$ " + MONEY.format(total));

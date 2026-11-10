@@ -59,37 +59,37 @@ class CashMovementRulesTests {
     @Test
     void withdrawalWithoutReasonIsRefused_RN28() {
         assertThrows(MissingReasonException.class,
-                () -> cashRegisterService.withdrawal(register.getId(), new BigDecimal("10"), null));
+                () -> cashRegisterService.withdrawal(register.getId(), new BigDecimal("10"), null, register.getOperator()));
         assertThrows(MissingReasonException.class,
-                () -> cashRegisterService.withdrawal(register.getId(), new BigDecimal("10"), "   "));
+                () -> cashRegisterService.withdrawal(register.getId(), new BigDecimal("10"), "   ", register.getOperator()));
         assertThrows(MissingReasonException.class,
-                () -> cashRegisterService.withdrawal(register.getId(), new BigDecimal("10"), "ab"));
+                () -> cashRegisterService.withdrawal(register.getId(), new BigDecimal("10"), "ab", register.getOperator()));
         assertEquals(0, new BigDecimal("100.00").compareTo(balance()));
     }
 
     @Test
     void supplementWithoutReasonIsRefused_RN28() {
         assertThrows(MissingReasonException.class,
-                () -> cashRegisterService.supplement(register.getId(), new BigDecimal("10"), ""));
+                () -> cashRegisterService.supplement(register.getId(), new BigDecimal("10"), "", register.getOperator()));
         assertEquals(0, new BigDecimal("100.00").compareTo(balance()));
     }
 
     @Test
     void reasonIsTrimmedAndStored_RN28() {
         CashMovement movement = cashRegisterService.withdrawal(register.getId(), new BigDecimal("10"),
-                "  Pagamento fornecedor  ");
+                "  Pagamento fornecedor  ", register.getOperator());
         assertEquals("Pagamento fornecedor", movement.getReason());
     }
 
     @Test
     void reasonLongerThanTheColumnIsRefused_RN28() {
         assertThrows(MissingReasonException.class,
-                () -> cashRegisterService.supplement(register.getId(), new BigDecimal("10"), "x".repeat(156)));
+                () -> cashRegisterService.supplement(register.getId(), new BigDecimal("10"), "x".repeat(156), register.getOperator()));
     }
 
     @Test
     void rectifyingAWithdrawalDownReturnsTheDifferenceToTheDrawer_RN29() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("100"), "retirada errada");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("100"), "retirada errada", register.getOperator());
         assertEquals(0, BigDecimal.ZERO.compareTo(balance()));
         CashMovement rectification = cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("10"),
                 "Valor digitado errado", manager);
@@ -99,17 +99,17 @@ class CashMovementRulesTests {
 
     @Test
     void rectifyingASupplementUpAndDown_RN29() {
-        CashMovement supplement = cashRegisterService.supplement(register.getId(), new BigDecimal("50"), "reforço");
+        CashMovement supplement = cashRegisterService.supplement(register.getId(), new BigDecimal("50"), "reforço", register.getOperator());
         cashRegisterService.rectify(supplement.getId(), new BigDecimal("80"), "faltou lançar 30", manager);
         assertEquals(0, new BigDecimal("180.00").compareTo(balance()));
-        CashMovement other = cashRegisterService.supplement(register.getId(), new BigDecimal("50"), "outro reforço");
+        CashMovement other = cashRegisterService.supplement(register.getId(), new BigDecimal("50"), "outro reforço", register.getOperator());
         cashRegisterService.rectify(other.getId(), new BigDecimal("20"), "sobrou 30 lançado", manager);
         assertEquals(0, new BigDecimal("200.00").compareTo(balance()));
     }
 
     @Test
     void theOriginalMovementIsNeverChanged_RN29() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada", register.getOperator());
         cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("4"), "erro de digitação", manager);
         CashMovement original = movementRepository.findById(withdrawal.getId()).orElseThrow();
         assertEquals(0, new BigDecimal("40").compareTo(original.getAmount()));
@@ -119,7 +119,7 @@ class CashMovementRulesTests {
 
     @Test
     void rectificationRecordsWhoAuthorizedAndWhatItCorrects_RN29() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada", register.getOperator());
         CashMovement rectification = cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("4"),
                 "erro de digitação", manager);
         assertEquals(CashMovement.Type.RETIFICACAO, rectification.getType());
@@ -131,7 +131,7 @@ class CashMovementRulesTests {
 
     @Test
     void operatorCannotRectify_RN29() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada", register.getOperator());
         assertThrows(ManagerAuthorizationRequiredException.class,
                 () -> cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("4"), "erro", operator));
         assertThrows(ManagerAuthorizationRequiredException.class,
@@ -140,14 +140,14 @@ class CashMovementRulesTests {
 
     @Test
     void rectificationNeedsAReason_RN29() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada", register.getOperator());
         assertThrows(MissingReasonException.class,
                 () -> cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("4"), " ", manager));
     }
 
     @Test
     void aMovementCanBeRectifiedOnlyOnce_RN29() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada", register.getOperator());
         cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("4"), "erro de digitação", manager);
         assertThrows(IllegalArgumentException.class,
                 () -> cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("5"), "outro erro", manager));
@@ -155,7 +155,7 @@ class CashMovementRulesTests {
 
     @Test
     void aRectificationCannotBeRectified_RN29() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada", register.getOperator());
         CashMovement rectification = cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("4"),
                 "erro de digitação", manager);
         assertThrows(IllegalArgumentException.class,
@@ -164,7 +164,7 @@ class CashMovementRulesTests {
 
     @Test
     void sameOrNegativeCorrectedValueIsRefused_RN29() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada", register.getOperator());
         assertThrows(IllegalArgumentException.class,
                 () -> cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("40.00"), "igual", manager));
         assertThrows(IllegalArgumentException.class,
@@ -173,14 +173,14 @@ class CashMovementRulesTests {
 
     @Test
     void rectifyingAWithdrawalUpwardBeyondTheDrawerIsRefused_RN29() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada", register.getOperator());
         assertThrows(InsufficientCashException.class,
                 () -> cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("500"), "valor maior", manager));
     }
 
     @Test
     void closedRegisterCannotBeRectified_RN29() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "retirada", register.getOperator());
         cashRegisterService.close(register.getId(), new BigDecimal("60.00"));
         assertThrows(CashRegisterClosedException.class,
                 () -> cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("4"), "tarde demais", manager));

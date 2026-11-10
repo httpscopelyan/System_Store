@@ -74,6 +74,7 @@
                 <Button text="💲 Suprimento" onAction="#onSupplement" styleClass="win-button"/>
                 <Button text="💲 Sangria (F9)" onAction="#onWithdrawal" styleClass="win-button"/>
                 <Button text="🧮 Retificar" onAction="#onRectify" styleClass="win-button"/>
+                <Button text="🔍 Ver itens" onAction="#onViewItems" styleClass="win-button"/>
                 <Button text="🖨 Imprimir Movimentação (F7)" onAction="#onPrintMovimentacao" styleClass="win-button"/>
                 <Button text="🔄 Atualizar (F5)" onAction="#onRefresh" styleClass="win-button"/>
             </FlowPane>

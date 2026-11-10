@@ -60,6 +60,7 @@ public class PagamentoDinheiroController {
 
     @FXML
     public void initialize() {
+        navigator.setPageBackHandler(this::onVoltar);
         vendaAtual = userSession.getVendaAtual();
         totalLabel.setText(formatMoney(vendaAtual == null ? BigDecimal.ZERO : vendaAtual.getTotal()));
         changeLabel.setText(formatMoney(BigDecimal.ZERO));

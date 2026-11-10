@@ -662,6 +662,22 @@ venda → bipar → somar → finalizar → baixa de estoque.
     alteração (`Propagation.MANDATORY`): se uma falha, a outra também. Sem update nem delete no service.
   - **Consequências:** o usuário com histórico não pode ser apagado (só inativado). O painel admin web, em
     rodada futura, só lê essas consultas; a senha do Yan nunca fica em texto puro no repositório.
+- **0021 — Caixa único por grupo de nomes (2026-11-11):**
+  - **Status:** Aceito.
+  - **Decisão:** Dayana e Ana Clara compartilham um só caixa aberto. O grupo é definido no código, por nome
+    normalizado (`SharedCashRegisterMembers`), no mesmo padrão de `StaffPermissions`. `cash_register.operator_id`
+    continua guardando quem abriu. Qualquer uma das duas abre e fecha. Operadores fora do grupo mantêm caixa próprio.
+  - **Consequências:** todo o dinheiro já era somado por `cash_register_id`, então nenhum cálculo mudou; só
+    `open`, `findOpenByOperator` e `history` passaram a olhar o grupo. Se houver dois caixas abertos do grupo (estado
+    anterior à unificação), o mais antigo é devolvido primeiro, para que nenhum fique órfão. A autoria passa a vir
+    de `Sale.operator`, `DirectCharge.operator` e `CashMovement.operator` (V37); cupons de caixa mostram "Abertura por".
+- **0022 — Voltar por página no Navigator (2026-11-11):**
+  - **Status:** Aceito.
+  - **Decisão:** cada tela do fluxo de pagamento registra um `pageBackHandler` no `Navigator`; o handler é limpo a
+    cada troca de página. `back()` respeita o bloqueio (`lock`) e depois executa o handler, que reabre a venda
+    (`reopenForEditing`) antes de navegar. O `PAYMENT_FLOW` do histórico não mudou.
+  - **Consequências:** o laço em que o Voltar global devolvia a venda `EM_PAGAMENTO` e a tela de venda a levava de
+    volta ao pagamento acabou; cobrança viva na maquininha continua recusando o Voltar.
 
 ---
 

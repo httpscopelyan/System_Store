@@ -169,6 +169,10 @@ com JavaFX real); falta a validação manual do dev com `mvn javafx:run`.
 | RF83 | Conta administradora Yan (gerente) criada por seed, com senha só em hash BCrypt | ✅* | F1 | `AdministratorYanSeed`, `StaffPermissions.isAdministrator` |
 | RF84 | Botão "Trocar de conta": cards das contas ativas e senha só da conta escolhida | ✅* | F1 | `SwitchAccountController`, `SessionLauncher`; retoma venda com pagamento parcial |
 | RF85 | Painel admin web (contas, permissões, histórico) | ⬜ | F2 | só os dados estão prontos (RF82, `SaleHistoryService`); a página web fica para a próxima rodada |
+| RF86 | Ver os itens de uma venda a partir do Histórico de Vendas e da Movimentação do Caixa | ✅* | F1 | `SaleDetailDialog`, `SaleDetailAction`, `SaleHistoryService.findSaleDetail` (duplo clique, Enter ou botão "Ver itens") |
+| RF87 | Caixa único compartilhado entre Dayana e Ana Clara (abertura e fechamento únicos; qualquer uma abre e fecha) | ✅* | F1 | ADR 0021; `SharedCashRegisterMembers`, `CashRegisterService.findOpenByOperator/open/history`; busca o caixa aberto mais antigo do grupo |
+| RF88 | Operador de cada movimentação gravado e exibido; cupom da venda nomeia o operador | ✅* | F1 | migration V37 (`cash_movement.operator_id`); coluna Operador na movimentação; cupons de caixa dizem "Abertura por:" |
+| RF89 | Voltar (botão e atalho) funciona na etapa de forma de pagamento | ✅* | F1 | ADR 0022; `Navigator.setPageBackHandler`; botão "Voltar (ESC)" em `pagamento.fxml` |
 
 ## Regras de Negócio (RN)
 | RN | Descrição | Status |

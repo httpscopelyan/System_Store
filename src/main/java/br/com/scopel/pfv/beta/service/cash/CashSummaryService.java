@@ -7,6 +7,7 @@ import br.com.scopel.pfv.beta.model.DirectCharge;
 import br.com.scopel.pfv.beta.model.Payment;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.Sale;
+import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.service.CashRegisterService;
 import br.com.scopel.pfv.beta.service.DirectChargeService;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,8 @@ public class CashSummaryService {
             debit = debit.add(totals.debit);
             rows.add(new CashMovementRow(sale.getCreatedAt(), true, totals.cash, totals.pix, totals.credit,
                     totals.debit, BigDecimal.ZERO, sale.getTotal(), sale.getId(),
-                    sale.getCustomer() != null ? sale.getCustomer().getName() : ANONYMOUS_CUSTOMER, null));
+                    sale.getCustomer() != null ? sale.getCustomer().getName() : ANONYMOUS_CUSTOMER,
+                    nameOf(sale.getOperator()), null));
         }
 
         BigDecimal supplements = BigDecimal.ZERO;
@@ -71,7 +73,7 @@ public class CashSummaryService {
             }
             rows.add(new CashMovementRow(movement.getCreatedAt(), entry, movement.getAmount(), BigDecimal.ZERO,
                     BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, movement.getAmount(), null,
-                    describe(movement), movement));
+                    describe(movement), nameOf(movement.getOperator()), movement));
         }
 
         BigDecimal extra = BigDecimal.ZERO;
@@ -79,7 +81,7 @@ public class CashSummaryService {
             extra = extra.add(charge.getAmount());
             rows.add(new CashMovementRow(charge.getCreatedAt(), true, BigDecimal.ZERO, BigDecimal.ZERO,
                     BigDecimal.ZERO, BigDecimal.ZERO, charge.getAmount(), charge.getAmount(), null,
-                    describe(charge), null));
+                    describe(charge), nameOf(charge.getOperator()), null));
         }
 
         rows.sort(Comparator.comparing(CashMovementRow::at));
@@ -110,6 +112,10 @@ public class CashSummaryService {
                     + movement.getCorrectedMovement().getId() + ")";
         }
         return base;
+    }
+
+    private String nameOf(User operator) {
+        return operator == null || operator.getName() == null ? "" : operator.getName();
     }
 
     private String describe(DirectCharge charge) {

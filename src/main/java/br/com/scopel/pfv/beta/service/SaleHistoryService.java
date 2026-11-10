@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SaleHistoryService {
@@ -41,6 +42,14 @@ public class SaleHistoryService {
         return saleRepository
                 .findHistory(Sale.Status.FINALIZADA, operatorId, start, end, PageRequest.of(pageNumber, pageSize))
                 .map(this::toEntry);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<SaleHistoryEntry> findSaleDetail(Long saleId) {
+        if (saleId == null) {
+            return Optional.empty();
+        }
+        return saleRepository.findById(saleId).map(this::toEntry);
     }
 
     private SaleHistoryEntry toEntry(Sale sale) {

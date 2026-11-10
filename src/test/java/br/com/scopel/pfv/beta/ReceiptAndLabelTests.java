@@ -4,6 +4,7 @@ import br.com.scopel.pfv.beta.hardware.PrinterPort;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.SaleItem;
+import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.service.AppSettingService;
 import br.com.scopel.pfv.beta.service.LabelService;
 import br.com.scopel.pfv.beta.model.CardType;
@@ -69,6 +70,42 @@ class ReceiptAndLabelTests {
         assertTrue(receipt.contains("Arroz 5kg"), "item");
         assertTrue(receipt.contains("TOTAL"), "linha de total");
         assertTrue(receipt.contains("51,00"), "valor total");
+    }
+
+    @Test
+    void saleReceiptNamesTheOperatorWhoMadeTheSale() {
+        ReceiptService rs = new ReceiptService(settingsStub, noopPrinter);
+        Sale sale = saleWithOneItem();
+        User seller = new User();
+        seller.setName("Ana Clara");
+        sale.setOperator(seller);
+
+        String receipt = rs.buildSaleReceipt(sale);
+
+        assertTrue(receipt.contains("Operador: Ana Clara"), "operador da venda");
+    }
+
+    @Test
+    void saleReceiptWithoutOperatorKeepsWorkingWithoutTheOperatorLine() {
+        ReceiptService rs = new ReceiptService(settingsStub, noopPrinter);
+
+        String receipt = rs.buildSaleReceipt(saleWithOneItem());
+
+        assertFalse(receipt.contains("Operador:"));
+    }
+
+    @Test
+    void saleReceiptCopyAlsoNamesTheOperator() {
+        ReceiptService rs = new ReceiptService(settingsStub, noopPrinter);
+        Sale sale = saleWithOneItem();
+        User seller = new User();
+        seller.setName("Dayana");
+        sale.setOperator(seller);
+
+        String receiptCopy = rs.buildSaleReceiptCopy(sale, ReceiptPayment.pix());
+
+        assertTrue(receiptCopy.contains("2a VIA"));
+        assertTrue(receiptCopy.contains("Operador: Dayana"));
     }
 
     @Test

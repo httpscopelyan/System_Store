@@ -329,3 +329,17 @@ CARTAO/PIX e pagamento múltiplo (RN18) ficam na F4.
 - **Validação manual do dev:** `mvn javafx:run` — fechamento com Extra, pagamento dividido (dinheiro + débito) com a maquininha real, Ana Clara no Estoque, troca de conta.
 - **Revisão de 2026-11-10 (correções):** `SplitPaymentService.registerPart` passou a carregar os itens da venda devolvida (sem isso a tela de venda quebrava ao voltar depois de uma parte parcial); atalhos F11/F12 do shell instalados uma única vez por janela (após "Trocar de conta" a gaveta abria duas vezes e o F11 se anulava); relógio do rodapé único (`ShellClock`); aviso na aba Cobrar quando a cobrança é aprovada sem caixa aberto (não entra no Extra); campo de observação trunca em 155 caracteres ao colar. Testes novos: `SplitPaymentDetachedFlowTests`.
 - **Mudança de comportamento:** o reajuste de preços em massa (`AJUSTE_PRECOS`) agora respeita `StaffPermissions.canEditPrices` (gerente ou Dayana); antes qualquer operador conseguia.
+
+---
+
+## 2026-11-11 — Itens da venda, caixa único Dayana/Ana Clara e Voltar no pagamento (v1.3.1)
+
+- Entregue (RF86–RF89, ADR 0021 e 0022): detalhe da venda no Histórico e no Caixa; caixa único do grupo Dayana/Ana Clara;
+  operador em cada movimentação (V37) e no cupom da venda; Voltar (botão e atalho) no fluxo de pagamento.
+- **Decisão de projeto:** a busca do caixa aberto do grupo devolve o mais **antigo** (e não o mais novo). Se na hora da
+  atualização as duas tiverem caixa aberto, os dois são fechados em sequência e nenhum fica órfão.
+- **Atenção na primeira abertura em produção:** movimentações antigas (sangria/suprimento) não têm operador gravado; a coluna
+  Operador aparece vazia para elas. Caixas já fechados continuam separados por operadora no histórico anterior.
+- **Mudança no cupom:** a venda agora imprime `Operador: <nome>`; os cupons de caixa trocaram `Operador:` por `Abertura por:`.
+- **Pendente:** estorno de venda com parte em cartão/PIX já recebida (continua sem fluxo); painel admin web (RF85); validação
+  manual com `mvn javafx:run` — principalmente as duas contas no mesmo caixa e o Voltar a partir de cada forma de pagamento.

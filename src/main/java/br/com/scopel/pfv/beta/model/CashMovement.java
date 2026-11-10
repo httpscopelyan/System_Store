@@ -45,6 +45,10 @@ public class CashMovement {
     @JoinColumn(name = "authorized_by_id")
     private User authorizedBy;
 
+    @ManyToOne
+    @JoinColumn(name = "operator_id")
+    private User operator;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 }

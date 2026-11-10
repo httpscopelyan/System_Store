@@ -32,6 +32,9 @@
                 <Button text="4  —  DIVIDIR" onAction="#onDividir"
                         styleClass="pay-option" maxWidth="Infinity"/>
 
+                <Button text="◀ Voltar (ESC)" onAction="#onVoltar" focusTraversable="false"
+                        styleClass="secondary-button"/>
+
                 <Label fx:id="statusLabel" styleClass="sale-status"/>
             </VBox>
         </ScrollPane>

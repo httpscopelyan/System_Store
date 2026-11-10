@@ -124,8 +124,8 @@ class CashSummaryServiceTests {
         finalizedSale("12.50", PaymentMethod.PIX, null, null);
         finalizedSale("40.00", PaymentMethod.CARTAO, CardType.DEBITO, null);
         finalizedSale("55.00", PaymentMethod.CARTAO, CardType.CREDITO, null);
-        cashRegisterService.supplement(register.getId(), new BigDecimal("10"), "troco");
-        cashRegisterService.withdrawal(register.getId(), new BigDecimal("5"), "sangria");
+        cashRegisterService.supplement(register.getId(), new BigDecimal("10"), "troco", register.getOperator());
+        cashRegisterService.withdrawal(register.getId(), new BigDecimal("5"), "sangria", register.getOperator());
 
         CashOverview overview = cashSummaryService.overview(register);
         CashSummary summary = overview.summary();
@@ -144,8 +144,8 @@ class CashSummaryServiceTests {
     @Test
     void summaryFinalBalanceAlwaysEqualsTheDrawerBalance_RN15() {
         finalizedSale("20.00", PaymentMethod.DINHEIRO, null, "30.00");
-        cashRegisterService.supplement(register.getId(), new BigDecimal("50"), "reforço");
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("30"), "retirada");
+        cashRegisterService.supplement(register.getId(), new BigDecimal("50"), "reforço", register.getOperator());
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("30"), "retirada", register.getOperator());
         assertEquals(0, cashRegisterService.currentBalance(register)
                 .compareTo(cashSummaryService.overview(register).summary().finalBalance()));
         cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("10"), "erro de digitação", manager);
@@ -155,7 +155,7 @@ class CashSummaryServiceTests {
 
     @Test
     void withdrawalRectificationReducesTheWithdrawalTotal_RN29() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("30"), "retirada");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("30"), "retirada", register.getOperator());
         cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("10"), "erro de digitação", manager);
         CashOverview overview = cashSummaryService.overview(register);
         assertEquals(0, new BigDecimal("10.00").compareTo(overview.summary().cashOut()));
@@ -164,14 +164,14 @@ class CashSummaryServiceTests {
 
     @Test
     void supplementRectificationAdjustsTheCashInTotal_RN29() {
-        CashMovement supplement = cashRegisterService.supplement(register.getId(), new BigDecimal("50"), "reforço");
+        CashMovement supplement = cashRegisterService.supplement(register.getId(), new BigDecimal("50"), "reforço", register.getOperator());
         cashRegisterService.rectify(supplement.getId(), new BigDecimal("20"), "foi só 20", manager);
         assertEquals(0, new BigDecimal("20.00").compareTo(cashSummaryService.overview(register).summary().cashIn()));
     }
 
     @Test
     void movementRowsCarryTheReasonAndTheRectificationTrail_RN28() {
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("30"), "Pagamento fornecedor");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("30"), "Pagamento fornecedor", register.getOperator());
         cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("10"), "erro de digitação", manager);
         List<CashMovementRow> rows = cashSummaryService.overview(register).rows();
         assertEquals(2, rows.size());
@@ -193,8 +193,8 @@ class CashSummaryServiceTests {
                 return defaultValue;
             }
         }, noopPrinter);
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("30"), "Pagamento fornecedor");
-        cashRegisterService.supplement(register.getId(), new BigDecimal("10"), "Troco inicial");
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("30"), "Pagamento fornecedor", register.getOperator());
+        cashRegisterService.supplement(register.getId(), new BigDecimal("10"), "Troco inicial", register.getOperator());
         register.setClosedAt(LocalDateTime.now());
         String receipt = receiptService.buildCashCloseReceipt(register, cashRegisterService.movements(register));
         assertTrue(receipt.contains("MOVIMENTOS DO CAIXA"));

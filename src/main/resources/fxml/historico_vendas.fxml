@@ -29,7 +29,10 @@
                 </columnResizePolicy>
             </TableView>
 
-            <Label fx:id="statusLabel" styleClass="sale-status"/>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button text="🔍 Ver itens" onAction="#onViewItems" styleClass="win-button"/>
+                <Label fx:id="statusLabel" styleClass="sale-status"/>
+            </HBox>
         </VBox>
     </center>
 

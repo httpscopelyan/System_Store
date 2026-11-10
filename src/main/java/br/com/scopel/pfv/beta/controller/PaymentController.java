@@ -4,6 +4,7 @@ import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.exception.ElectronicPaymentReceivedException;
+import br.com.scopel.pfv.beta.exception.IllegalSaleStateException;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.service.SaleService;
 import br.com.scopel.pfv.beta.service.SplitPaymentService;
@@ -53,6 +54,7 @@ public class PaymentController {
 
     @FXML
     public void initialize() {
+        navigator.setPageBackHandler(this::onVoltar);
         vendaAtual = userSession.getVendaAtual();
         if (vendaAtual != null) {
             totalLabel.setText(formatMoney(vendaAtual.getTotal()));
@@ -102,12 +104,6 @@ public class PaymentController {
         navigator.navigate(Page.PAGAMENTO_DIVIDIDO);
     }
 
-    /**
-     * Volta para a tela de venda reabrindo a venda para edição (RN21: transição
-     * EM_PAGAMENTO → ABERTA via {@code reopenForEditing}). Tolerante a duplo
-     * disparo (ESC repetido): se a venda já estiver ABERTA, apenas navega, sem
-     * tentar reabrir de novo — evita que a IllegalSaleStateException quebre a UI.
-     */
     @FXML
     public void onVoltar() {
         try {
@@ -117,6 +113,9 @@ public class PaymentController {
             }
         } catch (ElectronicPaymentReceivedException electronicReceived) {
             statusLabel.setText(electronicReceived.getMessage());
+            return;
+        } catch (IllegalSaleStateException saleNotInPayment) {
+            statusLabel.setText("Esta venda não está mais em pagamento. Abra a tela de venda novamente.");
             return;
         }
         navigator.navigate(Page.VENDA);

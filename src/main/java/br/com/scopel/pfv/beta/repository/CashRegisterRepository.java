@@ -4,6 +4,7 @@ import br.com.scopel.pfv.beta.model.CashRegister;
 import br.com.scopel.pfv.beta.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,5 +16,10 @@ public interface CashRegisterRepository extends JpaRepository<CashRegister, Long
     Optional<CashRegister> findFirstByOperatorAndStatusOrderByClosedAtDesc(User operator, CashRegister.Status status);
 
     List<CashRegister> findTop20ByOperatorOrderByOpenedAtDesc(User operator);
+
+    Optional<CashRegister> findFirstByOperator_IdInAndStatusOrderByOpenedAtAsc(Collection<Long> operatorIds,
+                                                                              CashRegister.Status status);
+
+    List<CashRegister> findTop20ByOperator_IdInOrderByOpenedAtDesc(Collection<Long> operatorIds);
 
 }

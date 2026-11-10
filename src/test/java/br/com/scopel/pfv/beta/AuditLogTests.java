@@ -235,8 +235,8 @@ class AuditLogTests {
 
     @Test
     void cashRectificationIsRecordedWithTheOriginalAndTheCorrectedAmount() {
-        CashRegister register = cashRegisterService.open(dayana, new BigDecimal("100.00"));
-        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "Fornecedor");
+        CashRegister register = cashRegisterService.open(manager, new BigDecimal("100.00"));
+        CashMovement withdrawal = cashRegisterService.withdrawal(register.getId(), new BigDecimal("40"), "Fornecedor", manager);
 
         cashRegisterService.rectify(withdrawal.getId(), new BigDecimal("10"), "erro de digitação", manager);
 

@@ -69,8 +69,9 @@ final class SaleScreenHarness {
         newOperator.setRole(role);
         newOperator.setActive(true);
         operator = context.getBean(UserRepository.class).save(newOperator);
-        CashRegister cashRegister = context.getBean(CashRegisterService.class)
-                .open(operator, new BigDecimal("50.00"));
+        CashRegisterService cashRegisterService = context.getBean(CashRegisterService.class);
+        CashRegister cashRegister = cashRegisterService.findOpenByOperator(operator)
+                .orElseGet(() -> cashRegisterService.open(operator, new BigDecimal("50.00")));
         userSession.setLoggedUser(operator);
         userSession.setCaixaAtual(cashRegister);
         userSession.setVendaAtual(null);

@@ -68,6 +68,7 @@ public class PagamentoPixController {
 
     @FXML
     public void initialize() {
+        navigator.setPageBackHandler(this::onVoltar);
         screen = new ChargeScreen(statusLabel, confirmButton);
         vendaAtual = userSession.getVendaAtual();
         done = false;

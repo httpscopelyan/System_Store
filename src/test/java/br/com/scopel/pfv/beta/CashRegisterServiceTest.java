@@ -64,8 +64,8 @@ class CashRegisterServiceTests {
         User operator = newOperator();
         CashRegister caixa = cashRegisterService.open(operator, new BigDecimal("100.00"));
 
-        cashRegisterService.supplement(caixa.getId(), new BigDecimal("50.00"), "reforço");
-        cashRegisterService.withdrawal(caixa.getId(), new BigDecimal("30.00"), "retirada");
+        cashRegisterService.supplement(caixa.getId(), new BigDecimal("50.00"), "reforço", caixa.getOperator());
+        cashRegisterService.withdrawal(caixa.getId(), new BigDecimal("30.00"), "retirada", caixa.getOperator());
 
         assertEquals(0, new BigDecimal("120.00").compareTo(cashRegisterService.currentBalance(caixa)));
     }
@@ -76,7 +76,7 @@ class CashRegisterServiceTests {
         CashRegister caixa = cashRegisterService.open(operator, new BigDecimal("100.00"));
 
         assertThrows(InsufficientCashException.class, () -> {
-            cashRegisterService.withdrawal(caixa.getId(), new BigDecimal("150.00"), "retirada grande");
+            cashRegisterService.withdrawal(caixa.getId(), new BigDecimal("150.00"), "retirada grande", caixa.getOperator());
         });
     }
 
@@ -84,7 +84,7 @@ class CashRegisterServiceTests {
     void closeRecordsDifferenceAndCloses() {
         User operator = newOperator();
         CashRegister caixa = cashRegisterService.open(operator, new BigDecimal("100.00"));
-        cashRegisterService.supplement(caixa.getId(), new BigDecimal("50.00"), "reforço");
+        cashRegisterService.supplement(caixa.getId(), new BigDecimal("50.00"), "reforço", caixa.getOperator());
 
         CashRegister fechado = cashRegisterService.close(caixa.getId(), new BigDecimal("140.00"));
 
@@ -102,7 +102,7 @@ class CashRegisterServiceTests {
         cashRegisterService.close(caixa.getId(), new BigDecimal("100.00"));
 
         assertThrows(CashRegisterClosedException.class, () -> {
-            cashRegisterService.withdrawal(caixa.getId(), new BigDecimal("10.00"), "tardia");
+            cashRegisterService.withdrawal(caixa.getId(), new BigDecimal("10.00"), "tardia", caixa.getOperator());
         });
     }
 

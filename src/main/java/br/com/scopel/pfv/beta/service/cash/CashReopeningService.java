@@ -52,7 +52,7 @@ public class CashReopeningService {
     public Optional<CashRegister> reopenLastClosed(String login, String reason, Path backupDirectory) {
         Optional<User> operator = userRepository.findByLogin(login);
         if (operator.isEmpty()
-                || registerRepository.findByOperatorAndStatus(operator.get(), CashRegister.Status.OPEN).isPresent()) {
+                || cashRegisterService.findOpenByOperator(operator.get()).isPresent()) {
             return Optional.empty();
         }
         Optional<CashRegister> lastClosed = registerRepository

@@ -180,6 +180,9 @@ direto com repository.
   (`service/audit/`, `audit_log`, ADR 0020); conta administradora Yan por seed (hash BCrypt, nunca a senha); botão
   "Trocar de conta" (`SessionLauncher`). Migrations V35–V36. Pendências em `REVISION.md` (estorno de parte eletrônica e
   painel admin web).
+- **Rodada de 2026-11-11**: ver os itens de uma venda no Histórico e na Movimentação do Caixa (`SaleDetailDialog`);
+  caixa único Dayana/Ana Clara (`SharedCashRegisterMembers`, ADR 0021) com operador gravado em cada movimentação (V37) e
+  no cupom da venda; Voltar funciona no fluxo de pagamento (`Navigator.setPageBackHandler`, ADR 0022).
 - UI básica: login, caixa (abrir/fechar), venda (bipar/finalizar). Navegação
   caixa→venda após abrir.
 

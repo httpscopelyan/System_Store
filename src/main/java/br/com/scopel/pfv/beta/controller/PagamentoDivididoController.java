@@ -83,6 +83,7 @@ public class PagamentoDivididoController {
 
     @FXML
     public void initialize() {
+        navigator.setPageBackHandler(this::onBack);
         saleInPayment = userSession.getVendaAtual();
         view = new SplitPaymentView(totalLabel, paidLabel, remainingLabel, partsBox, this::removeCashPart);
         cashParts = new SplitCashParts(splitPaymentService, view);

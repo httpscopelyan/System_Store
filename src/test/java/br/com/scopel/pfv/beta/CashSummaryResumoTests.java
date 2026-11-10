@@ -211,8 +211,8 @@ class CashSummaryResumoTests {
         // cartão 40,00 -> NÃO entra na gaveta
         finalizedCard(op, caixa, new BigDecimal("40.00"), new BigDecimal("1"), CardType.DEBITO);
 
-        cashRegisterService.supplement(caixa.getId(), new BigDecimal("50.00"), "reforço");
-        cashRegisterService.withdrawal(caixa.getId(), new BigDecimal("30.00"), "retirada");
+        cashRegisterService.supplement(caixa.getId(), new BigDecimal("50.00"), "reforço", caixa.getOperator());
+        cashRegisterService.withdrawal(caixa.getId(), new BigDecimal("30.00"), "retirada", caixa.getOperator());
 
         // gaveta = 100 + 20 + 15 + 50 - 30 = 155,00  (cartão de fora)
         assertEquals(0, new BigDecimal("155.00").compareTo(cashRegisterService.currentBalance(caixa)));
@@ -237,7 +237,7 @@ class CashSummaryResumoTests {
 
         finalizedCard(op, caixa, new BigDecimal("30.00"), new BigDecimal("1"), CardType.CREDITO); // crédito 30
         finalizedCard(op, caixa, new BigDecimal("45.00"), new BigDecimal("1"), CardType.DEBITO);  // débito 45
-        cashRegisterService.supplement(caixa.getId(), new BigDecimal("10.00"), "reforço");
+        cashRegisterService.supplement(caixa.getId(), new BigDecimal("10.00"), "reforço", caixa.getOperator());
 
         // Reproduz a fórmula do resumo sobre os dados reais do service.
         BigDecimal dinheiro = BigDecimal.ZERO;
