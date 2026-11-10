@@ -1,10 +1,10 @@
 {
-  "version": "1.3.0",
+  "version": "1.3.1",
   "releaseDate": "2026-11-10",
   "minJavaVersion": 24,
-  "changelog": "feat(caixa): Extra e observação no fechamento, pagamento dividido, auditoria e troca de conta",
+  "changelog": "feat(caixa): itens da venda, caixa único Dayana/Ana Clara e Voltar no pagamento",
   "mandatory": false,
-  "sha256": "d64f4e39fcec81293eb812ac78d9846c1bd78bd79308e7d63441b1e7bc358408",
-  "size": 59703569,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.0/scopel-store.jar"
+  "sha256": "9385122a0d122d21c0eab8db3d801a7807e03f234ada6a1baad80e5a94805abe",
+  "size": 59715672,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.1/scopel-store.jar"
 }
