@@ -4,6 +4,7 @@ import br.com.scopel.pfv.beta.exception.IllegalSaleStateException;
 import br.com.scopel.pfv.beta.exception.InvalidDiscountException;
 import br.com.scopel.pfv.beta.exception.InvalidQuantityException;
 import br.com.scopel.pfv.beta.exception.SaleItemNotFoundException;
+import br.com.scopel.pfv.beta.exception.SplitPaymentInProgressException;
 import br.com.scopel.pfv.beta.model.*;
 import br.com.scopel.pfv.beta.repository.SaleRepository;
 import jakarta.transaction.Transactional;
@@ -24,13 +25,16 @@ public class SaleService {
     private final ProductService productService;
     private final SalePaymentService salePaymentService;
     private final AppSettingService appSettingService;
+    private final SplitPaymentService splitPaymentService;
 
     public SaleService(SaleRepository saleRepository, ProductService productService,
-                       SalePaymentService salePaymentService, AppSettingService appSettingService) {
+                       SalePaymentService salePaymentService, AppSettingService appSettingService,
+                       SplitPaymentService splitPaymentService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.salePaymentService = salePaymentService;
         this.appSettingService = appSettingService;
+        this.splitPaymentService = splitPaymentService;
     }
 
     public Sale openSale(User operator, CashRegister cashRegister) {
@@ -139,6 +143,7 @@ public class SaleService {
             throw new IllegalSaleStateException();
         }
         requirePositive(discount, "não pode ser negativo");
+        requireNoRegisteredParts(sale);
 
         BigDecimal subtotal = subtotal(sale);
         if (discount.compareTo(subtotal) > 0) {
@@ -154,6 +159,7 @@ public class SaleService {
             throw new IllegalSaleStateException();
         }
         requirePositive(surcharge, "acréscimo não pode ser negativo");
+        requireNoRegisteredParts(sale);
 
         sale.setSurcharge(surcharge.setScale(2, RoundingMode.HALF_UP));
         sale.setTotal(calculateTotal(sale));
@@ -175,20 +181,24 @@ public class SaleService {
         return saleRepository.save(sale);
     }
 
+    @Transactional
     public Sale cancelSale(Sale sale) {
         if (sale.getStatus() == Sale.Status.FINALIZADA || sale.getStatus() == Sale.Status.CANCELADA) {
             throw new IllegalSaleStateException();
         }
+        splitPaymentService.discardCashPartsOrRefuse(sale);
 
         sale.setStatus(Sale.Status.CANCELADA);
         sale.setCanceledAt(LocalDateTime.now());
         return saleRepository.save(sale);
     }
 
+    @Transactional
     public Sale reopenForEditing(Sale sale) {
         if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
             throw new IllegalSaleStateException();
         }
+        splitPaymentService.discardCashPartsOrRefuse(sale);
         sale.setStatus(Sale.Status.ABERTA);
         return saleRepository.save(sale);
     }
@@ -321,6 +331,13 @@ public class SaleService {
             }
         }
         return null;
+    }
+
+    private void requireNoRegisteredParts(Sale sale) {
+        if (splitPaymentService.hasRegisteredParts(sale)) {
+            throw new SplitPaymentInProgressException(
+                    "Esta venda já tem parte do pagamento registrada; o total não pode mais ser alterado.");
+        }
     }
 
     private void requireNotClosed(Sale sale) {

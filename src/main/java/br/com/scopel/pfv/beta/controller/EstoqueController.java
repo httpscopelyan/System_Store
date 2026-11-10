@@ -92,8 +92,9 @@ public class EstoqueController {
                 pricingSuggestionService, selection, manager, StaffPermissions.canEditStockQuantity(user),
                 this::onCellEdited);
         managerAction = new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window);
-        bulkCellEditor = new BulkCellEditor(bulkEditService, selection, managerAction, BulkEditConfirmation::ask);
-        ViewOnlyMode.apply(user, table);
+        bulkCellEditor = new BulkCellEditor(bulkEditService, selection, managerAction, BulkEditConfirmation::ask,
+                userSession::getLoggedUser);
+        ViewOnlyMode.apply(user, table, colStock);
         marginsToggle.visibleProperty().set(manager);
         marginsToggle.managedProperty().bind(marginsToggle.visibleProperty());
         marginsToggle.setSelected(manager);

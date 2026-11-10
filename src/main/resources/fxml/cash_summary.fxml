@@ -11,27 +11,68 @@
     <Label text="Resumo do Caixa" styleClass="group-title"/>
 
     <Label text="Saldo Inicial" styleClass="win-label-bold"/>
-    <TextField fx:id="resSaldoInicial" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <TextField fx:id="openingBalanceField" text="R$ 0,00" editable="false" styleClass="money-field"/>
 
     <Label text="(+) Totais das Entradas" styleClass="section-plus"/>
-    <Label text="Dinheiro" styleClass="win-label"/>
-    <TextField fx:id="resEntDinheiro" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <HBox spacing="6">
+        <Label text="Esperado" styleClass="win-label-bold" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        <Label text="Contado" styleClass="win-label-bold" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+    </HBox>
+
+    <Label text="Dinheiro (contado na gaveta, em Saldo Final)" styleClass="win-label" wrapText="true"/>
+    <TextField fx:id="expectedCashInField" text="R$ 0,00" editable="false" styleClass="money-field"/>
+
     <Label text="PIX / QR Code" styleClass="win-label"/>
-    <TextField fx:id="resEntPix" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <HBox spacing="6">
+        <TextField fx:id="expectedPixField" text="R$ 0,00" editable="false" styleClass="money-field" HBox.hgrow="ALWAYS" prefWidth="110"/>
+        <TextField fx:id="countedPixField" promptText="Contado" styleClass="win-input" HBox.hgrow="ALWAYS" prefWidth="110"/>
+    </HBox>
+    <Label fx:id="pixDifferenceLabel" styleClass="win-label"/>
+
     <Label text="Cartão de Crédito" styleClass="win-label"/>
-    <TextField fx:id="resEntCredito" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <HBox spacing="6">
+        <TextField fx:id="expectedCreditField" text="R$ 0,00" editable="false" styleClass="money-field" HBox.hgrow="ALWAYS" prefWidth="110"/>
+        <TextField fx:id="countedCreditField" promptText="Contado" styleClass="win-input" HBox.hgrow="ALWAYS" prefWidth="110"/>
+    </HBox>
+    <Label fx:id="creditDifferenceLabel" styleClass="win-label"/>
+
     <Label text="Cartão de Débito" styleClass="win-label"/>
-    <TextField fx:id="resEntDebito" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <HBox spacing="6">
+        <TextField fx:id="expectedDebitField" text="R$ 0,00" editable="false" styleClass="money-field" HBox.hgrow="ALWAYS" prefWidth="110"/>
+        <TextField fx:id="countedDebitField" promptText="Contado" styleClass="win-input" HBox.hgrow="ALWAYS" prefWidth="110"/>
+    </HBox>
+    <Label fx:id="debitDifferenceLabel" styleClass="win-label"/>
+
+    <Label text="Extra (aba Cobrar)" styleClass="win-label"/>
+    <HBox spacing="6">
+        <TextField fx:id="expectedExtraField" text="R$ 0,00" editable="false" styleClass="money-field" HBox.hgrow="ALWAYS" prefWidth="110"/>
+        <TextField fx:id="countedExtraField" promptText="Contado" styleClass="win-input" HBox.hgrow="ALWAYS" prefWidth="110"/>
+    </HBox>
+    <Label fx:id="extraDifferenceLabel" styleClass="win-label"/>
+    <Label fx:id="extraNoteLabel" text="Observação do Extra" styleClass="win-label" wrapText="true"/>
+    <TextField fx:id="extraNoteField" promptText="Até 155 caracteres" styleClass="win-input"/>
+
     <Label text="Total (Entradas):" styleClass="win-label-bold"/>
-    <TextField fx:id="resEntTotal" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <TextField fx:id="totalInField" text="R$ 0,00" editable="false" styleClass="money-field"/>
 
     <Label text="(-) Totais das Saídas" styleClass="section-minus"/>
     <Label text="Dinheiro" styleClass="win-label"/>
-    <TextField fx:id="resSaiDinheiro" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <TextField fx:id="cashOutField" text="R$ 0,00" editable="false" styleClass="money-field"/>
     <Label text="Total (Saídas):" styleClass="win-label-bold"/>
-    <TextField fx:id="resSaiTotal" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <TextField fx:id="totalOutField" text="R$ 0,00" editable="false" styleClass="money-field"/>
 
     <Label text="(=) Saldo Caixa (Em Dinheiro)" styleClass="section-equals"/>
-    <Label text="Saldo Final:" styleClass="win-label-bold"/>
-    <TextField fx:id="resSaldoFinal" text="R$ 0,00" editable="false" styleClass="money-field"/>
+    <HBox spacing="6">
+        <Label text="Saldo Final:" styleClass="win-label-bold" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        <Label text="Contado na gaveta:" styleClass="win-label-bold" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+    </HBox>
+    <HBox spacing="6">
+        <TextField fx:id="expectedDrawerBalanceField" text="R$ 0,00" editable="false" styleClass="money-field" HBox.hgrow="ALWAYS" prefWidth="110"/>
+        <TextField fx:id="countedDrawerField" promptText="Contado" styleClass="win-input" HBox.hgrow="ALWAYS" prefWidth="110"/>
+    </HBox>
+    <Label fx:id="drawerDifferenceLabel" styleClass="win-label"/>
+
+    <Label fx:id="totalDifferenceLabel" styleClass="win-label-bold" wrapText="true"/>
+    <Button fx:id="closeButton" text="🔒 Fechar Caixa" onAction="#onClose" styleClass="win-button-primary"
+            maxWidth="Infinity"/>
 </VBox>

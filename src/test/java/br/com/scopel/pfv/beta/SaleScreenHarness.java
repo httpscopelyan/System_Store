@@ -52,14 +52,18 @@ final class SaleScreenHarness {
     }
 
     static SaleScreenHarness open(ApplicationContext context, User.Role role) throws Exception {
+        return open(context, role, "Operador de teste");
+    }
+
+    static SaleScreenHarness open(ApplicationContext context, User.Role role, String operatorName) throws Exception {
         SaleScreenHarness harness = new SaleScreenHarness(context);
-        harness.prepareOperator(role);
+        harness.prepareOperator(role, operatorName);
         return harness;
     }
 
-    private void prepareOperator(User.Role role) {
+    private void prepareOperator(User.Role role, String operatorName) {
         User newOperator = new User();
-        newOperator.setName("Operador de teste");
+        newOperator.setName(operatorName);
         newOperator.setLogin("fx_" + UUID.randomUUID());
         newOperator.setPassword("x");
         newOperator.setRole(role);
@@ -122,7 +126,10 @@ final class SaleScreenHarness {
         jdbc.update("delete from cash_movement where cash_register_id in "
                 + "(select id from cash_register where operator_id = ?)", operatorId);
         jdbc.update("delete from cash_register where operator_id = ?", operatorId);
+        jdbc.update("delete from audit_log where actor_id = ?", operatorId);
         for (String code : productCodes) {
+            jdbc.update("delete from audit_log where entity_type = 'PRODUCT' and entity_id in "
+                    + "(select id from product where code = ?)", code);
             jdbc.update("delete from product where code = ?", code);
         }
         jdbc.update("delete from users where id = ?", operatorId);

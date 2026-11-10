@@ -5,6 +5,9 @@ import br.com.scopel.pfv.beta.exception.CashRegisterClosedException;
 import br.com.scopel.pfv.beta.exception.InsufficientCashException;
 import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.RegisterNotFindException;
+import br.com.scopel.pfv.beta.exception.SplitPaymentInProgressException;
+import br.com.scopel.pfv.beta.model.AuditAction;
+import br.com.scopel.pfv.beta.model.AuditEntityType;
 import br.com.scopel.pfv.beta.model.CashMovement;
 import br.com.scopel.pfv.beta.model.CashRegister;
 import br.com.scopel.pfv.beta.model.Payment;
@@ -15,6 +18,7 @@ import br.com.scopel.pfv.beta.repository.CashMovementRepository;
 import br.com.scopel.pfv.beta.repository.CashRegisterRepository;
 import br.com.scopel.pfv.beta.repository.PaymentRepository;
 import br.com.scopel.pfv.beta.repository.SaleRepository;
+import br.com.scopel.pfv.beta.service.audit.AuditLogService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -33,15 +37,18 @@ public class CashRegisterService {
     private final CashMovementRepository movementRepository;
     private final SaleRepository saleRepository;
     private final PaymentRepository paymentRepository;
+    private final AuditLogService auditLogService;
 
     public CashRegisterService(CashRegisterRepository registerRepository,
                                CashMovementRepository movementRepository,
                                SaleRepository saleRepository,
-                               PaymentRepository paymentRepository) {
+                               PaymentRepository paymentRepository,
+                               AuditLogService auditLogService) {
         this.registerRepository = registerRepository;
         this.movementRepository = movementRepository;
         this.saleRepository = saleRepository;
         this.paymentRepository = paymentRepository;
+        this.auditLogService = auditLogService;
     }
 
     public List<Payment> payments(CashRegister cashRegister) {
@@ -91,7 +98,7 @@ public class CashRegisterService {
         }
 
         for (Payment p : paymentRepository.findBySale_CashRegister_Id(cashRegister.getId())) {
-            if (p.getMethod() == PaymentMethod.DINHEIRO) {
+            if (p.getMethod() == PaymentMethod.DINHEIRO && p.getSale().getStatus() == Sale.Status.FINALIZADA) {
                 BigDecimal net = nz(p.getAmountReceived()).subtract(nz(p.getChange()));
                 balance = balance.add(net);
             }
@@ -189,7 +196,12 @@ public class CashRegisterService {
         rectification.setCashRegister(register);
         rectification.setCorrectedMovement(original);
         rectification.setAuthorizedBy(authorizedBy);
-        return movementRepository.save(rectification);
+        CashMovement savedRectification = movementRepository.save(rectification);
+        auditLogService.record(authorizedBy, AuditAction.CASH_RECTIFICATION, AuditEntityType.CASH_MOVEMENT,
+                original.getId(), "Retificação de " + original.getType().name() + " #" + original.getId()
+                        + " do caixa #" + register.getId() + " - motivo: " + normalizedReason,
+                original.getAmount().setScale(2, RoundingMode.HALF_UP).toPlainString(), corrected.toPlainString());
+        return savedRectification;
     }
 
     public CashRegister close(Long cashRegisterId, BigDecimal countedAmount) {
@@ -198,6 +210,10 @@ public class CashRegisterService {
                 .orElseThrow(() -> new RegisterNotFindException("Caixa não registrado!"));
         if (r.getStatus() != CashRegister.Status.OPEN) {
             throw new CashRegisterClosedException();
+        }
+        if (paymentRepository.existsBySale_CashRegister_IdAndSale_Status(cashRegisterId, Sale.Status.EM_PAGAMENTO)) {
+            throw new SplitPaymentInProgressException(
+                    "Há venda com pagamento dividido em andamento neste caixa. Conclua a venda antes de fechar.");
         }
 
         BigDecimal expected = currentBalance(r);

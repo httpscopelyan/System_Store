@@ -8,4 +8,6 @@ import java.util.List;
 public interface DirectChargeRepository extends JpaRepository<DirectCharge, Long> {
 
     List<DirectCharge> findTop10ByOrderByCreatedAtDesc();
+
+    List<DirectCharge> findByCashRegister_IdOrderByCreatedAtAsc(Long cashRegisterId);
 }

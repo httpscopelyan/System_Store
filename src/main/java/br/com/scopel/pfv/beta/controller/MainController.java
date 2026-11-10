@@ -6,6 +6,7 @@ import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.BlockButtons;
 import br.com.scopel.pfv.beta.controller.support.DrawerShortcut;
 import br.com.scopel.pfv.beta.controller.support.MoreBlocks;
+import br.com.scopel.pfv.beta.controller.support.ShellClock;
 import br.com.scopel.pfv.beta.controller.support.FullscreenShortcut;
 import br.com.scopel.pfv.beta.controller.support.UpdateNotice;
 import br.com.scopel.pfv.beta.hardware.PrinterPort;
@@ -14,7 +15,6 @@ import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.service.UpdateService;
 import br.com.scopel.pfv.beta.service.alert.StockAlertService;
 import javafx.application.Platform;
-import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
@@ -29,7 +29,6 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +36,7 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class MainController {
 
+    private static final String SCENE_SHORTCUTS_INSTALLED = "shell.sceneShortcutsInstalled";
     private static final Locale PT_BR = Locale.forLanguageTag("pt-BR");
     private static final DateTimeFormatter DATE_TIME =
             DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM 'de' yyyy  HH:mm:ss", PT_BR);
@@ -92,7 +92,7 @@ public class MainController {
         boolean gerente = user != null && user.getRole() == User.Role.GERENTE;
         moreBlocks = new MoreBlocks(blocksBar, moreButton, button -> button != configButton || gerente);
 
-        startClock();
+        ShellClock.restart(dateTimeLabel, DATE_TIME);
         setupShortcuts();
         updateNotice = new UpdateNotice(updateService, updateButton, this::hasSaleInProgress, this::showHint);
         updateNotice.setup();
@@ -140,19 +140,13 @@ public class MainController {
         caixaStatusLabel.setText(caixaAberto ? "Caixa aberto" : "Caixa fechado");
     }
 
-    private void startClock() {
-        Timeline clock = new Timeline(new KeyFrame(Duration.ZERO,
-                e -> dateTimeLabel.setText(LocalDateTime.now().format(DATE_TIME))),
-                new KeyFrame(Duration.seconds(1)));
-        clock.setCycleCount(Animation.INDEFINITE);
-        clock.play();
-    }
-
     private void setupShortcuts() {
         root.sceneProperty().addListener((obs, oldScene, scene) -> {
             if (scene == null) return;
-            new DrawerShortcut(printer, this::showHint).install(scene);
-            FullscreenShortcut.install(scene);
+            if (scene.getProperties().putIfAbsent(SCENE_SHORTCUTS_INSTALLED, Boolean.TRUE) == null) {
+                new DrawerShortcut(printer, this::showHint).install(scene);
+                FullscreenShortcut.install(scene);
+            }
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F1), this::onConsultaPreco);
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F2), this::onVender);
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F3), () -> navigator.navigate(Page.ESTOQUE));

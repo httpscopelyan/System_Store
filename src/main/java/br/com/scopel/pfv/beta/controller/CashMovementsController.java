@@ -26,6 +26,7 @@ public class CashMovementsController {
     @FXML private TableColumn<CashMovementRow, String> colMovPix;
     @FXML private TableColumn<CashMovementRow, String> colMovCredito;
     @FXML private TableColumn<CashMovementRow, String> colMovDebito;
+    @FXML private TableColumn<CashMovementRow, String> colMovExtra;
     @FXML private TableColumn<CashMovementRow, String> colMovTotal;
     @FXML private TableColumn<CashMovementRow, String> colMovVenda;
     @FXML private TableColumn<CashMovementRow, String> colMovHist;
@@ -37,12 +38,13 @@ public class CashMovementsController {
         colMovPix.setCellValueFactory(cell -> text(MoneyFormat.format(cell.getValue().pix())));
         colMovCredito.setCellValueFactory(cell -> text(MoneyFormat.format(cell.getValue().credit())));
         colMovDebito.setCellValueFactory(cell -> text(MoneyFormat.format(cell.getValue().debit())));
+        colMovExtra.setCellValueFactory(cell -> text(MoneyFormat.format(cell.getValue().extra())));
         colMovTotal.setCellValueFactory(cell -> text(MoneyFormat.format(cell.getValue().total())));
         colMovVenda.setCellValueFactory(cell -> text(
                 cell.getValue().saleId() == null ? "" : String.valueOf(cell.getValue().saleId())));
         colMovHist.setCellValueFactory(cell -> text(cell.getValue().history()));
         for (TableColumn<CashMovementRow, String> numeric : List.of(colMovDinheiro, colMovPix, colMovCredito,
-                colMovDebito, colMovTotal)) {
+                colMovDebito, colMovExtra, colMovTotal)) {
             numeric.setStyle(NUMERIC_STYLE);
         }
         colMovOp.setCellValueFactory(cell -> text("●"));

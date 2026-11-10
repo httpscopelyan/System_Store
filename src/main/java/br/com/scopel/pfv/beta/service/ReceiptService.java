@@ -21,6 +21,7 @@ import java.util.List;
 public class ReceiptService {
 
     private static final int WIDTH = 40;
+    private static final String EXTRA_NOTE_LABEL = "Obs. extra: ";
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -33,22 +34,42 @@ public class ReceiptService {
     }
 
     public String buildSaleReceipt(Sale sale) {
-        return buildSaleReceipt(sale, null);
+        return buildSaleReceipt(sale, List.of(), false);
     }
 
     public String buildSaleReceipt(Sale sale, ReceiptPayment payment) {
-        return buildSaleReceipt(sale, payment, false);
+        return buildSaleReceipt(sale, singlePayment(payment), false);
     }
 
     public String buildSaleReceiptCopy(Sale sale, ReceiptPayment payment) {
-        return buildSaleReceipt(sale, payment, true);
+        return buildSaleReceipt(sale, singlePayment(payment), true);
     }
 
     public void printSaleReceiptCopy(Sale sale, ReceiptPayment payment) {
         printer.print(buildSaleReceiptCopy(sale, payment));
     }
 
-    private String buildSaleReceipt(Sale sale, ReceiptPayment payment, boolean copy) {
+    public String buildSplitSaleReceipt(Sale sale, List<ReceiptPayment> payments) {
+        return buildSaleReceipt(sale, payments, false);
+    }
+
+    public String buildSplitSaleReceiptCopy(Sale sale, List<ReceiptPayment> payments) {
+        return buildSaleReceipt(sale, payments, true);
+    }
+
+    public void printSplitSaleReceipt(Sale sale, List<ReceiptPayment> payments) {
+        printer.print(buildSplitSaleReceipt(sale, payments));
+    }
+
+    public void printSplitSaleReceiptCopy(Sale sale, List<ReceiptPayment> payments) {
+        printer.print(buildSplitSaleReceiptCopy(sale, payments));
+    }
+
+    private List<ReceiptPayment> singlePayment(ReceiptPayment payment) {
+        return payment == null ? List.of() : List.of(payment);
+    }
+
+    private String buildSaleReceipt(Sale sale, List<ReceiptPayment> payments, boolean copy) {
         String store = appSettingService.getString("store.name", "MERCADO");
         StringBuilder sb = new StringBuilder();
         sb.append(center(store)).append('\n');
@@ -77,7 +98,7 @@ public class ReceiptService {
             sb.append(leftRight("Acrescimo", "+" + money(sale.getSurcharge()))).append('\n');
         }
         sb.append(leftRight("TOTAL", money(sale.getTotal()))).append('\n');
-        appendPayment(sb, payment);
+        appendPayments(sb, payments);
         sb.append(line()).append('\n');
         sb.append(center("*** NAO E DOCUMENTO FISCAL ***"));
         return sb.toString();
@@ -111,6 +132,28 @@ public class ReceiptService {
 
     public void printSaleReceipt(Sale sale, ReceiptPayment payment) {
         printer.print(buildSaleReceipt(sale, payment));
+    }
+
+    private void appendPayments(StringBuilder sb, List<ReceiptPayment> payments) {
+        if (payments == null || payments.isEmpty()) {
+            return;
+        }
+        if (payments.size() == 1) {
+            appendPayment(sb, payments.get(0));
+            return;
+        }
+        sb.append(center("PAGAMENTO DIVIDIDO")).append('\n');
+        BigDecimal totalChange = BigDecimal.ZERO;
+        for (ReceiptPayment payment : payments) {
+            if (payment == null || payment.method() == null) {
+                continue;
+            }
+            sb.append(leftRight(paymentName(payment), money(payment.received()))).append('\n');
+            totalChange = totalChange.add(payment.change() == null ? BigDecimal.ZERO : payment.change());
+        }
+        if (totalChange.signum() > 0) {
+            sb.append(leftRight("Troco", money(totalChange))).append('\n');
+        }
     }
 
     private void appendPayment(StringBuilder sb, ReceiptPayment payment) {
@@ -191,6 +234,7 @@ public class ReceiptService {
         sb.append(leftRight("Entrada PIX", money(summary.pix()))).append('\n');
         sb.append(leftRight("Entrada credito", money(summary.credit()))).append('\n');
         sb.append(leftRight("Entrada debito", money(summary.debit()))).append('\n');
+        sb.append(leftRight("Entrada extra", money(summary.extra()))).append('\n');
         sb.append(leftRight("Saidas dinheiro", money(summary.cashOut()))).append('\n');
         sb.append(leftRight("Saldo em dinheiro", money(summary.finalBalance()))).append('\n');
         sb.append(line()).append('\n');
@@ -212,12 +256,26 @@ public class ReceiptService {
         total = total.add(appendComparisonRow(sb, "PIX", cr.getExpectedPix(), cr.getCountedPix()));
         total = total.add(appendComparisonRow(sb, "Credito", cr.getExpectedCredit(), cr.getCountedCredit()));
         total = total.add(appendComparisonRow(sb, "Debito", cr.getExpectedDebit(), cr.getCountedDebit()));
+        if (cr.getExpectedExtra() != null) {
+            total = total.add(appendComparisonRow(sb, "Extra", cr.getExpectedExtra(), cr.getCountedExtra()));
+        }
+        appendExtraNote(sb, cr);
         sb.append(line()).append('\n');
         String verdict = total.signum() == 0 ? "CAIXA CONFERE"
                 : total.signum() < 0 ? "FALTA " + money(total.negate()) : "SOBRA " + money(total);
         sb.append(leftRight("DIFERENCA TOTAL", money(total))).append('\n');
         sb.append(center(verdict)).append('\n');
         sb.append(line()).append('\n');
+    }
+
+    private void appendExtraNote(StringBuilder sb, CashRegister cr) {
+        if (cr.getExtraNote() == null || cr.getExtraNote().isBlank()) {
+            return;
+        }
+        String note = EXTRA_NOTE_LABEL + cr.getExtraNote().trim();
+        for (int start = 0; start < note.length(); start += WIDTH) {
+            sb.append(note, start, Math.min(note.length(), start + WIDTH)).append('\n');
+        }
     }
 
     private BigDecimal appendComparisonRow(StringBuilder sb, String label, BigDecimal expected, BigDecimal counted) {

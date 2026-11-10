@@ -38,4 +38,7 @@ public class DirectCharge {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(length = 155)
+    private String note;
 }

@@ -62,6 +62,15 @@ public class CashRegister {
     @Column(precision = 10, scale = 2)
     private BigDecimal countedDebit;
 
+    @Column(precision = 10, scale = 2)
+    private BigDecimal expectedExtra;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal countedExtra;
+
+    @Column(length = 155)
+    private String extraNote;
+
     public BigDecimal totalDifference() {
         BigDecimal total = difference == null ? BigDecimal.ZERO : difference;
         if (expectedPix != null) {
@@ -69,7 +78,14 @@ public class CashRegister {
             total = total.add(nz(countedCredit).subtract(nz(expectedCredit)));
             total = total.add(nz(countedDebit).subtract(nz(expectedDebit)));
         }
-        return total;
+        return total.add(extraDifference());
+    }
+
+    public BigDecimal extraDifference() {
+        if (expectedExtra == null) {
+            return BigDecimal.ZERO;
+        }
+        return nz(countedExtra).subtract(expectedExtra);
     }
 
     private static BigDecimal nz(BigDecimal value) {
@@ -200,5 +216,29 @@ public class CashRegister {
 
     public void setCountedDebit(BigDecimal countedDebit) {
         this.countedDebit = countedDebit;
+    }
+
+    public BigDecimal getExpectedExtra() {
+        return expectedExtra;
+    }
+
+    public void setExpectedExtra(BigDecimal expectedExtra) {
+        this.expectedExtra = expectedExtra;
+    }
+
+    public BigDecimal getCountedExtra() {
+        return countedExtra;
+    }
+
+    public void setCountedExtra(BigDecimal countedExtra) {
+        this.countedExtra = countedExtra;
+    }
+
+    public String getExtraNote() {
+        return extraNote;
+    }
+
+    public void setExtraNote(String extraNote) {
+        this.extraNote = extraNote;
     }
 }

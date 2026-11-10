@@ -15,6 +15,7 @@
             <TableColumn fx:id="colMovPix" text="PIX / QR" prefWidth="85"/>
             <TableColumn fx:id="colMovCredito" text="Cartão Crédito" prefWidth="110"/>
             <TableColumn fx:id="colMovDebito" text="Cartão Débito" prefWidth="105"/>
+            <TableColumn fx:id="colMovExtra" text="Extra" prefWidth="85"/>
             <TableColumn fx:id="colMovTotal" text="Total" prefWidth="95"/>
             <TableColumn fx:id="colMovVenda" text="Venda" prefWidth="70"/>
             <TableColumn fx:id="colMovHist" text="Histórico" prefWidth="260"/>

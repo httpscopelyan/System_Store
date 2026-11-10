@@ -17,6 +17,11 @@ public final class MoneyFormat {
         return "R$ " + format.format(value == null ? BigDecimal.ZERO : value);
     }
 
+    public static String plain(BigDecimal value) {
+        BigDecimal safeValue = value == null ? BigDecimal.ZERO : value;
+        return safeValue.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString().replace('.', ',');
+    }
+
     public static String quantity(BigDecimal value) {
         if (value == null) {
             return "";

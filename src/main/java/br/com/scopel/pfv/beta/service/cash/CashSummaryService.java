@@ -3,10 +3,12 @@ package br.com.scopel.pfv.beta.service.cash;
 import br.com.scopel.pfv.beta.model.CardType;
 import br.com.scopel.pfv.beta.model.CashMovement;
 import br.com.scopel.pfv.beta.model.CashRegister;
+import br.com.scopel.pfv.beta.model.DirectCharge;
 import br.com.scopel.pfv.beta.model.Payment;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.service.CashRegisterService;
+import br.com.scopel.pfv.beta.service.DirectChargeService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,11 +22,14 @@ import java.util.Map;
 public class CashSummaryService {
 
     private static final String ANONYMOUS_CUSTOMER = "CONSUMIDOR";
+    private static final String DIRECT_CHARGE_LABEL = "COBRANÇA";
 
     private final CashRegisterService cashRegisterService;
+    private final DirectChargeService directChargeService;
 
-    public CashSummaryService(CashRegisterService cashRegisterService) {
+    public CashSummaryService(CashRegisterService cashRegisterService, DirectChargeService directChargeService) {
         this.cashRegisterService = cashRegisterService;
+        this.directChargeService = directChargeService;
     }
 
     public CashOverview overview(CashRegister cashRegister) {
@@ -45,7 +50,7 @@ public class CashSummaryService {
             credit = credit.add(totals.credit);
             debit = debit.add(totals.debit);
             rows.add(new CashMovementRow(sale.getCreatedAt(), true, totals.cash, totals.pix, totals.credit,
-                    totals.debit, sale.getTotal(), sale.getId(),
+                    totals.debit, BigDecimal.ZERO, sale.getTotal(), sale.getId(),
                     sale.getCustomer() != null ? sale.getCustomer().getName() : ANONYMOUS_CUSTOMER, null));
         }
 
@@ -65,18 +70,28 @@ public class CashSummaryService {
                 }
             }
             rows.add(new CashMovementRow(movement.getCreatedAt(), entry, movement.getAmount(), BigDecimal.ZERO,
-                    BigDecimal.ZERO, BigDecimal.ZERO, movement.getAmount(), null, describe(movement), movement));
+                    BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, movement.getAmount(), null,
+                    describe(movement), movement));
+        }
+
+        BigDecimal extra = BigDecimal.ZERO;
+        for (DirectCharge charge : directChargeService.chargesOf(cashRegister)) {
+            extra = extra.add(charge.getAmount());
+            rows.add(new CashMovementRow(charge.getCreatedAt(), true, BigDecimal.ZERO, BigDecimal.ZERO,
+                    BigDecimal.ZERO, BigDecimal.ZERO, charge.getAmount(), charge.getAmount(), null,
+                    describe(charge), null));
         }
 
         rows.sort(Comparator.comparing(CashMovementRow::at));
-        return new CashOverview(rows, summarize(cashRegister, salesCash.add(supplements), pix, credit, debit, withdrawals));
+        return new CashOverview(rows,
+                summarize(cashRegister, salesCash.add(supplements), pix, credit, debit, extra, withdrawals));
     }
 
     private CashSummary summarize(CashRegister cashRegister, BigDecimal cashIn, BigDecimal pix,
-                                  BigDecimal credit, BigDecimal debit, BigDecimal cashOut) {
+                                  BigDecimal credit, BigDecimal debit, BigDecimal extra, BigDecimal cashOut) {
         BigDecimal opening = cashRegister.getOpeningAmount() == null ? BigDecimal.ZERO : cashRegister.getOpeningAmount();
-        BigDecimal totalIn = cashIn.add(pix).add(credit).add(debit);
-        return new CashSummary(opening, cashIn, pix, credit, debit, totalIn, cashOut,
+        BigDecimal totalIn = cashIn.add(pix).add(credit).add(debit).add(extra);
+        return new CashSummary(opening, cashIn, pix, credit, debit, extra, totalIn, cashOut,
                 opening.add(cashIn).subtract(cashOut));
     }
 
@@ -95,6 +110,13 @@ public class CashSummaryService {
                     + movement.getCorrectedMovement().getId() + ")";
         }
         return base;
+    }
+
+    private String describe(DirectCharge charge) {
+        String chargeForm = charge.getMethod() == PaymentMethod.PIX ? "PIX"
+                : charge.getCardType() == CardType.DEBITO ? "Débito" : "Crédito";
+        String base = DIRECT_CHARGE_LABEL + " (" + chargeForm + ")";
+        return charge.getNote() != null ? base + " - " + charge.getNote() : base;
     }
 
     private Map<Long, SaleReceiptTotals> receiptTotalsBySale(CashRegister cashRegister) {

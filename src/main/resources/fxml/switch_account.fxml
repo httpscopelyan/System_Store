@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.SwitchAccountController"
+            stylesheets="@../css/styles.css" styleClass="inicio-root">
+    <center>
+        <VBox spacing="18">
+            <padding><Insets top="22" right="28" bottom="22" left="28"/></padding>
+
+            <VBox fx:id="accountsPanel" spacing="12">
+                <Label text="Escolha a conta para entrar" styleClass="form-label"/>
+                <FlowPane fx:id="accountCardsPane" hgap="14" vgap="14"/>
+            </VBox>
+
+            <VBox fx:id="passwordPanel" styleClass="form-card" spacing="12" maxWidth="420"
+                  visible="false" managed="false">
+                <Label fx:id="selectedAccountLabel" styleClass="account-selected-name"/>
+                <VBox spacing="6">
+                    <Label text="Senha" styleClass="form-label"/>
+                    <PasswordField fx:id="passwordField" onAction="#onEnter"/>
+                </VBox>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <Button text="Entrar" onAction="#onEnter" styleClass="success-button"/>
+                    <Button text="Outra conta" onAction="#onChooseAnotherAccount" styleClass="secondary-button"/>
+                </HBox>
+            </VBox>
+
+            <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+        </VBox>
+    </center>
+    <bottom>
+        <fx:include source="back_bar.fxml"/>
+    </bottom>
+</BorderPane>

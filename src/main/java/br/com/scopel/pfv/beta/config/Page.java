@@ -20,6 +20,7 @@ public enum Page {
     TABELAS_PRECO("/fxml/price_table_form.fxml"),
     CONFIG("/fxml/config_form.fxml"),
     MINHA_CONTA("/fxml/my_account.fxml"),
+    TROCAR_CONTA("/fxml/switch_account.fxml"),
     COBRAR("/fxml/direct_charge.fxml"),
     COMPRAS("/fxml/purchase_form.fxml"),
     ORCAMENTO("/fxml/quote_form.fxml"),
@@ -31,6 +32,7 @@ public enum Page {
     PAGAMENTO_CARTAO("/fxml/pagamento_cartao.fxml"),
     PAGAMENTO_ESPERA("/fxml/pagamento_espera.fxml"),
     PAGAMENTO_PIX("/fxml/pagamento_pix.fxml"),
+    PAGAMENTO_DIVIDIDO("/fxml/pagamento_dividido.fxml"),
     VENDA_FINALIZADA("/fxml/venda_finalizada.fxml"),
     HISTORICO_VENDAS("/fxml/historico_vendas.fxml");
 

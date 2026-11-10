@@ -5,6 +5,7 @@ import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
 import br.com.scopel.pfv.beta.service.StaffPermissions;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.controller.support.SuggestedPriceBinding;
+import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.RegisterProductDuplicateException;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.service.PricingSuggestionService;
@@ -75,7 +76,8 @@ public class CreateProductsController {
                     DecimalInput.parseOrZero(quantityField.getText()),
                     DecimalInput.parseOrZero(minStockField.getText()),
                     categoryField.getText(),
-                    activeBox.isSelected());
+                    activeBox.isSelected(),
+                    userSession.getLoggedUser());
             clearForm();
             messageLabel.setText("Produto cadastrado!");
             codeField.requestFocus();
@@ -83,6 +85,8 @@ public class CreateProductsController {
             messageLabel.setText("Preço de venda inválido");
         } catch (RegisterProductDuplicateException duplicate) {
             messageLabel.setText("Este código já está cadastrado");
+        } catch (ManagerAuthorizationRequiredException notAllowed) {
+            messageLabel.setText("Seu usuário não tem permissão para cadastrar produtos.");
         } catch (IllegalArgumentException invalidField) {
             messageLabel.setText(invalidField.getMessage());
         } catch (Exception unexpected) {

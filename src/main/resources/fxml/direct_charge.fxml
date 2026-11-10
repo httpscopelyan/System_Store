@@ -30,11 +30,14 @@
                         <Button focusTraversable="false" onAction="#onKeypad" styleClass="calc-key, calc-clear" text="C" userData="C" GridPane.columnIndex="0" GridPane.rowIndex="4" />
                         <Button focusTraversable="false" onAction="#onEnter" styleClass="calc-key, calc-enter" text="ENTER" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                     </GridPane>
+                    <Label maxWidth="Infinity" styleClass="win-label-bold" text="Observação (opcional — TAB para digitar, ESC para sair)" />
+                    <TextField fx:id="noteField" promptText="Até 155 caracteres" styleClass="win-input" />
                 </VBox>
 
                 <VBox fx:id="choosePanel" alignment="CENTER" managed="false" maxWidth="420" spacing="14" visible="false">
                     <Label styleClass="finalized-caption" text="Forma de pagamento" />
                     <Label fx:id="chooseAmountLabel" styleClass="calc-display" text="R$ 0" />
+                    <Label fx:id="chooseNoteLabel" styleClass="sale-status" wrapText="true" />
                     <Button focusTraversable="false" maxWidth="Infinity" onAction="#onDebit" styleClass="calc-key, calc-method" text="1 · Débito" />
                     <Button focusTraversable="false" maxWidth="Infinity" onAction="#onCredit" styleClass="calc-key, calc-method" text="2 · Crédito" />
                     <Button focusTraversable="false" maxWidth="Infinity" onAction="#onPix" styleClass="calc-key, calc-method" text="3 · PIX" />

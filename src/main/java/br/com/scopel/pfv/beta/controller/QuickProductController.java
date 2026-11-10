@@ -138,7 +138,7 @@ public class QuickProductController {
         }
 
         try {
-            registeredProduct = productService.save(buildProduct(description.trim(), price, unit));
+            registeredProduct = productService.save(buildProduct(description.trim(), price, unit), userSession.getLoggedUser());
             closeDialog();
         } catch (RegisterProductDuplicateException duplicate) {
             showError("Este código já está cadastrado");

@@ -73,7 +73,7 @@
             <HBox styleClass="win-footer" spacing="10" alignment="CENTER_LEFT">
                 <padding><Insets top="4" right="12" bottom="8" left="12"/></padding>
                 <Button text="➕ Entrada" onAction="#onNavigate" userData="ENTRADA_ESTOQUE" styleClass="win-button, edit-action"/>
-                <Button text="⚖ Ajuste" onAction="#onNavigate" userData="AJUSTE_ESTOQUE" styleClass="win-button, edit-action"/>
+                <Button text="⚖ Ajuste" onAction="#onNavigate" userData="AJUSTE_ESTOQUE" styleClass="win-button, edit-action, quantity-action"/>
                 <Button text="📅 Lotes" onAction="#onNavigate" userData="LOTES" styleClass="win-button, edit-action"/>
                 <Button text="🏷 Etiquetas" onAction="#onNavigate" userData="ETIQUETAS" styleClass="win-button"/>
                 <Button text="🖨 Relatórios" onAction="#onNavigate" userData="RELATORIOS" styleClass="win-button"/>

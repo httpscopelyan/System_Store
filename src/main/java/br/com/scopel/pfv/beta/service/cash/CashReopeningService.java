@@ -87,6 +87,9 @@ public class CashReopeningService {
         register.setCountedCredit(null);
         register.setExpectedDebit(null);
         register.setCountedDebit(null);
+        register.setExpectedExtra(null);
+        register.setCountedExtra(null);
+        register.setExtraNote(null);
     }
 
     private void writeBackup(Path directory, CashRegister register, String content) {

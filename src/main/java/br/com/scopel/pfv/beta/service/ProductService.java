@@ -6,6 +6,8 @@ import br.com.scopel.pfv.beta.exception.RegisterProductDuplicateException;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.repository.ProductRepository;
+import br.com.scopel.pfv.beta.service.audit.ProductChangeAudit;
+import br.com.scopel.pfv.beta.service.audit.ProductSnapshot;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +27,11 @@ public class ProductService {
     private static final Pattern VALID_CODE = Pattern.compile("[\\p{L}\\p{N} .\\-]+");
 
     private final ProductRepository repository;
+    private final ProductChangeAudit productChangeAudit;
 
-    public ProductService(ProductRepository repository) {
+    public ProductService(ProductRepository repository, ProductChangeAudit productChangeAudit) {
         this.repository = repository;
+        this.productChangeAudit = productChangeAudit;
     }
 
     public Product findCode(String code) {
@@ -82,9 +86,18 @@ public class ProductService {
         return repository.findById(id).orElseThrow(() -> new ProductNotfindException("id " + id));
     }
 
+    @Transactional
     public Product create(String code, String description, Product.Unidade unit, BigDecimal price,
                           BigDecimal costPrice, BigDecimal quantity, BigDecimal minStock,
                           String category, boolean active) {
+        return create(code, description, unit, price, costPrice, quantity, minStock, category, active, null);
+    }
+
+    @Transactional
+    public Product create(String code, String description, Product.Unidade unit, BigDecimal price,
+                          BigDecimal costPrice, BigDecimal quantity, BigDecimal minStock,
+                          String category, boolean active, User actor) {
+        requireProductRegistrationAllowed(actor);
         String normalizedCode = normalizeCode(code);
         requireDescription(description);
         requireUnit(unit);
@@ -103,12 +116,19 @@ public class ProductService {
         product.setMinStock(minStock.setScale(3, RoundingMode.HALF_UP));
         product.setCategory(normalizeCategory(category));
         product.setActive(active);
-        return save(product);
+        return save(product, actor);
     }
 
     @Transactional
     public Product changeCode(Long id, String newCode) {
+        return changeCode(id, newCode, null);
+    }
+
+    @Transactional
+    public Product changeCode(Long id, String newCode, User actor) {
+        requireProductDataEditor(actor);
         Product product = findById(id);
+        ProductSnapshot beforeChange = ProductSnapshot.of(product);
         String normalized = normalizeCode(newCode);
         if (normalized.equals(product.getCode())) {
             return product;
@@ -120,19 +140,38 @@ public class ProductService {
             throw new RegisterProductDuplicateException(normalized);
         }
         product.setCode(normalized);
-        return repository.save(product);
+        Product renamed = repository.save(product);
+        productChangeAudit.recordChanges(actor, beforeChange, renamed);
+        return renamed;
     }
 
     @Transactional
     public Product update(Long id, String code, String description, Product.Unidade unit, BigDecimal price,
                           BigDecimal costPrice, BigDecimal minStock, String category, boolean active) {
-        changeCode(id, code);
-        return update(id, description, unit, price, costPrice, minStock, category, active);
+        return update(id, code, description, unit, price, costPrice, minStock, category, active, null);
     }
 
+    @Transactional
+    public Product update(Long id, String code, String description, Product.Unidade unit, BigDecimal price,
+                          BigDecimal costPrice, BigDecimal minStock, String category, boolean active,
+                          User actor) {
+        changeCode(id, code, actor);
+        return update(id, description, unit, price, costPrice, minStock, category, active, actor);
+    }
+
+    @Transactional
     public Product update(Long id, String description, Product.Unidade unit, BigDecimal price,
                           BigDecimal costPrice, BigDecimal minStock, String category, boolean active) {
+        return update(id, description, unit, price, costPrice, minStock, category, active, null);
+    }
+
+    @Transactional
+    public Product update(Long id, String description, Product.Unidade unit, BigDecimal price,
+                          BigDecimal costPrice, BigDecimal minStock, String category, boolean active,
+                          User actor) {
+        requireProductDataEditor(actor);
         Product product = findById(id);
+        ProductSnapshot beforeChange = ProductSnapshot.of(product);
 
         requireDescription(description);
         requireUnit(unit);
@@ -147,7 +186,9 @@ public class ProductService {
         product.setMinStock(minStock.setScale(3, RoundingMode.HALF_UP));
         product.setCategory(normalizeCategory(category));
         product.setActive(active);
-        return repository.save(product);
+        Product updated = repository.save(product);
+        productChangeAudit.recordChanges(actor, beforeChange, updated);
+        return updated;
     }
 
     public List<Product> listAll() {
@@ -187,29 +228,59 @@ public class ProductService {
         return product.getCostPrice() == null || product.getCostPrice().signum() <= 0;
     }
 
+    @Transactional
     public Product inactivate(String code, User actor) {
         if (actor == null || actor.getRole() != User.Role.GERENTE) {
             throw new ManagerAuthorizationRequiredException();
         }
         Product product = findCode(code);
+        ProductSnapshot beforeChange = ProductSnapshot.of(product);
         product.setActive(false);
-        return repository.save(product);
+        Product inactivated = repository.save(product);
+        productChangeAudit.recordChanges(actor, beforeChange, inactivated);
+        return inactivated;
     }
 
+    @Transactional
     public Product save(Product product) {
+        return save(product, null);
+    }
+
+    @Transactional
+    public Product save(Product product, User actor) {
+        requireProductRegistrationAllowed(actor);
         if (repository.findByCodeIgnoreCase(product.getCode()).isPresent()) {
             throw new RegisterProductDuplicateException(product.getCode());
         }
-        return repository.save(product);
+        Product registered = repository.save(product);
+        productChangeAudit.recordCreation(actor, registered);
+        return registered;
     }
 
+    @Transactional
     public Product modificationPrice(String code, BigDecimal value) {
-        Product product = findCode(code);
-        product.setPrice(value);
-        return repository.save(product);
+        return modificationPrice(code, value, null);
     }
 
+    @Transactional
+    public Product modificationPrice(String code, BigDecimal value, User actor) {
+        requirePriceEditor(actor);
+        Product product = findCode(code);
+        ProductSnapshot beforeChange = ProductSnapshot.of(product);
+        product.setPrice(value);
+        Product repriced = repository.save(product);
+        productChangeAudit.recordChanges(actor, beforeChange, repriced);
+        return repriced;
+    }
+
+    @Transactional
     public int adjustPricesByPercent(BigDecimal percent, String category) {
+        return adjustPricesByPercent(percent, category, null);
+    }
+
+    @Transactional
+    public int adjustPricesByPercent(BigDecimal percent, String category, User actor) {
+        requirePriceEditor(actor);
         List<Product> products = (category == null || category.isBlank())
                 ? repository.findAll()
                 : repository.findByCategory(category);
@@ -217,15 +288,35 @@ public class ProductService {
         BigDecimal factor = BigDecimal.ONE.add(percent.divide(new BigDecimal("100"), 6, RoundingMode.HALF_UP));
         int changed = 0;
         for (Product product : products) {
+            ProductSnapshot beforeChange = ProductSnapshot.of(product);
             BigDecimal adjusted = product.getPrice().multiply(factor).setScale(2, RoundingMode.HALF_UP);
             if (adjusted.compareTo(BigDecimal.ZERO) < 0) {
                 adjusted = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
             }
             product.setPrice(adjusted);
             repository.save(product);
+            productChangeAudit.recordChanges(actor, beforeChange, product);
             changed++;
         }
         return changed;
+    }
+
+    private void requireProductRegistrationAllowed(User actor) {
+        if (actor != null && !StaffPermissions.canRegisterProducts(actor)) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+    }
+
+    private void requireProductDataEditor(User actor) {
+        if (actor != null && !StaffPermissions.canEditProductData(actor)) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+    }
+
+    private void requirePriceEditor(User actor) {
+        if (actor != null && !StaffPermissions.canEditPrices(actor)) {
+            throw new ManagerAuthorizationRequiredException();
+        }
     }
 
     private String normalizeCode(String code) {

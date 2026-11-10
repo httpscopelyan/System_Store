@@ -1,7 +1,11 @@
 package br.com.scopel.pfv.beta.repository;
 
 import br.com.scopel.pfv.beta.model.Sale;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,6 +24,31 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 
     // Histórico de vendas: por status, mais recentes primeiro.
     List<Sale> findByStatusOrderByCreatedAtDesc(Sale.Status status);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select s from Sale s where s.id = :id")
+    Optional<Sale> findByIdForUpdate(@Param("id") Long id);
+
+    @Query("""
+            select s from Sale s
+            where s.operator.id = :operatorId and s.status = :status
+              and exists (select p.id from Payment p where p.sale = s)
+            order by s.createdAt desc, s.id desc
+            """)
+    List<Sale> findWithRegisteredPayments(@Param("operatorId") Long operatorId,
+                                          @Param("status") Sale.Status status);
+
+    @Query("""
+            select s from Sale s
+            where s.status = :status and s.createdAt between :start and :end
+              and (:operatorId is null or s.operator.id = :operatorId)
+            order by s.createdAt desc, s.id desc
+            """)
+    Page<Sale> findHistory(@Param("status") Sale.Status status,
+                           @Param("operatorId") Long operatorId,
+                           @Param("start") LocalDateTime start,
+                           @Param("end") LocalDateTime end,
+                           Pageable pageable);
 
     // --- Relatórios ---
 

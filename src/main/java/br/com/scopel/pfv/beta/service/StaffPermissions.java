@@ -8,9 +8,10 @@ import java.util.Set;
 
 public final class StaffPermissions {
 
-    private static final Set<String> STOCK_QUANTITY_EDITORS = Set.of("dayana", "joao");
+    private static final Set<String> STOCK_QUANTITY_EDITORS = Set.of("dayana", "joao", "ana clara");
     private static final Set<String> PRICE_EDITORS = Set.of("dayana");
-    private static final Set<String> VIEW_ONLY = Set.of("ana clara");
+    private static final Set<String> STOCK_QUANTITY_ONLY = Set.of("ana clara");
+    private static final Set<String> ADMINISTRATORS = Set.of("yan");
 
     private StaffPermissions() {
     }
@@ -20,21 +21,38 @@ public final class StaffPermissions {
     }
 
     public static boolean canEditPrices(User user) {
-        return user != null && (user.getRole() == User.Role.GERENTE || matchesAny(user, PRICE_EDITORS));
+        return user != null && !isStockQuantityOnly(user)
+                && (user.getRole() == User.Role.GERENTE || matchesAny(user, PRICE_EDITORS));
     }
 
     public static boolean canRegisterProducts(User user) {
-        return user != null && !isViewOnly(user);
+        return user != null && !isStockQuantityOnly(user);
+    }
+
+    public static boolean canEditProductData(User user) {
+        return user != null && !isStockQuantityOnly(user);
+    }
+
+    public static boolean isStockQuantityOnly(User user) {
+        return user != null && matchesAny(user, STOCK_QUANTITY_ONLY);
+    }
+
+    public static boolean isFullyReadOnly(User user) {
+        return isViewOnly(user) && !canEditStockQuantity(user);
     }
 
     public static boolean isViewOnly(User user) {
-        return user != null && matchesAny(user, VIEW_ONLY);
+        return user != null && !canEditProductData(user);
+    }
+
+    public static boolean isAdministrator(User user) {
+        return user != null && matchesAny(user, ADMINISTRATORS);
     }
 
     public static boolean isReservedName(String name) {
         String normalized = normalize(name);
         return STOCK_QUANTITY_EDITORS.contains(normalized) || PRICE_EDITORS.contains(normalized)
-                || VIEW_ONLY.contains(normalized);
+                || STOCK_QUANTITY_ONLY.contains(normalized) || ADMINISTRATORS.contains(normalized);
     }
 
     private static boolean matchesAny(User user, Set<String> names) {

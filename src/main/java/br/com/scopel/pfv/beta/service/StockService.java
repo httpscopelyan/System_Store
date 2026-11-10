@@ -2,11 +2,14 @@ package br.com.scopel.pfv.beta.service;
 
 import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.ProductNotfindException;
+import br.com.scopel.pfv.beta.model.AuditAction;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.StockMovement;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.repository.ProductRepository;
 import br.com.scopel.pfv.beta.repository.StockMovementRepository;
+import br.com.scopel.pfv.beta.service.audit.ProductChangeAudit;
+import br.com.scopel.pfv.beta.service.audit.ProductSnapshot;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -20,18 +23,22 @@ public class StockService {
 
     private static final int MAX_REASON_LENGTH = 120;
     private static final String VIEW_ONLY_MESSAGE = "Seu usuário só pode visualizar o estoque.";
+    private static final String QUANTITY_ONLY_MESSAGE = "Seu usuário só pode alterar a quantidade em estoque.";
     private static final String INLINE_EDIT_REASON = "Edição direta na tela de Estoque";
 
     private final ProductRepository productRepository;
     private final StockMovementRepository movementRepository;
     private final AppSettingService appSettingService;
+    private final ProductChangeAudit productChangeAudit;
 
     public StockService(ProductRepository productRepository,
                         StockMovementRepository movementRepository,
-                        AppSettingService appSettingService) {
+                        AppSettingService appSettingService,
+                        ProductChangeAudit productChangeAudit) {
         this.productRepository = productRepository;
         this.movementRepository = movementRepository;
         this.appSettingService = appSettingService;
+        this.productChangeAudit = productChangeAudit;
     }
 
     public record CostPreview(BigDecimal currentCost, BigDecimal newCost, StockCostMode mode) {
@@ -66,6 +73,8 @@ public class StockService {
         Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
 
+        ProductSnapshot beforeEntry = ProductSnapshot.of(product);
+        BigDecimal previousQuantity = product.getQuantity();
         BigDecimal qty = quantity.setScale(3, RoundingMode.HALF_UP);
         BigDecimal newCost = costAfterEntry(product, qty, unitCost);
         BigDecimal newStock = product.getQuantity().add(qty);
@@ -76,22 +85,27 @@ public class StockService {
         productRepository.save(product);
 
         record(product, StockMovement.Type.ENTRADA, qty, unitCost, reason, operator, newStock);
+        productChangeAudit.recordStockQuantity(operator, AuditAction.STOCK_ENTRY, product, previousQuantity, reason);
+        productChangeAudit.recordChanges(operator, beforeEntry, product);
         return product;
     }
 
     @Transactional
     public Product adjust(String code, BigDecimal newQuantity, String reason, User operator) {
-        requireNotViewOnly(operator);
+        requireStockQuantityAllowed(operator);
         String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);
         Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
 
+        BigDecimal previousQuantity = product.getQuantity();
         BigDecimal target = newQuantity.setScale(3, RoundingMode.HALF_UP);
         BigDecimal delta = target.subtract(product.getQuantity()).abs();
         product.setQuantity(target);
         productRepository.save(product);
 
         record(product, StockMovement.Type.AJUSTE, delta, null, normalizedReason, operator, target);
+        productChangeAudit.recordStockQuantity(operator, AuditAction.STOCK_ADJUSTMENT, product, previousQuantity,
+                normalizedReason);
         return product;
     }
 
@@ -117,6 +131,7 @@ public class StockService {
         }
         Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
+        BigDecimal previousQuantity = product.getQuantity();
         BigDecimal target = correctQuantity.setScale(3, RoundingMode.HALF_UP);
         BigDecimal delta = target.subtract(product.getQuantity()).abs();
         StockMovement lastMovement = movementRepository.findByProduct_IdOrderByCreatedAtDesc(product.getId())
@@ -129,6 +144,8 @@ public class StockService {
         rectification.setCorrectedMovement(lastMovement);
         rectification.setAuthorizedBy(authorizedBy);
         movementRepository.save(rectification);
+        productChangeAudit.recordStockQuantity(authorizedBy, AuditAction.STOCK_RECTIFICATION, product,
+                previousQuantity, normalizedReason);
         return product;
     }
 
@@ -140,6 +157,13 @@ public class StockService {
 
     private void requireNotViewOnly(User operator) {
         if (StaffPermissions.isViewOnly(operator)) {
+            throw new IllegalArgumentException(
+                    StaffPermissions.isStockQuantityOnly(operator) ? QUANTITY_ONLY_MESSAGE : VIEW_ONLY_MESSAGE);
+        }
+    }
+
+    private void requireStockQuantityAllowed(User operator) {
+        if (StaffPermissions.isFullyReadOnly(operator)) {
             throw new IllegalArgumentException(VIEW_ONLY_MESSAGE);
         }
     }

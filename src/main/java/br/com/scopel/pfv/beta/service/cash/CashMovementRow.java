@@ -6,10 +6,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record CashMovementRow(LocalDateTime at, boolean entry, BigDecimal cash, BigDecimal pix,
-                              BigDecimal credit, BigDecimal debit, BigDecimal total, Long saleId, String history,
-                              CashMovement movement) {
+                              BigDecimal credit, BigDecimal debit, BigDecimal extra, BigDecimal total,
+                              Long saleId, String history, CashMovement movement) {
 
     public boolean isRectifiable() {
         return movement != null && movement.getType() != CashMovement.Type.RETIFICACAO;
+    }
+
+    public boolean isDirectCharge() {
+        return extra != null && extra.signum() > 0;
     }
 }

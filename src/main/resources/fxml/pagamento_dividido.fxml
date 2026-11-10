@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="root" focusTraversable="true" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.PagamentoDivididoController"
+            stylesheets="@../css/styles.css"
+            styleClass="sale-root">
+
+    <center>
+        <VBox spacing="14" alignment="TOP_LEFT">
+            <padding>
+                <Insets top="24" right="28" bottom="24" left="28"/>
+            </padding>
+
+            <Label text="Pagamento dividido — forma desta parte" styleClass="code-label"/>
+            <VBox fx:id="methodPanel" spacing="10">
+                <Button fx:id="cashOption" text="1  —  DINHEIRO" onAction="#onCash" focusTraversable="false"
+                        styleClass="pay-option-secondary" maxWidth="Infinity"/>
+                <Button fx:id="debitOption" text="2  —  DÉBITO" onAction="#onDebit" focusTraversable="false"
+                        styleClass="pay-option-secondary" maxWidth="Infinity"/>
+                <Button fx:id="creditOption" text="3  —  CRÉDITO" onAction="#onCredit" focusTraversable="false"
+                        styleClass="pay-option-secondary" maxWidth="Infinity"/>
+                <Button fx:id="pixOption" text="4  —  PIX" onAction="#onPix" focusTraversable="false"
+                        styleClass="pay-option-secondary" maxWidth="Infinity"/>
+            </VBox>
+
+            <VBox fx:id="amountPanel" spacing="6" visible="false" managed="false">
+                <Label fx:id="partMethodLabel" text="Valor desta parte" styleClass="code-label"/>
+                <TextField fx:id="partAmountField" promptText="0,00" styleClass="code-field"/>
+            </VBox>
+
+            <VBox fx:id="manualBox" spacing="6" visible="false" managed="false">
+                <Label text="Valor recebido na maquininha" styleClass="code-label"/>
+                <TextField fx:id="machineReceivedField" promptText="0,00" styleClass="code-field"/>
+            </VBox>
+
+            <VBox fx:id="pixBox" spacing="6" visible="false" managed="false">
+                <Label text="PIX Copia e Cola" styleClass="code-label"/>
+                <TextArea fx:id="pixArea" editable="false" wrapText="true" prefHeight="90"
+                          styleClass="receipt-preview" maxWidth="Infinity"/>
+            </VBox>
+
+            <Label fx:id="statusLabel" styleClass="sale-status" wrapText="true"/>
+            <Label fx:id="failureLabel" styleClass="split-failure" wrapText="true" maxWidth="Infinity"
+                   visible="false" managed="false"/>
+
+            <HBox spacing="12">
+                <Button fx:id="confirmButton" text="Confirmar parte (Enter)" onAction="#onConfirm"
+                        focusTraversable="false" styleClass="finalize-button"/>
+                <Button fx:id="backButton" text="Voltar (ESC)" onAction="#onBack" focusTraversable="false"
+                        styleClass="secondary-button"/>
+            </HBox>
+        </VBox>
+    </center>
+
+    <right>
+        <VBox spacing="12" alignment="TOP_CENTER" prefWidth="440.0">
+            <padding>
+                <Insets top="24" right="28" bottom="24" left="0"/>
+            </padding>
+
+            <HBox styleClass="total-panel" spacing="24" maxWidth="Infinity">
+                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                    <Label text="TOTAL" styleClass="total-caption"/>
+                    <Label fx:id="totalLabel" text="R$ 0,00" styleClass="split-summary-value"/>
+                </VBox>
+                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                    <Label text="JÁ PAGO" styleClass="total-caption"/>
+                    <Label fx:id="paidLabel" text="R$ 0,00" styleClass="split-summary-value"/>
+                </VBox>
+            </HBox>
+
+            <VBox styleClass="total-panel, split-remaining-panel" spacing="4" maxWidth="Infinity">
+                <Label text="FALTA PAGAR" styleClass="total-caption"/>
+                <Label fx:id="remainingLabel" text="R$ 0,00" styleClass="total-value"/>
+            </VBox>
+
+            <Label text="Partes já registradas" styleClass="code-label" maxWidth="Infinity"/>
+            <ScrollPane fitToWidth="true" focusTraversable="false" VBox.vgrow="ALWAYS" minHeight="110">
+                <VBox fx:id="partsBox" spacing="6">
+                    <padding><Insets top="6" right="6" bottom="6" left="6"/></padding>
+                </VBox>
+            </ScrollPane>
+        </VBox>
+    </right>
+
+    <bottom>
+        <HBox styleClass="sale-footer" spacing="8" alignment="CENTER_LEFT">
+            <Label text="1" styleClass="key-hint"/>
+            <Label text="Dinheiro"/>
+            <Label text="2" styleClass="key-hint"/>
+            <Label text="Débito"/>
+            <Label text="3" styleClass="key-hint"/>
+            <Label text="Crédito"/>
+            <Label text="4" styleClass="key-hint"/>
+            <Label text="PIX"/>
+            <Label text="   Enter" styleClass="key-hint"/>
+            <Label text="Confirmar parte"/>
+            <Label text="   DEL" styleClass="key-hint"/>
+            <Label text="Remover último dinheiro"/>
+            <Label text="   ESC" styleClass="key-hint"/>
+            <Label text="Voltar"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

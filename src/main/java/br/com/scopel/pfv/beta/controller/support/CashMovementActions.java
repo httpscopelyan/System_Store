@@ -49,6 +49,9 @@ public final class CashMovementActions {
     }
 
     public Result rectify(CashMovementRow row) {
+        if (row != null && row.isDirectCharge()) {
+            return new Result(false, "Cobrança da aba Cobrar não pode ser retificada.");
+        }
         if (row == null || !row.isRectifiable()) {
             return new Result(false, "Selecione uma sangria ou suprimento na lista para retificar.");
         }

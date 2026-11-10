@@ -3,8 +3,10 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
+import br.com.scopel.pfv.beta.exception.ElectronicPaymentReceivedException;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.service.SaleService;
+import br.com.scopel.pfv.beta.service.SplitPaymentService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -29,6 +31,7 @@ public class PaymentController {
     private final UserSession userSession;
     private final Navigator navigator;
     private final SaleService saleService;
+    private final SplitPaymentService splitPaymentService;
 
     private Sale vendaAtual;
 
@@ -40,10 +43,12 @@ public class PaymentController {
     @FXML private Label statusLabel;
     @FXML private Node dinheiroOption;
 
-    public PaymentController(UserSession userSession, Navigator navigator, SaleService saleService) {
+    public PaymentController(UserSession userSession, Navigator navigator, SaleService saleService,
+                             SplitPaymentService splitPaymentService) {
         this.userSession = userSession;
         this.navigator = navigator;
         this.saleService = saleService;
+        this.splitPaymentService = splitPaymentService;
     }
 
     @FXML
@@ -68,6 +73,7 @@ public class PaymentController {
             case DIGIT1, NUMPAD1 -> onDinheiro();
             case DIGIT2, NUMPAD2 -> onCartao();
             case DIGIT3, NUMPAD3 -> onPix();
+            case DIGIT4, NUMPAD4 -> onDividir();
             case ESCAPE -> onVoltar();
             default -> {
                 return;
@@ -78,17 +84,22 @@ public class PaymentController {
 
     @FXML
     public void onDinheiro() {
-        navigator.navigate(Page.PAGAMENTO_DINHEIRO);
+        navigateToSingleOrSplit(Page.PAGAMENTO_DINHEIRO);
     }
 
     @FXML
     public void onCartao() {
-        navigator.navigate(Page.PAGAMENTO_CARTAO);
+        navigateToSingleOrSplit(Page.PAGAMENTO_CARTAO);
     }
 
     @FXML
     public void onPix() {
-        navigator.navigate(Page.PAGAMENTO_PIX);
+        navigateToSingleOrSplit(Page.PAGAMENTO_PIX);
+    }
+
+    @FXML
+    public void onDividir() {
+        navigator.navigate(Page.PAGAMENTO_DIVIDIDO);
     }
 
     /**
@@ -99,11 +110,21 @@ public class PaymentController {
      */
     @FXML
     public void onVoltar() {
-        if (vendaAtual != null && vendaAtual.getStatus() == Sale.Status.EM_PAGAMENTO) {
-            vendaAtual = saleService.reopenForEditing(vendaAtual);
-            userSession.setVendaAtual(vendaAtual);
+        try {
+            if (vendaAtual != null && vendaAtual.getStatus() == Sale.Status.EM_PAGAMENTO) {
+                vendaAtual = saleService.reopenForEditing(vendaAtual);
+                userSession.setVendaAtual(vendaAtual);
+            }
+        } catch (ElectronicPaymentReceivedException electronicReceived) {
+            statusLabel.setText(electronicReceived.getMessage());
+            return;
         }
         navigator.navigate(Page.VENDA);
+    }
+
+    private void navigateToSingleOrSplit(Page singlePaymentPage) {
+        boolean partsAlreadyRegistered = vendaAtual != null && splitPaymentService.hasRegisteredParts(vendaAtual);
+        navigator.navigate(partsAlreadyRegistered ? Page.PAGAMENTO_DIVIDIDO : singlePaymentPage);
     }
 
     private String formatMoney(BigDecimal value) {

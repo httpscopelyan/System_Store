@@ -1,5 +1,6 @@
 package br.com.scopel.pfv.beta;
 
+import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.model.CashMovement;
 import br.com.scopel.pfv.beta.model.User;
 import javafx.scene.Node;
@@ -28,6 +29,7 @@ class CaixaScreenTests {
 
     @Autowired private ApplicationContext context;
     @Autowired private JdbcTemplate jdbc;
+    @Autowired private UserSession userSession;
 
     private SaleScreenHarness screen;
 
@@ -120,5 +122,71 @@ class CaixaScreenTests {
             assertTrue(box.getItems().contains("Outro"));
             assertTrue(box.isEditable());
         });
+    }
+
+    private void fillClosingCounts(String drawer, String pix, String credit, String debit, String extra)
+            throws Exception {
+        screen.type("countedDrawerField", drawer);
+        screen.type("countedPixField", pix);
+        screen.type("countedCreditField", credit);
+        screen.type("countedDebitField", debit);
+        screen.type("countedExtraField", extra);
+    }
+
+    private Map<String, Object> registerOfTheLoggedOperator() {
+        return jdbc.queryForMap("select status, counted_extra, extra_note from cash_register "
+                + "where operator_id = ? order by id desc limit 1", userSession.getLoggedUser().getId());
+    }
+
+    @Test
+    void extraNoteBecomesRequiredOnlyWhileTheCountedExtraDiffersFromTheExpected() throws Exception {
+        screen.type("countedExtraField", "5");
+        assertTrue(screen.text("extraNoteLabel").contains("obrigatória"));
+
+        screen.type("countedExtraField", "0");
+        assertEquals("Observação do Extra", screen.text("extraNoteLabel"));
+    }
+
+    @Test
+    void closingWithADifferentExtraAndNoNoteIsRefusedAndTheRegisterStaysOpen() throws Exception {
+        fillClosingCounts("50", "0", "0", "0", "5");
+
+        click("Fechar Caixa");
+
+        assertTrue(screen.text("statusLabel").contains("Observação do Extra"));
+        assertEquals("OPEN", String.valueOf(registerOfTheLoggedOperator().get("status")));
+    }
+
+    @Test
+    void closingWithAMissingCountIsRefusedAndTheRegisterStaysOpen() throws Exception {
+        screen.type("countedDrawerField", "50");
+
+        click("Fechar Caixa");
+
+        assertTrue(screen.text("statusLabel").contains("Informe o valor contado"));
+        assertEquals("OPEN", String.valueOf(registerOfTheLoggedOperator().get("status")));
+    }
+
+    @Test
+    void closingWithEveryCountMatchingClosesTheRegister() throws Exception {
+        fillClosingCounts("50", "0", "0", "0", "0");
+
+        click("Fechar Caixa");
+
+        assertTrue(screen.text("statusLabel").startsWith("Caixa FECHADO"));
+        assertEquals("CLOSED", String.valueOf(registerOfTheLoggedOperator().get("status")));
+    }
+
+    @Test
+    void closingWithADifferentExtraAndANoteStoresTheNoteWithTheCountedValue() throws Exception {
+        fillClosingCounts("50", "0", "0", "0", "5");
+        screen.type("extraNoteField", "Cobrança feita na maquininha sem registro");
+
+        click("Fechar Caixa");
+
+        assertTrue(screen.text("statusLabel").startsWith("Caixa FECHADO"));
+        Map<String, Object> closed = registerOfTheLoggedOperator();
+        assertEquals("Cobrança feita na maquininha sem registro", closed.get("extra_note"));
+        assertEquals(0, new java.math.BigDecimal("5").compareTo((java.math.BigDecimal) closed.get("counted_extra")));
     }
 }

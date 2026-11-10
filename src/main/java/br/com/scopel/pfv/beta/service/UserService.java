@@ -4,11 +4,14 @@ import br.com.scopel.pfv.beta.exception.InvalidPasswordException;
 import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.UserDuplicatedException;
 import br.com.scopel.pfv.beta.exception.UserNotFindException;
+import br.com.scopel.pfv.beta.model.AccountSummary;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -66,6 +69,9 @@ public class UserService {
         if (renamed && StaffPermissions.isViewOnly(user)) {
             throw new IllegalArgumentException("Esta conta não pode trocar o nome. Peça ao gerente.");
         }
+        if (renamed && StaffPermissions.isAdministrator(user)) {
+            throw new IllegalArgumentException("A conta administradora não pode trocar o nome.");
+        }
         if (renamed && StaffPermissions.isReservedName(login)) {
             throw new UserDuplicatedException();
         }
@@ -88,6 +94,10 @@ public class UserService {
 
     public boolean hasUsers() {
         return repository.count() > 0;
+    }
+
+    public List<AccountSummary> listActiveAccounts() {
+        return repository.findActiveAccounts();
     }
 
     public User login(String login, String rawPassword) {
@@ -118,6 +128,9 @@ public class UserService {
     public User modificationRole(String login, User.Role role) {
         User n = repository.findByLogin(login)
                 .orElseThrow(() -> new UserNotFindException());
+        if (StaffPermissions.isAdministrator(n)) {
+            throw new IllegalArgumentException("A conta administradora não pode ter o perfil alterado.");
+        }
         n.setRole(role);
         return repository.save(n);
     }

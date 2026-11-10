@@ -647,6 +647,21 @@ venda → bipar → somar → finalizar → baixa de estoque.
     No caixa o valor é o delta assinado, de modo que o saldo reflete o valor corrigido.
   - **Consequências:** o resumo do caixa passou para `CashSummaryService` (testável) e trata a retificação
     na mesma coluna do movimento corrigido.
+- **0019 — Pagamento dividido persistido parte a parte (2026-11-10):**
+  - **Status:** Aceito.
+  - **Decisão:** cada parte (dinheiro, débito, crédito, PIX) é gravada assim que confirmada; a venda
+    finaliza sozinha quando o restante zera, com baixa de estoque uma única vez (trava pessimista em
+    `SaleRepository.findByIdForUpdate`). Cartão e PIX nunca passam do restante; só dinheiro gera troco.
+  - **Consequências:** a parte de cartão ou PIX já foi cobrada na maquininha e não pode sumir: venda com
+    parte eletrônica não reabre nem cancela, e o caixa não fecha com ela pendente. Partes em dinheiro podem
+    ser removidas (auditado). Após queda do app, o login retoma a venda parcial. Pendência: fluxo de estorno
+    autorizado por gerente (RN a definir).
+- **0020 — Histórico de auditoria somente-inserção (2026-11-10):**
+  - **Status:** Aceito.
+  - **Decisão:** `audit_log` registra quem, quando, o quê, valor anterior e novo, na mesma transação da
+    alteração (`Propagation.MANDATORY`): se uma falha, a outra também. Sem update nem delete no service.
+  - **Consequências:** o usuário com histórico não pode ser apagado (só inativado). O painel admin web, em
+    rodada futura, só lê essas consultas; a senha do Yan nunca fica em texto puro no repositório.
 
 ---
 

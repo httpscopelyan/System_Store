@@ -315,3 +315,17 @@ CARTAO/PIX e pagamento múltiplo (RN18) ficam na F4.
 - **Correção (1.2.0):** `cancel` do gateway passou a enviar `X-Idempotency-Key`; sem ela o Mercado Pago recusava o cancelamento (400). Cancelamento real validado (202 → `canceled`). Teste PIX real aprovado de ponta a ponta (`processed/accredited`, método `pix`) e estornado.
 
 - **Modo da maquininha nas Configurações (1.2.0):** seção "Maquininha (Mercado Pago Point)" mostra o modo atual (PDV ou manual) e alterna por botão via `PATCH /terminals/v1/setup` (`MercadoPagoTerminalModeControl`, `ConfigTerminalController`). Depois de alterar, reiniciar a maquininha. Com a Point em modo manual o PDV não consegue cobrar.
+
+---
+
+## 2026-11-10 — Extra no caixa, pagamento dividido, auditoria, Yan e troca de conta
+
+- Entregue (RF78–RF84, ADR 0019 e 0020): cobranças da aba Cobrar como "Extra" no fechamento, Esperado/Contado dentro de "Totais das Entradas", pagamento dividido (tecla 4), Ana Clara só com quantidade, `audit_log`, conta Yan por seed, botão "Trocar de conta". Migrations V35 e V36.
+- **Pendente (ALTA) — estorno de pagamento dividido:** venda com parte em cartão/PIX já recebida não pode ser reaberta nem cancelada, e o caixa não fecha com ela pendente. Falta um fluxo de estorno autorizado por gerente (estorno na maquininha + registro auditado). Decidir antes de publicar.
+- **Pendente — painel admin web (RF85):** só os dados estão prontos (`AuditLogService`, `SaleHistoryService`, `StaffPermissions.isAdministrator`). Falta a página web, o canal seguro entre ela e o app e a edição de permissões (hoje fixas em `StaffPermissions`).
+- **Pendente — edição de produto:** qualquer usuário que não seja a Ana Clara ainda edita preço e custo na tela de edição. Agora fica auditado, mas não bloqueado; revisar quem deve poder.
+- **Pendente — Trocar de conta:** o Esc da página volta à tela anterior (padrão do `back_bar`); para escolher outra conta use o botão "Outra conta".
+- **Segurança:** a senha da conta Yan foi enviada em conversa; trocar em "Minha conta" no primeiro acesso. Nunca aparece em texto puro no repositório (só o hash BCrypt no seed).
+- **Validação manual do dev:** `mvn javafx:run` — fechamento com Extra, pagamento dividido (dinheiro + débito) com a maquininha real, Ana Clara no Estoque, troca de conta.
+- **Revisão de 2026-11-10 (correções):** `SplitPaymentService.registerPart` passou a carregar os itens da venda devolvida (sem isso a tela de venda quebrava ao voltar depois de uma parte parcial); atalhos F11/F12 do shell instalados uma única vez por janela (após "Trocar de conta" a gaveta abria duas vezes e o F11 se anulava); relógio do rodapé único (`ShellClock`); aviso na aba Cobrar quando a cobrança é aprovada sem caixa aberto (não entra no Extra); campo de observação trunca em 155 caracteres ao colar. Testes novos: `SplitPaymentDetachedFlowTests`.
+- **Mudança de comportamento:** o reajuste de preços em massa (`AJUSTE_PRECOS`) agora respeita `StaffPermissions.canEditPrices` (gerente ou Dayana); antes qualquer operador conseguia.

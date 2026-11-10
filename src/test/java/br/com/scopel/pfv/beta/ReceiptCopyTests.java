@@ -10,6 +10,7 @@ import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.SaleItem;
 import br.com.scopel.pfv.beta.service.AppSettingService;
 import br.com.scopel.pfv.beta.service.ReceiptService;
+import br.com.scopel.pfv.beta.service.SplitPaymentService;
 import javafx.scene.control.Button;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.verify;
 
 class ReceiptCopyTests {
 
+    private final SplitPaymentService splitPaymentService = org.mockito.Mockito.mock(SplitPaymentService.class);
     private final List<String> printed = new CopyOnWriteArrayList<>();
     private final PrinterPort recordingPrinter = new PrinterPort() {
         @Override public void print(String content) { printed.add(content); }
@@ -74,7 +76,7 @@ class ReceiptCopyTests {
         screen.session.setCardTypeSelecionado(cardType);
         screen.session.setUltimoTroco(change);
         screen.load("venda_finalizada.fxml", fixture -> new VendaFinalizadaController(fixture.session,
-                fixture.navigator, new ReceiptService(settingsStub, recordingPrinter)));
+                fixture.navigator, new ReceiptService(settingsStub, recordingPrinter), splitPaymentService));
         return screen;
     }
 
@@ -143,7 +145,7 @@ class ReceiptCopyTests {
             @Override public void openDrawer() { }
         };
         offline.load("venda_finalizada.fxml", fixture -> new VendaFinalizadaController(fixture.session,
-                fixture.navigator, new ReceiptService(settingsStub, broken)));
+                fixture.navigator, new ReceiptService(settingsStub, broken), splitPaymentService));
         offline.onFx(() -> offline.button("novaViaButton").fire());
 
         assertTrue(offline.statusContainsIn("copyStatusLabel", "sem papel", 5));

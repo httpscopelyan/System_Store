@@ -4,12 +4,14 @@ import br.com.scopel.pfv.beta.controller.support.ProductTablePresenter.CellEdit;
 import br.com.scopel.pfv.beta.controller.support.ProductTablePresenter.EditableColumn;
 import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.model.Product;
+import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.service.ProductBulkEditService;
 import br.com.scopel.pfv.beta.service.ProductBulkEditService.BulkResult;
 import javafx.scene.control.TableColumn;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.function.Supplier;
 
 public final class BulkCellEditor {
 
@@ -26,13 +28,15 @@ public final class BulkCellEditor {
     private final ProductSelection selection;
     private final ManagerAuthorizedAction managerAction;
     private final Confirmation confirmation;
+    private final Supplier<User> loggedUser;
 
     public BulkCellEditor(ProductBulkEditService bulkEditService, ProductSelection selection,
-                          ManagerAuthorizedAction managerAction, Confirmation confirmation) {
+                          ManagerAuthorizedAction managerAction, Confirmation confirmation, Supplier<User> loggedUser) {
         this.bulkEditService = bulkEditService;
         this.selection = selection;
         this.managerAction = managerAction;
         this.confirmation = confirmation;
+        this.loggedUser = loggedUser;
     }
 
     public Outcome commit(CellEdit edit) {
@@ -88,9 +92,9 @@ public final class BulkCellEditor {
 
     private BulkResult apply(CellEdit edit, BigDecimal number, List<Long> ids) {
         return switch (edit.column()) {
-            case NAME -> bulkEditService.applyDescription(ids, edit.text());
-            case CODE -> bulkEditService.applyCode(ids.get(0), edit.text());
-            case MIN_STOCK -> bulkEditService.applyMinStock(ids, number);
+            case NAME -> bulkEditService.applyDescription(ids, edit.text(), loggedUser.get());
+            case CODE -> bulkEditService.applyCode(ids.get(0), edit.text(), loggedUser.get());
+            case MIN_STOCK -> bulkEditService.applyMinStock(ids, number, loggedUser.get());
             case STOCK -> managerAction.apply(actor -> bulkEditService.applyStockQuantity(ids, number, actor));
             case PRICE -> managerAction.apply(actor -> bulkEditService.applyPrice(ids, number, actor));
             case COST -> managerAction.apply(actor -> bulkEditService.applyCost(ids, number, actor));

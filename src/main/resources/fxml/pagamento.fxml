@@ -29,6 +29,8 @@
                         styleClass="pay-option" maxWidth="Infinity"/>
                 <Button text="3  —  PIX" onAction="#onPix"
                         styleClass="pay-option" maxWidth="Infinity"/>
+                <Button text="4  —  DIVIDIR" onAction="#onDividir"
+                        styleClass="pay-option" maxWidth="Infinity"/>
 
                 <Label fx:id="statusLabel" styleClass="sale-status"/>
             </VBox>
@@ -43,6 +45,8 @@
             <Label text="Cartão"/>
             <Label text="3" styleClass="key-hint"/>
             <Label text="PIX"/>
+            <Label text="4" styleClass="key-hint"/>
+            <Label text="Dividir"/>
             <Label text="   ESC" styleClass="key-hint"/>
             <Label text="Voltar à venda"/>
         </HBox>

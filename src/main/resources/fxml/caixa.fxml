@@ -58,10 +58,7 @@
     <right>
         <ScrollPane fitToWidth="true" prefWidth="292" styleClass="group-box"
                     hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-            <VBox>
-                <fx:include fx:id="cashSummary" source="cash_summary.fxml"/>
-                <fx:include fx:id="cashClosing" source="cash_closing.fxml"/>
-            </VBox>
+            <fx:include fx:id="cashSummary" source="cash_summary.fxml"/>
         </ScrollPane>
     </right>
 

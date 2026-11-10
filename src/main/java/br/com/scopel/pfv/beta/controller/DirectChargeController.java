@@ -3,6 +3,11 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.AmountInput;
 import br.com.scopel.pfv.beta.controller.support.CardChargePoller;
+import br.com.scopel.pfv.beta.controller.support.DirectChargeKeyboard;
+import br.com.scopel.pfv.beta.controller.support.DirectChargePanels;
+import br.com.scopel.pfv.beta.controller.support.DirectChargeRequest;
+import br.com.scopel.pfv.beta.controller.support.DirectChargePanels.State;
+import br.com.scopel.pfv.beta.controller.support.MaxLengthInput;
 import br.com.scopel.pfv.beta.controller.support.MoneyFormat;
 import br.com.scopel.pfv.beta.hardware.CardPaymentGateway;
 import br.com.scopel.pfv.beta.model.CardType;
@@ -13,7 +18,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.input.KeyCode;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import org.springframework.stereotype.Component;
@@ -21,29 +26,26 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
 @Component
-public class DirectChargeController {
-
-    private enum State { INPUT, CHOOSE, CHARGING }
-
-    private static final String BACKSPACE_KEY = "⌫";
+public class DirectChargeController implements DirectChargeKeyboard.Actions {
 
     private final CardPaymentGateway gateway;
     private final DirectChargeService directChargeService;
     private final UserSession userSession;
     private final AmountInput input = new AmountInput();
+    private final DirectChargeKeyboard keyboard = new DirectChargeKeyboard(this);
 
-    private State state = State.INPUT;
+    private DirectChargePanels panels;
     private BigDecimal amount;
-    private PaymentMethod method;
-    private CardType cardType;
     private CardChargePoller poller;
 
     @FXML private BorderPane root;
     @FXML private Label displayLabel;
+    @FXML private TextField noteField;
     @FXML private Node inputPanel;
     @FXML private Node choosePanel;
     @FXML private Node chargingPanel;
     @FXML private Label chooseAmountLabel;
+    @FXML private Label chooseNoteLabel;
     @FXML private Label chargingAmountLabel;
     @FXML private Label chargingTitleLabel;
     @FXML private Label statusLabel;
@@ -61,24 +63,27 @@ public class DirectChargeController {
         input.clear();
         amount = null;
         poller = null;
+        panels = new DirectChargePanels(inputPanel, choosePanel, chargingPanel);
+        MaxLengthInput.limit(noteField, DirectChargeService.MAX_NOTE_LENGTH);
         show(State.INPUT);
-        root.addEventFilter(KeyEvent.KEY_PRESSED, this::onKey);
+        root.addEventFilter(KeyEvent.KEY_PRESSED,
+                event -> keyboard.handle(event, panels.state(), noteField.isFocused()));
         root.sceneProperty().addListener((observable, oldScene, newScene) -> {
             if (newScene == null && poller != null) {
                 poller.stop();
             }
         });
-        Platform.runLater(root::requestFocus);
     }
 
     @FXML
     public void onKeypad(ActionEvent event) {
-        pressKey((String) ((Node) event.getSource()).getUserData());
+        pressKeypad((String) ((Node) event.getSource()).getUserData());
     }
 
     @FXML
+    @Override
     public void onEnter() {
-        if (state != State.INPUT) {
+        if (!panels.is(State.INPUT)) {
             return;
         }
         if (!input.isPositive()) {
@@ -91,34 +96,40 @@ public class DirectChargeController {
         }
         amount = input.value();
         chooseAmountLabel.setText(MoneyFormat.format(amount));
+        chooseNoteLabel.setText(note().isEmpty() ? "" : "Observação: " + note());
         show(State.CHOOSE);
     }
 
     @FXML
+    @Override
     public void onDebit() {
-        startCharge(PaymentMethod.CARTAO, CardType.DEBITO, "Débito");
+        startCharge(PaymentMethod.CARTAO, CardType.DEBITO);
     }
 
     @FXML
+    @Override
     public void onCredit() {
-        startCharge(PaymentMethod.CARTAO, CardType.CREDITO, "Crédito");
+        startCharge(PaymentMethod.CARTAO, CardType.CREDITO);
     }
 
     @FXML
+    @Override
     public void onPix() {
-        startCharge(PaymentMethod.PIX, null, "PIX");
+        startCharge(PaymentMethod.PIX, null);
     }
 
     @FXML
+    @Override
     public void onBack() {
-        if (state == State.CHOOSE) {
+        if (panels.is(State.CHOOSE)) {
             show(State.INPUT);
         }
     }
 
     @FXML
+    @Override
     public void onCancelCharge() {
-        if (state != State.CHARGING || poller == null) {
+        if (!panels.is(State.CHARGING) || poller == null) {
             return;
         }
         statusLabel.setText("Cancelando a cobrança na maquininha...");
@@ -128,89 +139,49 @@ public class DirectChargeController {
         }, statusLabel::setText);
     }
 
-    private void onKey(KeyEvent event) {
-        boolean handled = true;
-        if (state == State.INPUT) {
-            handled = handleInputKey(event);
-        } else if (state == State.CHOOSE) {
-            switch (event.getCode()) {
-                case DIGIT1, NUMPAD1 -> onDebit();
-                case DIGIT2, NUMPAD2 -> onCredit();
-                case DIGIT3, NUMPAD3 -> onPix();
-                case ESCAPE -> onBack();
-                default -> handled = false;
-            }
-        } else if (event.getCode() == KeyCode.ESCAPE) {
-            onCancelCharge();
-        } else {
-            handled = false;
-        }
-        if (handled) {
-            event.consume();
-        }
+    @Override
+    public void onLeaveNote() {
+        root.requestFocus();
     }
 
-    private boolean handleInputKey(KeyEvent event) {
-        String text = event.getText();
-        KeyCode code = event.getCode();
-        if (code == KeyCode.ENTER) {
-            onEnter();
-        } else if (code == KeyCode.BACK_SPACE) {
-            pressKey(BACKSPACE_KEY);
-        } else if (code == KeyCode.ESCAPE) {
-            pressKey("C");
-        } else if (code == KeyCode.DECIMAL || ",".equals(text) || ".".equals(text)) {
-            pressKey(",");
-        } else if (text != null && text.length() == 1 && Character.isDigit(text.charAt(0))) {
-            pressKey(text);
-        } else {
-            return false;
-        }
-        return true;
-    }
-
-    private void pressKey(String key) {
+    @Override
+    public void pressKeypad(String key) {
         messageLabel.setText("");
         switch (key) {
-            case BACKSPACE_KEY -> input.backspace();
-            case "C" -> input.clear();
-            case "," -> input.comma();
+            case DirectChargeKeyboard.BACKSPACE_KEY -> input.backspace();
+            case DirectChargeKeyboard.CLEAR_KEY -> input.clear();
+            case DirectChargeKeyboard.COMMA_KEY -> input.comma();
             default -> input.digit(key.charAt(0));
         }
         displayLabel.setText("R$ " + input.display());
     }
 
-    private void startCharge(PaymentMethod chosenMethod, CardType chosenCardType, String label) {
-        if (state != State.CHOOSE) {
-            return;
-        }
-        method = chosenMethod;
-        cardType = chosenCardType;
-        BigDecimal value = amount;
-        chargingTitleLabel.setText("Cobrança no " + label);
-        chargingAmountLabel.setText(MoneyFormat.format(value));
-        statusLabel.setText("Enviando a cobrança para a maquininha...");
-        show(State.CHARGING);
-        poller = new CardChargePoller(gateway, statusLabel::setText, () -> approved(label), this::ended);
-        poller.start(() -> chosenMethod == PaymentMethod.PIX
-                ? gateway.createPixCharge(value)
-                : gateway.createCharge(value, chosenCardType));
+    private String note() {
+        return noteField.getText() == null ? "" : noteField.getText().trim();
     }
 
-    private void approved(String label) {
-        poller = null;
-        String registration = "";
-        try {
-            directChargeService.register(amount, method, cardType, userSession.getLoggedUser(),
-                    userSession.getCaixaAtual());
-        } catch (RuntimeException failure) {
-            registration = " ATENÇÃO: não foi possível registrar a cobrança (" + failure.getMessage() + ").";
+    private void startCharge(PaymentMethod chosenMethod, CardType chosenCardType) {
+        if (!panels.is(State.CHOOSE)) {
+            return;
         }
-        String approvedMessage = "✔ Cobrança aprovada: " + MoneyFormat.format(amount) + " (" + label + ")";
+        DirectChargeRequest sentRequest = new DirectChargeRequest(amount, chosenMethod, chosenCardType, note());
+        chargingTitleLabel.setText("Cobrança no " + sentRequest.methodLabel());
+        chargingAmountLabel.setText(MoneyFormat.format(sentRequest.amount()));
+        statusLabel.setText("Enviando a cobrança para a maquininha...");
+        show(State.CHARGING);
+        poller = new CardChargePoller(gateway, statusLabel::setText, () -> approved(sentRequest), this::ended);
+        poller.start(() -> sentRequest.createOn(gateway));
+    }
+
+    private void approved(DirectChargeRequest approvedRequest) {
+        poller = null;
+        String outcome = approvedRequest.registerApproved(directChargeService, userSession.getLoggedUser(),
+                userSession.getCaixaAtual());
         input.clear();
+        noteField.clear();
         displayLabel.setText("R$ " + input.display());
         show(State.INPUT);
-        messageLabel.setText(approvedMessage + registration);
+        messageLabel.setText(outcome);
     }
 
     private void ended(String message) {
@@ -220,18 +191,10 @@ public class DirectChargeController {
     }
 
     private void show(State newState) {
-        state = newState;
-        setVisible(inputPanel, newState == State.INPUT);
-        setVisible(choosePanel, newState == State.CHOOSE);
-        setVisible(chargingPanel, newState == State.CHARGING);
+        panels.show(newState);
         if (newState != State.INPUT) {
             messageLabel.setText("");
         }
         Platform.runLater(root::requestFocus);
-    }
-
-    private void setVisible(Node node, boolean visible) {
-        node.setVisible(visible);
-        node.setManaged(visible);
     }
 }

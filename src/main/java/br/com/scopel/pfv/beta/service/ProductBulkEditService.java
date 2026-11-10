@@ -4,6 +4,8 @@ import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.repository.ProductRepository;
+import br.com.scopel.pfv.beta.service.audit.ProductChangeAudit;
+import br.com.scopel.pfv.beta.service.audit.ProductSnapshot;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +25,13 @@ public class ProductBulkEditService {
     private final PricingSuggestionService pricingSuggestionService;
     private final StockService stockService;
     private final ProductService productService;
+    private final ProductChangeAudit productChangeAudit;
 
     public ProductBulkEditService(ProductRepository repository, PricingSuggestionService pricingSuggestionService,
-                                  StockService stockService, ProductService productService) {
+                                  StockService stockService, ProductService productService,
+                                  ProductChangeAudit productChangeAudit) {
         this.productService = productService;
+        this.productChangeAudit = productChangeAudit;
         this.repository = repository;
         this.pricingSuggestionService = pricingSuggestionService;
         this.stockService = stockService;
@@ -37,7 +42,7 @@ public class ProductBulkEditService {
         requirePriceEditor(actor);
         requireNonNegative(price, "O preço");
         BigDecimal normalized = price.setScale(2, RoundingMode.HALF_UP);
-        return update(productIds, product -> {
+        return update(productIds, actor, product -> {
             product.setPrice(normalized);
             return true;
         });
@@ -48,7 +53,7 @@ public class ProductBulkEditService {
         requireManager(actor);
         requireNonNegative(cost, "O custo");
         BigDecimal normalized = cost.setScale(2, RoundingMode.HALF_UP);
-        return update(productIds, product -> {
+        return update(productIds, actor, product -> {
             product.setCostPrice(normalized);
             return true;
         });
@@ -58,7 +63,7 @@ public class ProductBulkEditService {
     public BulkResult applyMarginPercent(Collection<Long> productIds, BigDecimal marginPercent, User actor) {
         requireManager(actor);
         requireNonNegative(marginPercent, "A margem");
-        return update(productIds, product -> {
+        return update(productIds, actor, product -> {
             BigDecimal price = pricingSuggestionService.suggestFor(product.getCostPrice(), marginPercent);
             if (price == null) {
                 return false;
@@ -71,7 +76,7 @@ public class ProductBulkEditService {
     @Transactional
     public BulkResult applySuggestedPrice(Collection<Long> productIds, User actor) {
         requirePriceEditor(actor);
-        return update(productIds, product -> {
+        return update(productIds, actor, product -> {
             BigDecimal price = pricingSuggestionService.suggestFor(product);
             if (price == null) {
                 return false;
@@ -83,7 +88,12 @@ public class ProductBulkEditService {
 
     @Transactional
     public BulkResult applyCode(Long productId, String code) {
-        productService.changeCode(productId, code);
+        return applyCode(productId, code, null);
+    }
+
+    @Transactional
+    public BulkResult applyCode(Long productId, String code, User actor) {
+        productService.changeCode(productId, code, actor);
         return new BulkResult(1, 0);
     }
 
@@ -101,9 +111,15 @@ public class ProductBulkEditService {
 
     @Transactional
     public BulkResult applyMinStock(Collection<Long> productIds, BigDecimal minStock) {
+        return applyMinStock(productIds, minStock, null);
+    }
+
+    @Transactional
+    public BulkResult applyMinStock(Collection<Long> productIds, BigDecimal minStock, User actor) {
+        requireProductDataEditor(actor);
         requireNonNegative(minStock, "O estoque mínimo");
         BigDecimal normalized = minStock.setScale(3, RoundingMode.HALF_UP);
-        return update(productIds, product -> {
+        return update(productIds, actor, product -> {
             product.setMinStock(normalized);
             return true;
         });
@@ -111,23 +127,31 @@ public class ProductBulkEditService {
 
     @Transactional
     public BulkResult applyDescription(Collection<Long> productIds, String description) {
+        return applyDescription(productIds, description, null);
+    }
+
+    @Transactional
+    public BulkResult applyDescription(Collection<Long> productIds, String description, User actor) {
+        requireProductDataEditor(actor);
         if (description == null || description.isBlank()) {
             throw new IllegalArgumentException("A descrição é obrigatória.");
         }
         String normalized = description.trim();
-        return update(productIds, product -> {
+        return update(productIds, actor, product -> {
             product.setDescription(normalized);
             return true;
         });
     }
 
-    private BulkResult update(Collection<Long> productIds, Predicate<Product> change) {
+    private BulkResult update(Collection<Long> productIds, User actor, Predicate<Product> change) {
         List<Product> products = repository.findAllById(productIds);
         int changed = 0;
         int skipped = 0;
         for (Product product : products) {
+            ProductSnapshot beforeChange = ProductSnapshot.of(product);
             if (change.test(product)) {
                 repository.save(product);
+                productChangeAudit.recordChanges(actor, beforeChange, product);
                 changed++;
             } else {
                 skipped++;
@@ -138,6 +162,12 @@ public class ProductBulkEditService {
 
     private void requirePriceEditor(User actor) {
         if (!StaffPermissions.canEditPrices(actor)) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+    }
+
+    private void requireProductDataEditor(User actor) {
+        if (actor != null && !StaffPermissions.canEditProductData(actor)) {
             throw new ManagerAuthorizationRequiredException();
         }
     }

@@ -63,14 +63,12 @@ class StockPermissionTests {
     }
 
     @Test
-    void anaClaraCannotRegisterEntriesOrAdjustments() {
+    void anaClaraCannotRegisterEntriesBecauseTheyCarryCost() {
         Product p = product();
         User ana = named("Ana Clara", User.Role.OPERADOR);
 
         assertThrows(IllegalArgumentException.class,
                 () -> stockService.registerEntry(p.getCode(), BigDecimal.ONE, null, "nota", ana));
-        assertThrows(IllegalArgumentException.class,
-                () -> stockService.adjust(p.getCode(), BigDecimal.ONE, "contagem", ana));
         assertEquals(0, new BigDecimal("10").compareTo(productRepository.findById(p.getId()).orElseThrow().getQuantity()));
     }
 }

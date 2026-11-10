@@ -1,0 +1,13 @@
+package br.com.scopel.pfv.beta.model;
+
+public enum AuditAction {
+    STOCK_ENTRY,
+    STOCK_ADJUSTMENT,
+    STOCK_RECTIFICATION,
+    PRICE_CHANGE,
+    COST_CHANGE,
+    PRODUCT_CREATED,
+    PRODUCT_UPDATED,
+    CASH_RECTIFICATION,
+    PAYMENT_PART_REMOVED
+}

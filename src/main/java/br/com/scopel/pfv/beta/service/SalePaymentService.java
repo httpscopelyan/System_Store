@@ -5,16 +5,13 @@ import br.com.scopel.pfv.beta.exception.IllegalSaleStateException;
 import br.com.scopel.pfv.beta.exception.InsufficientPaymentException;
 import br.com.scopel.pfv.beta.exception.InvalidDiscountException;
 import br.com.scopel.pfv.beta.exception.PaymentMethodNotAvailableException;
+import br.com.scopel.pfv.beta.exception.SplitPaymentInProgressException;
 import br.com.scopel.pfv.beta.model.CardType;
 import br.com.scopel.pfv.beta.model.Payment;
 import br.com.scopel.pfv.beta.model.PaymentInput;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
-import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.Sale;
-import br.com.scopel.pfv.beta.model.SaleItem;
 import br.com.scopel.pfv.beta.repository.PaymentRepository;
-import br.com.scopel.pfv.beta.repository.ProductRepository;
-import br.com.scopel.pfv.beta.repository.SaleRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +23,15 @@ import java.util.List;
 @Service
 public class SalePaymentService {
 
-    private final SaleRepository saleRepository;
-    private final ProductRepository productRepository;
-    private final PaymentRepository paymentRepository;
+    private static final String SPLIT_PAYMENT_IN_PROGRESS = "Esta venda já tem parte do pagamento registrada."
+            + " Conclua o pagamento dividido do valor restante.";
 
-    public SalePaymentService(SaleRepository saleRepository, ProductRepository productRepository,
-                              PaymentRepository paymentRepository) {
-        this.saleRepository = saleRepository;
-        this.productRepository = productRepository;
+    private final PaymentRepository paymentRepository;
+    private final SaleFinalizer saleFinalizer;
+
+    public SalePaymentService(PaymentRepository paymentRepository, SaleFinalizer saleFinalizer) {
         this.paymentRepository = paymentRepository;
+        this.saleFinalizer = saleFinalizer;
     }
 
     public BigDecimal calculateChange(BigDecimal total, BigDecimal amountReceived) {
@@ -52,28 +49,28 @@ public class SalePaymentService {
         }
         BigDecimal change = calculateChange(sale.getTotal(), amountReceived);
         savePayment(sale, method, null, amountReceived, change);
-        return finalizeSale(sale);
+        return saleFinalizer.finalizeSale(sale);
     }
 
     @Transactional
     public Sale payCard(Sale sale, CardType cardType) {
         requireInPayment(sale);
         savePayment(sale, PaymentMethod.CARTAO, cardType, sale.getTotal(), noChange());
-        return finalizeSale(sale);
+        return saleFinalizer.finalizeSale(sale);
     }
 
     @Transactional
     public Sale payPix(Sale sale) {
         requireInPayment(sale);
         savePayment(sale, PaymentMethod.PIX, null, sale.getTotal(), noChange());
-        return finalizeSale(sale);
+        return saleFinalizer.finalizeSale(sale);
     }
 
     @Transactional
     public Sale finalizeOnCredit(Sale sale) {
         requireInPayment(sale);
         savePayment(sale, PaymentMethod.PRAZO, null, sale.getTotal(), noChange());
-        return finalizeSale(sale);
+        return saleFinalizer.finalizeSale(sale);
     }
 
     @Transactional
@@ -111,14 +108,19 @@ public class SalePaymentService {
                 thisChange = change;
                 changeAssigned = true;
             }
-            savePayment(sale, input.method(), null, input.amount().setScale(2, RoundingMode.HALF_UP), thisChange);
+            CardType cardType = input.method() == PaymentMethod.CARTAO ? input.cardType() : null;
+            savePayment(sale, input.method(), cardType, input.amount().setScale(2, RoundingMode.HALF_UP),
+                    thisChange);
         }
-        return finalizeSale(sale);
+        return saleFinalizer.finalizeSale(sale);
     }
 
     private void requireInPayment(Sale sale) {
         if (sale.getStatus() != Sale.Status.EM_PAGAMENTO) {
             throw new IllegalSaleStateException();
+        }
+        if (sale.getId() != null && paymentRepository.existsBySale_Id(sale.getId())) {
+            throw new SplitPaymentInProgressException(SPLIT_PAYMENT_IN_PROGRESS);
         }
     }
 
@@ -136,19 +138,5 @@ public class SalePaymentService {
         payment.setChange(change);
         payment.setCreatedAt(LocalDateTime.now());
         paymentRepository.save(payment);
-    }
-
-    private Sale finalizeSale(Sale sale) {
-        decreaseStock(sale);
-        sale.setStatus(Sale.Status.FINALIZADA);
-        return saleRepository.save(sale);
-    }
-
-    private void decreaseStock(Sale sale) {
-        for (SaleItem item : sale.getItems()) {
-            Product product = item.getProduct();
-            product.setQuantity(product.getQuantity().subtract(item.getQuantity()));
-            productRepository.save(product);
-        }
     }
 }

@@ -88,7 +88,7 @@ class CashClosingByMethodTests {
 
     private ClosingCount count(String cash, String pix, String credit, String debit) {
         return new ClosingCount(new BigDecimal(cash), new BigDecimal(pix), new BigDecimal(credit),
-                new BigDecimal(debit));
+                new BigDecimal(debit), BigDecimal.ZERO, null);
     }
 
     @Test
@@ -113,7 +113,7 @@ class CashClosingByMethodTests {
     @Test
     void closingRequiresTheCountOfEveryMethodAndRefusesNegatives() {
         assertThrows(IllegalArgumentException.class,
-                () -> closingService.close(register.getId(), new ClosingCount(BigDecimal.TEN, null, null, null)));
+                () -> closingService.close(register.getId(), new ClosingCount(BigDecimal.TEN, null, null, null, null, null)));
         assertThrows(IllegalArgumentException.class,
                 () -> closingService.close(register.getId(), count("105.00", "-1", "30.00", "40.00")));
         assertEquals(CashRegister.Status.OPEN, cashRegisterService.findOpenByOperator(operator).orElseThrow().getStatus());

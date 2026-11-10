@@ -7,6 +7,7 @@ import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.controller.support.SuggestedPriceBinding;
+import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.service.PricingSuggestionService;
 import br.com.scopel.pfv.beta.service.ProductService;
@@ -87,8 +88,8 @@ public class EditProductController {
 
     @FXML
     public void onSave() {
-        if (StaffPermissions.isViewOnly(userSession.getLoggedUser())) {
-            messageLabel.setText("Seu usuário só pode visualizar o estoque.");
+        if (!StaffPermissions.canEditProductData(userSession.getLoggedUser())) {
+            messageLabel.setText("Seu usuário não pode alterar os dados do produto.");
             return;
         }
         if (productId == null) {
@@ -105,11 +106,14 @@ public class EditProductController {
                     DecimalInput.parseRequired(costField.getText()),
                     DecimalInput.parseRequired(minStockField.getText()),
                     categoryField.getText(),
-                    activeBox.isSelected());
+                    activeBox.isSelected(),
+                    userSession.getLoggedUser());
             userSession.setProdutoEmEdicaoId(null);
             navigator.navigate(Page.ESTOQUE);
         } catch (NumberFormatException invalidNumber) {
             messageLabel.setText("Custo, preço ou estoque mínimo inválidos.");
+        } catch (ManagerAuthorizationRequiredException notAllowed) {
+            messageLabel.setText("Seu usuário não tem permissão para esta alteração.");
         } catch (IllegalArgumentException invalidField) {
             messageLabel.setText(invalidField.getMessage());
         } catch (Exception unexpected) {

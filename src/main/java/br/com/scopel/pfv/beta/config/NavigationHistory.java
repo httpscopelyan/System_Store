@@ -16,6 +16,7 @@ public class NavigationHistory {
             Page.PAGAMENTO_CARTAO,
             Page.PAGAMENTO_ESPERA,
             Page.PAGAMENTO_PIX,
+            Page.PAGAMENTO_DIVIDIDO,
             Page.VENDA_FINALIZADA);
 
     private final Deque<Page> entries = new ArrayDeque<>();

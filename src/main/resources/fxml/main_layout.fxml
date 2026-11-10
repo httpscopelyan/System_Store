@@ -30,6 +30,7 @@
                 <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="🏷&#10;Preços" userData="TABELAS_PRECO" />
                 <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="📊&#10;Relatórios&#10;F8" userData="RELATORIOS" />
                 <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="👤&#10;Minha conta" userData="MINHA_CONTA" />
+                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="🔁&#10;Trocar de conta" userData="TROCAR_CONTA" />
                 <Button fx:id="configButton" onAction="#onNavigate" styleClass="block-button, block-extra" text="⚙&#10;Config" userData="CONFIG" />
                 <Button fx:id="moreButton" onAction="#onToggleMore" styleClass="block-button" text="»&#10;Mais" />
             </TilePane>

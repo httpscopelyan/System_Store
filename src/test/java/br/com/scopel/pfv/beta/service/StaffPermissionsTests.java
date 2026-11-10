@@ -17,16 +17,17 @@ class StaffPermissionsTests {
     }
 
     @Test
-    void dayanaAndJoaoEditStockQuantityEvenAsOperators() {
+    void dayanaJoaoAndAnaClaraEditStockQuantityEvenAsOperators() {
         assertTrue(StaffPermissions.canEditStockQuantity(user("Dayana", User.Role.OPERADOR)));
         assertTrue(StaffPermissions.canEditStockQuantity(user("Joao", User.Role.OPERADOR)));
         assertTrue(StaffPermissions.canEditStockQuantity(user("  JOÃO ", User.Role.OPERADOR)));
+        assertTrue(StaffPermissions.canEditStockQuantity(user("Ana Clara", User.Role.OPERADOR)));
+        assertTrue(StaffPermissions.canEditStockQuantity(user("ana  clara", User.Role.OPERADOR)));
     }
 
     @Test
     void nobodyElseEditsStockQuantityNotEvenManagers() {
         assertFalse(StaffPermissions.canEditStockQuantity(user("Maria", User.Role.OPERADOR)));
-        assertFalse(StaffPermissions.canEditStockQuantity(user("Ana Clara", User.Role.OPERADOR)));
         assertFalse(StaffPermissions.canEditStockQuantity(null));
         assertFalse(StaffPermissions.canEditStockQuantity(user("Chefe", User.Role.GERENTE)));
     }
@@ -44,7 +45,11 @@ class StaffPermissionsTests {
         assertTrue(StaffPermissions.isReservedName("Dayana"));
         assertTrue(StaffPermissions.isReservedName("João"));
         assertTrue(StaffPermissions.isReservedName("Ana Clara"));
+        assertTrue(StaffPermissions.isReservedName("Yan"));
+        assertTrue(StaffPermissions.isReservedName("  yAN "));
         assertFalse(StaffPermissions.isReservedName("Maria"));
+        assertFalse(StaffPermissions.isReservedName("Yann"));
+        assertFalse(StaffPermissions.isReservedName(null));
     }
 
     @Test
@@ -53,6 +58,7 @@ class StaffPermissionsTests {
         assertTrue(StaffPermissions.canEditPrices(user("Chefe", User.Role.GERENTE)));
         assertFalse(StaffPermissions.canEditPrices(user("Joao", User.Role.OPERADOR)));
         assertFalse(StaffPermissions.canEditPrices(user("Ana Clara", User.Role.OPERADOR)));
+        assertFalse(StaffPermissions.canEditPrices(user("Ana Clara", User.Role.GERENTE)));
     }
 
     @Test
@@ -60,5 +66,28 @@ class StaffPermissionsTests {
         assertTrue(StaffPermissions.isViewOnly(user("Ana Clara", User.Role.OPERADOR)));
         assertFalse(StaffPermissions.isViewOnly(user("Dayana", User.Role.OPERADOR)));
         assertFalse(StaffPermissions.isViewOnly(null));
+    }
+
+    @Test
+    void anaClaraIsLimitedToStockQuantityAndIsNotFullyReadOnly() {
+        User anaClara = user("Ana Clara", User.Role.OPERADOR);
+        assertTrue(StaffPermissions.isStockQuantityOnly(anaClara));
+        assertFalse(StaffPermissions.isFullyReadOnly(anaClara));
+        assertFalse(StaffPermissions.canEditProductData(anaClara));
+        assertFalse(StaffPermissions.isStockQuantityOnly(user("Dayana", User.Role.OPERADOR)));
+        assertTrue(StaffPermissions.canEditProductData(user("Maria", User.Role.OPERADOR)));
+        assertFalse(StaffPermissions.isStockQuantityOnly(null));
+        assertFalse(StaffPermissions.isFullyReadOnly(null));
+        assertFalse(StaffPermissions.canEditProductData(null));
+    }
+
+    @Test
+    void onlyYanIsAdministrator() {
+        assertTrue(StaffPermissions.isAdministrator(user("Yan", User.Role.GERENTE)));
+        assertTrue(StaffPermissions.isAdministrator(user(" YAN ", User.Role.GERENTE)));
+        assertFalse(StaffPermissions.isAdministrator(user("Chefe", User.Role.GERENTE)));
+        assertFalse(StaffPermissions.isAdministrator(user("Dayana", User.Role.OPERADOR)));
+        assertFalse(StaffPermissions.isAdministrator(user("Yan Carlos", User.Role.GERENTE)));
+        assertFalse(StaffPermissions.isAdministrator(null));
     }
 }

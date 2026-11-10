@@ -174,6 +174,12 @@ direto com repository.
   para gerente; motivo obrigatório e retificação de caixa e estoque (`service/cash/`); botão Voltar global;
   código de produto alfanumérico; modo de custo da entrada (último/médio). Migrations V29–V32. Validação
   manual do dev pendente (testes de tela com JavaFX real já cobrem os fluxos).
+- **Rodada de 2026-11-10**: cobranças da aba Cobrar entram no caixa como "Extra" (com observação) e o
+  fechamento confere Esperado/Contado dentro de "Totais das Entradas"; pagamento dividido (`service/SplitPaymentService`,
+  parte persistida a parte, ADR 0019); Ana Clara edita só a quantidade do estoque; histórico de auditoria
+  (`service/audit/`, `audit_log`, ADR 0020); conta administradora Yan por seed (hash BCrypt, nunca a senha); botão
+  "Trocar de conta" (`SessionLauncher`). Migrations V35–V36. Pendências em `REVISION.md` (estorno de parte eletrônica e
+  painel admin web).
 - UI básica: login, caixa (abrir/fechar), venda (bipar/finalizar). Navegação
   caixa→venda após abrir.
 

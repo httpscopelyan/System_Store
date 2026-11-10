@@ -161,6 +161,14 @@ com JavaFX real); falta a validação manual do dev com `mvn javafx:run`.
 | RF74 | Filtros do Estoque: só abaixo do mínimo e sem custo | ✅* | F1 | `ProductService.filterForStock` |
 | RF76 | Apagar produto só por gerente (inativa) e filtro "Só inativos" no Estoque | ✅* | F1 | `ProductService.inactivate(code, actor)`; visão padrão só ativos |
 | RF77 | Venda não aceita quantidade acima do estoque; aviso na tela | ✅* | F1 | `SaleService.addItem` (`requireAvailableStock`); liberável em `sale.allow_negative_stock` |
+| RF78 | Cobranças da aba Cobrar entram no caixa como "Extra", cada uma com observação opcional | ✅* | F1 | `DirectChargeService`, `CashSummary.extra`; migration V35 |
+| RF79 | Esperado e Contado dentro de "Totais das Entradas", com linha Extra e Observação do Extra (obrigatória se o contado diferir) | ✅* | F1 | `CashClosingPanel`, `ClosingCount`; `cash_closing.fxml` removido |
+| RF80 | Pagamento dividido em formas diferentes (ex.: R$ 40 no débito + R$ 50 em dinheiro) | ✅* | F1 | ADR 0019; `SplitPaymentService`, `pagamento_dividido.fxml`; tecla 4 na escolha da forma |
+| RF81 | Ana Clara altera só a quantidade do estoque (preço e cadastro continuam bloqueados) | ✅* | F1 | `StaffPermissions.isStockQuantityOnly`; validação no service e `ViewOnlyMode` na tela |
+| RF82 | Histórico de auditoria de alterações de estoque, preço, custo, produto e retificações, de qualquer usuário | ✅* | F1 | ADR 0020; `audit_log` (V36), `AuditLogService`; leitura para o painel admin (futuro) |
+| RF83 | Conta administradora Yan (gerente) criada por seed, com senha só em hash BCrypt | ✅* | F1 | `AdministratorYanSeed`, `StaffPermissions.isAdministrator` |
+| RF84 | Botão "Trocar de conta": cards das contas ativas e senha só da conta escolhida | ✅* | F1 | `SwitchAccountController`, `SessionLauncher`; retoma venda com pagamento parcial |
+| RF85 | Painel admin web (contas, permissões, histórico) | ⬜ | F2 | só os dados estão prontos (RF82, `SaleHistoryService`); a página web fica para a próxima rodada |
 
 ## Regras de Negócio (RN)
 | RN | Descrição | Status |

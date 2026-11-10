@@ -1,6 +1,7 @@
 package br.com.scopel.pfv.beta.controller.support;
 
 import br.com.scopel.pfv.beta.config.UserSession;
+import br.com.scopel.pfv.beta.exception.ElectronicPaymentReceivedException;
 import br.com.scopel.pfv.beta.exception.IllegalSaleStateException;
 import br.com.scopel.pfv.beta.exception.InvalidDiscountException;
 import br.com.scopel.pfv.beta.exception.ProductNotfindException;
@@ -103,6 +104,8 @@ public final class SaleAdjustments {
             activeSale.set(saleService.openSale(userSession.getLoggedUser(), userSession.getCaixaAtual()));
             view.showSale(activeSale.current());
             view.showLastItem(null);
+        } catch (ElectronicPaymentReceivedException electronicReceived) {
+            view.showStatus(electronicReceived.getMessage());
         } catch (IllegalSaleStateException invalidState) {
             view.showStatus("Não é possível cancelar nesta situação");
         }

@@ -62,7 +62,6 @@ public class CaixaController {
     @FXML private Label closingInfoLabel;
     @FXML private CashMovementsController cashMovementsController;
     @FXML private CashSummaryController cashSummaryController;
-    @FXML private CashClosingController cashClosingController;
     @FXML private TextField openingAmountField;
     @FXML private Label periodLabel;
     @FXML private TextField movementAmountField;
@@ -87,7 +86,7 @@ public class CaixaController {
         history = new CashHistoryPresenter(historyTable, colHistDate, colHistBalance);
         statusPanel = new CashStatusPanel(statusBigLabel, openingInfoLabel, closingInfoLabel, periodLabel);
         closingFlow = new CashClosingFlow(cashClosingService, cashRegisterService, receiptService, userSession);
-        cashClosingController.bind(closingFlow, this::finishClosing);
+        cashSummaryController.bind(closingFlow, this::finishClosing);
         movementActions = new CashMovementActions(cashRegisterService,
                 new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window), this::window);
         movementReasonBox.setItems(FXCollections.observableArrayList(REASONS));
@@ -114,15 +113,13 @@ public class CaixaController {
         if (displayed == null) {
             statusPanel.showEmpty();
             cashMovementsController.show(List.of());
-            cashSummaryController.show(CashSummary.empty());
-            cashClosingController.show(null, CashSummary.empty());
+            cashSummaryController.show(null, CashSummary.empty());
             return;
         }
         statusPanel.show(displayed);
         CashOverview overview = cashSummaryService.overview(displayed);
         cashMovementsController.show(overview.rows());
-        cashSummaryController.show(overview.summary());
-        cashClosingController.show(displayed, overview.summary());
+        cashSummaryController.show(displayed, overview.summary());
     }
 
     @FXML

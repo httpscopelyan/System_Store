@@ -14,6 +14,12 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     // Pagamentos de todas as vendas de um caixa (para a movimentação por forma).
     List<Payment> findBySale_CashRegister_Id(Long cashRegisterId);
 
+    List<Payment> findBySale_IdOrderByCreatedAtAscIdAsc(Long saleId);
+
+    boolean existsBySale_Id(Long saleId);
+
+    boolean existsBySale_CashRegister_IdAndSale_Status(Long cashRegisterId, Sale.Status status);
+
     // Total recebido por forma de pagamento (líquido do troco) no período.
     @Query("""
             select p.method, coalesce(sum(p.amountReceived - p.change), 0) from Payment p

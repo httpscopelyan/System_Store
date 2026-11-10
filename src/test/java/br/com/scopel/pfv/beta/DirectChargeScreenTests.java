@@ -4,6 +4,9 @@ import br.com.scopel.pfv.beta.hardware.CardPaymentGateway;
 import br.com.scopel.pfv.beta.model.User;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -87,5 +90,44 @@ class DirectChargeScreenTests {
                 assertTrue(((Label) screen.node("messageLabel")).getText().contains("modo PDV"));
             }
         });
+    }
+
+    private void typeKeyOn(String nodeId, String character, KeyCode code) throws Exception {
+        screen.onFx(() -> screen.node(nodeId).fireEvent(
+                new KeyEvent(KeyEvent.KEY_PRESSED, character, character, code, false, false, false, false)));
+        screen.settle();
+    }
+
+    @Test
+    void noteFieldAcceptsAtMost155Characters() throws Exception {
+        screen = SaleScreenHarness.open(context, User.Role.OPERADOR);
+        screen.showPage("direct_charge");
+
+        screen.type("noteField", "x".repeat(200));
+
+        assertEquals(155, screen.text("noteField").length());
+    }
+
+    @Test
+    void digitsTypedInTheNoteFieldDoNotChangeTheChargeAmount() throws Exception {
+        screen = SaleScreenHarness.open(context, User.Role.OPERADOR);
+        screen.showPage("direct_charge");
+
+        screen.focus("noteField");
+        typeKeyOn("noteField", "5", KeyCode.DIGIT5);
+
+        screen.onFx(() -> assertEquals("R$ 0", display()));
+    }
+
+    @Test
+    void digitsTypedOutsideTheNoteFieldStillBuildTheChargeAmount() throws Exception {
+        screen = SaleScreenHarness.open(context, User.Role.OPERADOR);
+        screen.showPage("direct_charge");
+
+        screen.focus("root");
+        typeKeyOn("root", "5", KeyCode.DIGIT5);
+
+        screen.onFx(() -> assertEquals("R$ 5", display()));
+        assertTrue(((TextField) screen.node("noteField")).getText().isEmpty());
     }
 }

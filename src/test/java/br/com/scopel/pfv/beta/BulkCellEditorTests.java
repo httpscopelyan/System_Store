@@ -118,7 +118,7 @@ class BulkCellEditorTests {
         return new BulkCellEditor(bulkEditService, selection, action, message -> {
             confirmations.add(message);
             return confirmAnswer;
-        });
+        }, userSession::getLoggedUser);
     }
 
     private CellEdit edit(EditableColumn kind, TableColumn<Product, String> column, Product product, String text) {

@@ -1,6 +1,7 @@
 package br.com.scopel.pfv.beta.service;
 
 import br.com.scopel.pfv.beta.model.CardType;
+import br.com.scopel.pfv.beta.model.Payment;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
 
 import java.math.BigDecimal;
@@ -17,5 +18,10 @@ public record ReceiptPayment(PaymentMethod method, CardType cardType, BigDecimal
 
     public static ReceiptPayment pix() {
         return new ReceiptPayment(PaymentMethod.PIX, null, null, null);
+    }
+
+    public static ReceiptPayment of(Payment payment) {
+        return new ReceiptPayment(payment.getMethod(), payment.getCardType(), payment.getAmountReceived(),
+                payment.getChange());
     }
 }

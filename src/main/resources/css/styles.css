@@ -838,3 +838,76 @@
 
 .diff-bad { -fx-text-fill: #c00000; -fx-font-weight: bold; }
 .diff-ok { -fx-text-fill: #008000; -fx-font-weight: bold; }
+
+.split-summary-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.split-remaining-panel {
+    -fx-border-color: #f2c94c;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+}
+
+.split-part-row {
+    -fx-background-color: #e7eefa;
+    -fx-background-radius: 6;
+    -fx-padding: 6 10 6 10;
+}
+
+.split-part-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15325f;
+}
+
+.split-part-remove {
+    -fx-background-color: white;
+    -fx-text-fill: #c00000;
+    -fx-border-color: #c00000;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.split-failure {
+    -fx-background-color: #fdecea;
+    -fx-text-fill: #c00000;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-border-color: #c00000;
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 14 10 14;
+}
+
+.account-card {
+    -fx-background-color: white;
+    -fx-text-fill: #15325f;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-border-color: #2e6cb5;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-padding: 18 28 18 28;
+    -fx-min-width: 190;
+    -fx-alignment: center;
+    -fx-content-display: center;
+}
+
+.account-card:hover,
+.account-card:focused {
+    -fx-background-color: #e7eefa;
+}
+
+.account-selected-name {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #15325f;
+}
