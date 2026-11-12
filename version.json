@@ -1,10 +1,10 @@
 {
-  "version": "1.3.1",
-  "releaseDate": "2026-11-10",
+  "version": "1.3.2",
+  "releaseDate": "2026-11-12",
   "minJavaVersion": 24,
-  "changelog": "feat(caixa): itens da venda, caixa único Dayana/Ana Clara e Voltar no pagamento",
+  "changelog": "feat(impressao): nota só sob demanda (Emitir nova via), Imprimir nota nos itens da venda e 2ª via na aba Cobrar",
   "mandatory": false,
-  "sha256": "9385122a0d122d21c0eab8db3d801a7807e03f234ada6a1baad80e5a94805abe",
-  "size": 59715672,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.1/scopel-store.jar"
+  "sha256": "4a969a2310470b2d47e13f229fee495a9462536d710aaf72afbd3b4b72abb1e4",
+  "size": 59721685,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.2/scopel-store.jar"
 }
