@@ -7,7 +7,6 @@ import br.com.scopel.pfv.beta.exception.InsufficientPaymentException;
 import br.com.scopel.pfv.beta.exception.PaymentMethodNotAvailableException;
 import br.com.scopel.pfv.beta.controller.support.BackgroundPrinting;
 import br.com.scopel.pfv.beta.hardware.PrinterPort;
-import br.com.scopel.pfv.beta.service.ReceiptPayment;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.service.ReceiptService;
@@ -95,7 +94,7 @@ public class PagamentoDinheiroController {
                 change = BigDecimal.ZERO;
             }
 
-            printAndOpenDrawer(finalizada, received, change);
+            openDrawer();
 
             userSession.setUltimaVenda(finalizada);
             userSession.setUltimaForma(PaymentMethod.DINHEIRO);
@@ -112,13 +111,9 @@ public class PagamentoDinheiroController {
         }
     }
 
-    /** Cupom + gaveta (RN11). Falha de impressão NÃO desfaz a venda (RNF06). */
-    private void printAndOpenDrawer(Sale finalizada, BigDecimal received, BigDecimal change) {
-        ReceiptPayment paymentOnReceipt = ReceiptPayment.cash(received, change);
-        BackgroundPrinting.run(() -> {
-            receiptService.printSaleReceipt(finalizada, paymentOnReceipt);
-            printer.openDrawer();
-        }, message -> navigator.notice("Venda gravada. Aviso: impressão/gaveta falhou (" + message + ")"));
+    private void openDrawer() {
+        BackgroundPrinting.run(printer::openDrawer,
+                message -> navigator.notice("Venda gravada. Aviso: gaveta falhou (" + message + ")"));
     }
 
     private void updateChange() {

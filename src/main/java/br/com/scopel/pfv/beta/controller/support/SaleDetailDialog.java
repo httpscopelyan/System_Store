@@ -3,11 +3,14 @@ package br.com.scopel.pfv.beta.controller.support;
 import br.com.scopel.pfv.beta.service.SaleHistoryEntry;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Window;
 
@@ -15,6 +18,8 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class SaleDetailDialog {
@@ -27,15 +32,31 @@ public final class SaleDetailDialog {
     private SaleDetailDialog() {
     }
 
-    public static void show(Window owner, SaleHistoryEntry sale) {
+    public static void show(Window owner, SaleHistoryEntry sale,
+                            BiConsumer<Long, Consumer<String>> printCopy) {
         Dialog<Void> dialog = new Dialog<>();
         dialog.initOwner(owner);
         dialog.setTitle("Itens da venda");
         dialog.setHeaderText("Venda #" + sale.saleId() + (sale.createdAt() == null ? ""
                 : "  —  " + DATE_TIME.format(sale.createdAt())));
-        dialog.getDialogPane().setContent(contentOf(sale));
+        VBox content = contentOf(sale);
+        content.getChildren().add(printRow(sale.saleId(), printCopy));
+        dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
         dialog.showAndWait();
+    }
+
+    private static HBox printRow(Long saleId, BiConsumer<Long, Consumer<String>> printCopy) {
+        Label printStatus = label("", "win-label");
+        Button printButton = new Button("Imprimir nota");
+        printButton.getStyleClass().add("primary-button");
+        printButton.setOnAction(event -> {
+            printStatus.setText("Nota enviada para a impressora.");
+            printCopy.accept(saleId, message -> printStatus.setText("Falha ao imprimir a nota: " + message));
+        });
+        HBox row = new HBox(12, printButton, printStatus);
+        row.setAlignment(Pos.CENTER_LEFT);
+        return row;
     }
 
     private static VBox contentOf(SaleHistoryEntry sale) {

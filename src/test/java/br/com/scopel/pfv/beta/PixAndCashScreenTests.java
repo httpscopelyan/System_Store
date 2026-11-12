@@ -56,13 +56,13 @@ class PixAndCashScreenTests {
     }
 
     @Test
-    void pixPaidOnTheMachineRegistersTheSaleOnceAndPrintsPixOnTheReceipt() throws Exception {
+    void pixPaidOnTheMachineRegistersTheSaleOnceAndDoesNotPrintAutomatically() throws Exception {
         PaymentScreenFixture screen = openPix(new ScriptedGateway(true).script(PENDING, APPROVED));
 
         verify(screen.saleService, timeout(POLL_WAIT * 1000)).payPix(screen.sale);
-        verify(screen.receiptService, timeout(3000)).printSaleReceipt(eq(screen.sale),
-                argThat(payment -> payment.method() == PaymentMethod.PIX));
         verify(screen.navigator, timeout(2000)).navigate(Page.VENDA_FINALIZADA);
+        verify(screen.receiptService, never()).printSaleReceipt(any(br.com.scopel.pfv.beta.model.Sale.class),
+                any(br.com.scopel.pfv.beta.service.ReceiptPayment.class));
         verify(screen.navigator, never()).navigate(Page.PAGAMENTO);
         assertEquals(PaymentMethod.PIX, screen.session.getUltimaForma());
     }
@@ -131,7 +131,7 @@ class PixAndCashScreenTests {
     }
 
     @Test
-    void cashSaleReceiptShowsReceivedAndChangeAndOpensTheDrawerOffTheScreenThread() throws Exception {
+    void cashSaleOpensTheDrawerOffTheScreenThreadAndDoesNotPrintAutomatically() throws Exception {
         PaymentScreenFixture screen = new PaymentScreenFixture();
         PrinterPort printer = mock(PrinterPort.class);
         when(screen.saleService.pay(any(), eq(PaymentMethod.DINHEIRO), any())).thenReturn(screen.sale);
@@ -143,23 +143,19 @@ class PixAndCashScreenTests {
         screen.onFx(() -> ((TextField) screen.node("amountReceivedField")).fireEvent(
                 new javafx.event.ActionEvent()));
 
-        verify(screen.receiptService, timeout(3000)).printSaleReceipt(eq(screen.sale),
-                argThat(payment -> payment.method() == PaymentMethod.DINHEIRO
-                        && payment.received().compareTo(new BigDecimal("30.00")) == 0
-                        && payment.change().compareTo(new BigDecimal("4.10")) == 0));
         verify(printer, timeout(3000)).openDrawer();
         verify(screen.navigator).navigate(Page.VENDA_FINALIZADA);
+        verify(screen.receiptService, never()).printSaleReceipt(any(br.com.scopel.pfv.beta.model.Sale.class),
+                any(br.com.scopel.pfv.beta.service.ReceiptPayment.class));
     }
 
     @Test
-    void cashSaleIsKeptEvenWhenThePrinterFails() throws Exception {
+    void cashSaleIsKeptEvenWhenTheDrawerFails() throws Exception {
         PaymentScreenFixture screen = new PaymentScreenFixture();
         PrinterPort printer = mock(PrinterPort.class);
         when(screen.saleService.pay(any(), eq(PaymentMethod.DINHEIRO), any())).thenReturn(screen.sale);
         when(screen.saleService.calculateChange(any(), any())).thenReturn(BigDecimal.ZERO);
-        org.mockito.Mockito.doThrow(new RuntimeException("sem papel")).when(screen.receiptService)
-                .printSaleReceipt(any(br.com.scopel.pfv.beta.model.Sale.class),
-                        any(br.com.scopel.pfv.beta.service.ReceiptPayment.class));
+        org.mockito.Mockito.doThrow(new RuntimeException("sem papel")).when(printer).openDrawer();
         screen.load("pagamento_dinheiro.fxml", fixture -> new PagamentoDinheiroController(fixture.saleService,
                 fixture.session, fixture.navigator, fixture.receiptService, printer));
 

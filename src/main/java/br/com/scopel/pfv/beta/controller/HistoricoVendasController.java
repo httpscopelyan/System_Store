@@ -3,6 +3,7 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.controller.support.SaleDetailAction;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.service.SaleHistoryService;
+import br.com.scopel.pfv.beta.service.SaleReprintService;
 import br.com.scopel.pfv.beta.service.SaleService;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -30,6 +31,7 @@ public class HistoricoVendasController {
 
     private final SaleService saleService;
     private final SaleHistoryService saleHistoryService;
+    private final SaleReprintService saleReprintService;
 
     private SaleDetailAction saleDetailAction;
 
@@ -41,9 +43,11 @@ public class HistoricoVendasController {
     @FXML private TableColumn<Sale, String> colTotal;
     @FXML private Label statusLabel;
 
-    public HistoricoVendasController(SaleService saleService, SaleHistoryService saleHistoryService) {
+    public HistoricoVendasController(SaleService saleService, SaleHistoryService saleHistoryService,
+                                     SaleReprintService saleReprintService) {
         this.saleService = saleService;
         this.saleHistoryService = saleHistoryService;
+        this.saleReprintService = saleReprintService;
     }
 
     @FXML
@@ -59,7 +63,7 @@ public class HistoricoVendasController {
         colTotal.setCellValueFactory(c -> new SimpleStringProperty(money(c.getValue().getTotal())));
         colTotal.setStyle("-fx-alignment: CENTER-RIGHT;");
 
-        saleDetailAction = new SaleDetailAction(saleHistoryService, () -> table.getScene().getWindow());
+        saleDetailAction = new SaleDetailAction(saleHistoryService, saleReprintService, () -> table.getScene().getWindow());
         table.setOnMouseClicked(click -> {
             if (click.getButton() == MouseButton.PRIMARY && click.getClickCount() == 2) {
                 onViewItems();

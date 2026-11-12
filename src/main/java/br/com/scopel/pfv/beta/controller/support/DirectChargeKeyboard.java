@@ -29,6 +29,15 @@ public final class DirectChargeKeyboard {
 
     private final Actions actions;
 
+    public static void apply(AmountInput input, String key) {
+        switch (key) {
+            case BACKSPACE_KEY -> input.backspace();
+            case CLEAR_KEY -> input.clear();
+            case COMMA_KEY -> input.comma();
+            default -> input.digit(key.charAt(0));
+        }
+    }
+
     public DirectChargeKeyboard(Actions actions) {
         this.actions = actions;
     }

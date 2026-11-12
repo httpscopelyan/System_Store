@@ -4,6 +4,7 @@ import br.com.scopel.pfv.beta.hardware.CardChargeResult;
 import br.com.scopel.pfv.beta.hardware.CardPaymentGateway;
 import br.com.scopel.pfv.beta.model.CardType;
 import br.com.scopel.pfv.beta.model.CashRegister;
+import br.com.scopel.pfv.beta.model.DirectCharge;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.service.DirectChargeService;
@@ -23,15 +24,20 @@ public record DirectChargeRequest(BigDecimal amount, PaymentMethod method, CardT
         return method == PaymentMethod.PIX ? gateway.createPixCharge(amount) : gateway.createCharge(amount, cardType);
     }
 
-    public String registerApproved(DirectChargeService directChargeService, User operator, CashRegister cashRegister) {
+    public record Registration(String message, DirectCharge charge) {
+    }
+
+    public Registration registerApproved(DirectChargeService directChargeService, User operator,
+                                         CashRegister cashRegister) {
         String approvedMessage = "✔ Cobrança aprovada: " + MoneyFormat.format(amount) + " (" + methodLabel() + ")";
         try {
-            directChargeService.register(amount, method, cardType, operator, cashRegister, note);
-            return cashRegister == null
+            DirectCharge charge = directChargeService.register(amount, method, cardType, operator, cashRegister, note);
+            return new Registration(cashRegister == null
                     ? approvedMessage + " ATENÇÃO: sem caixa aberto, a cobrança não entra no Extra de nenhum caixa."
-                    : approvedMessage;
+                    : approvedMessage, charge);
         } catch (RuntimeException failure) {
-            return approvedMessage + " ATENÇÃO: não foi possível registrar a cobrança (" + failure.getMessage() + ").";
+            return new Registration(approvedMessage + " ATENÇÃO: não foi possível registrar a cobrança ("
+                    + failure.getMessage() + ").", null);
         }
     }
 }

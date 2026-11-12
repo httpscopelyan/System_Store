@@ -180,21 +180,16 @@ class CardChargeScreenTests {
     }
 
     @Test
-    void receiptPrintedAfterApprovalNamesTheCardTypeAndAPrinterFailureNeverUndoesTheSale() throws Exception {
+    void approvedCardSaleDoesNotPrintTheReceiptAutomatically() throws Exception {
         PaymentScreenFixture screen = new PaymentScreenFixture();
         screen.session.setCardTypeSelecionado(CardType.CREDITO);
-        doThrow(new RuntimeException("impressora offline")).when(screen.receiptService)
-                .printSaleReceipt(any(Sale.class), any(ReceiptPayment.class));
         when(screen.saleService.payCard(any(), any())).thenReturn(screen.sale);
         ScriptedGateway gateway = new ScriptedGateway(true).script(APPROVED);
         screen.load("pagamento_espera.fxml", fixture -> new PagamentoEsperaController(fixture.saleService,
                 fixture.session, fixture.navigator, fixture.receiptService, gateway));
 
-        verify(screen.receiptService, timeout(POLL_WAIT * 1000)).printSaleReceipt(eq(screen.sale),
-                argThat(payment -> payment.method() == PaymentMethod.CARTAO
-                        && payment.cardType() == CardType.CREDITO));
-        verify(screen.navigator, timeout(2000)).navigate(Page.VENDA_FINALIZADA);
-        verify(screen.navigator, timeout(2000)).notice(argThat(message -> message.contains("impressora offline")));
+        verify(screen.navigator, timeout(POLL_WAIT * 1000)).navigate(Page.VENDA_FINALIZADA);
+        verify(screen.receiptService, never()).printSaleReceipt(any(Sale.class), any(ReceiptPayment.class));
     }
 
     @Test

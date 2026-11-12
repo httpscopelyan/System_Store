@@ -53,6 +53,7 @@
             </StackPane>
 
             <Label fx:id="messageLabel" styleClass="sale-status" wrapText="true" />
+            <Button fx:id="reissueButton" focusTraversable="false" managed="false" onAction="#onReissue" styleClass="primary-button" text="Emitir nova via" visible="false" />
         </VBox>
     </center>
 </BorderPane>

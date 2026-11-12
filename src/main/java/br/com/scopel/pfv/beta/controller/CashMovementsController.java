@@ -3,6 +3,7 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.controller.support.MoneyFormat;
 import br.com.scopel.pfv.beta.controller.support.SaleDetailAction;
 import br.com.scopel.pfv.beta.service.SaleHistoryService;
+import br.com.scopel.pfv.beta.service.SaleReprintService;
 import br.com.scopel.pfv.beta.service.cash.CashMovementRow;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -25,6 +26,7 @@ public class CashMovementsController {
     private static final String NUMERIC_STYLE = "-fx-alignment: CENTER-RIGHT;";
 
     private final SaleHistoryService saleHistoryService;
+    private final SaleReprintService saleReprintService;
 
     private SaleDetailAction saleDetailAction;
     private Consumer<String> messageSink = message -> { };
@@ -44,7 +46,7 @@ public class CashMovementsController {
 
     @FXML
     public void initialize() {
-        saleDetailAction = new SaleDetailAction(saleHistoryService, () -> movTable.getScene().getWindow());
+        saleDetailAction = new SaleDetailAction(saleHistoryService, saleReprintService, () -> movTable.getScene().getWindow());
         movTable.setRowFactory(table -> rowOpeningItemsOnDoubleClick());
         colMovDate.setCellValueFactory(cell -> text(DATE_TIME.format(cell.getValue().at())));
         colMovDinheiro.setCellValueFactory(cell -> text(MoneyFormat.format(cell.getValue().cash())));
@@ -65,8 +67,9 @@ public class CashMovementsController {
         colMovOp.setCellFactory(column -> new EntryMarkerCell());
     }
 
-    public CashMovementsController(SaleHistoryService saleHistoryService) {
+    public CashMovementsController(SaleHistoryService saleHistoryService, SaleReprintService saleReprintService) {
         this.saleHistoryService = saleHistoryService;
+        this.saleReprintService = saleReprintService;
     }
 
     public void onMessage(Consumer<String> newMessageSink) {

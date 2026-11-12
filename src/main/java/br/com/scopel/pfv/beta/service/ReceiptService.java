@@ -4,6 +4,7 @@ import br.com.scopel.pfv.beta.hardware.PrinterPort;
 import br.com.scopel.pfv.beta.model.CardType;
 import br.com.scopel.pfv.beta.model.CashMovement;
 import br.com.scopel.pfv.beta.model.CashRegister;
+import br.com.scopel.pfv.beta.model.DirectCharge;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.SaleItem;
@@ -63,6 +64,38 @@ public class ReceiptService {
 
     public void printSplitSaleReceiptCopy(Sale sale, List<ReceiptPayment> payments) {
         printer.print(buildSplitSaleReceiptCopy(sale, payments));
+    }
+
+    public String buildDirectChargeReceiptCopy(DirectCharge charge) {
+        String store = appSettingService.getString("store.name", "MERCADO");
+        StringBuilder sb = new StringBuilder();
+        sb.append(center(store)).append('\n');
+        sb.append(center("COBRANCA - CUPOM NAO FISCAL")).append('\n');
+        sb.append(center("*** 2a VIA ***")).append('\n');
+        if (charge.getCreatedAt() != null) {
+            sb.append(DT.format(charge.getCreatedAt())).append('\n');
+        }
+        sb.append("Cobranca #").append(charge.getId() == null ? "-" : charge.getId()).append('\n');
+        if (charge.getOperator() != null) {
+            sb.append("Operador: ").append(clip(charge.getOperator().getName(), WIDTH - 10)).append('\n');
+        }
+        sb.append(line()).append('\n');
+        sb.append(leftRight("TOTAL", money(charge.getAmount()))).append('\n');
+        sb.append(leftRight("Pagamento", paymentName(new ReceiptPayment(charge.getMethod(), charge.getCardType(),
+                null, null)))).append('\n');
+        if (charge.getNote() != null && !charge.getNote().isBlank()) {
+            String note = "Obs.: " + charge.getNote().trim();
+            for (int start = 0; start < note.length(); start += WIDTH) {
+                sb.append(note, start, Math.min(note.length(), start + WIDTH)).append('\n');
+            }
+        }
+        sb.append(line()).append('\n');
+        sb.append(center("*** NAO E DOCUMENTO FISCAL ***"));
+        return sb.toString();
+    }
+
+    public void printDirectChargeReceiptCopy(DirectCharge charge) {
+        printer.print(buildDirectChargeReceiptCopy(charge));
     }
 
     private List<ReceiptPayment> singlePayment(ReceiptPayment payment) {

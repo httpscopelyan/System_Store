@@ -81,6 +81,22 @@ class ReceiptCopyTests {
     }
 
     @Test
+    void directChargeCopyShowsAmountMethodNoteAndSecondVia() {
+        ReceiptService service = new ReceiptService(settingsStub, recordingPrinter);
+        br.com.scopel.pfv.beta.model.DirectCharge charge = new br.com.scopel.pfv.beta.model.DirectCharge();
+        charge.setAmount(new BigDecimal("12.50"));
+        charge.setMethod(PaymentMethod.CARTAO);
+        charge.setCardType(CardType.DEBITO);
+        charge.setNote("Fiado do João");
+        charge.setCreatedAt(LocalDateTime.now());
+
+        String copy = service.buildDirectChargeReceiptCopy(charge);
+
+        assertTrue(copy.contains("2a VIA") && copy.contains("12,50") && copy.contains("Debito"));
+        assertTrue(copy.contains("Fiado do João"));
+    }
+
+    @Test
     void copyIsMarkedAsSecondViaAndKeepsItemsAndPayment() {
         ReceiptService service = new ReceiptService(settingsStub, recordingPrinter);
 

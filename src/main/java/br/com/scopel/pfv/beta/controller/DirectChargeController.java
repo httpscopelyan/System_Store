@@ -3,6 +3,9 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.AmountInput;
 import br.com.scopel.pfv.beta.controller.support.CardChargePoller;
+import br.com.scopel.pfv.beta.controller.support.ChargeReissue;
+import br.com.scopel.pfv.beta.service.ReceiptService;
+import br.com.scopel.pfv.beta.controller.support.DirectChargeGuard;
 import br.com.scopel.pfv.beta.controller.support.DirectChargeKeyboard;
 import br.com.scopel.pfv.beta.controller.support.DirectChargePanels;
 import br.com.scopel.pfv.beta.controller.support.DirectChargeRequest;
@@ -17,8 +20,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import org.springframework.stereotype.Component;
@@ -31,13 +33,16 @@ public class DirectChargeController implements DirectChargeKeyboard.Actions {
     private final CardPaymentGateway gateway;
     private final DirectChargeService directChargeService;
     private final UserSession userSession;
+    private final ReceiptService receiptService;
     private final AmountInput input = new AmountInput();
     private final DirectChargeKeyboard keyboard = new DirectChargeKeyboard(this);
 
     private DirectChargePanels panels;
     private BigDecimal amount;
     private CardChargePoller poller;
+    private ChargeReissue reissue;
 
+    @FXML private Node reissueButton;
     @FXML private BorderPane root;
     @FXML private Label displayLabel;
     @FXML private TextField noteField;
@@ -52,7 +57,8 @@ public class DirectChargeController implements DirectChargeKeyboard.Actions {
     @FXML private Label messageLabel;
 
     public DirectChargeController(CardPaymentGateway gateway, DirectChargeService directChargeService,
-                                  UserSession userSession) {
+                                  UserSession userSession, ReceiptService receiptService) {
+        this.receiptService = receiptService;
         this.gateway = gateway;
         this.directChargeService = directChargeService;
         this.userSession = userSession;
@@ -63,6 +69,7 @@ public class DirectChargeController implements DirectChargeKeyboard.Actions {
         input.clear();
         amount = null;
         poller = null;
+        reissue = new ChargeReissue(receiptService, reissueButton, messageLabel);
         panels = new DirectChargePanels(inputPanel, choosePanel, chargingPanel);
         MaxLengthInput.limit(noteField, DirectChargeService.MAX_NOTE_LENGTH);
         show(State.INPUT);
@@ -80,18 +87,14 @@ public class DirectChargeController implements DirectChargeKeyboard.Actions {
         pressKeypad((String) ((Node) event.getSource()).getUserData());
     }
 
-    @FXML
-    @Override
+    @FXML @Override
     public void onEnter() {
         if (!panels.is(State.INPUT)) {
             return;
         }
-        if (!input.isPositive()) {
-            messageLabel.setText("Digite o valor a cobrar.");
-            return;
-        }
-        if (!gateway.isIntegrated()) {
-            messageLabel.setText("A maquininha não está no modo PDV. Mude o modo em Configurações → Maquininha.");
+        String problem = DirectChargeGuard.problem(input, gateway);
+        if (problem != null) {
+            messageLabel.setText(problem);
             return;
         }
         amount = input.value();
@@ -100,34 +103,29 @@ public class DirectChargeController implements DirectChargeKeyboard.Actions {
         show(State.CHOOSE);
     }
 
-    @FXML
-    @Override
+    @FXML @Override
     public void onDebit() {
         startCharge(PaymentMethod.CARTAO, CardType.DEBITO);
     }
 
-    @FXML
-    @Override
+    @FXML @Override
     public void onCredit() {
         startCharge(PaymentMethod.CARTAO, CardType.CREDITO);
     }
 
-    @FXML
-    @Override
+    @FXML @Override
     public void onPix() {
         startCharge(PaymentMethod.PIX, null);
     }
 
-    @FXML
-    @Override
+    @FXML @Override
     public void onBack() {
         if (panels.is(State.CHOOSE)) {
             show(State.INPUT);
         }
     }
 
-    @FXML
-    @Override
+    @FXML @Override
     public void onCancelCharge() {
         if (!panels.is(State.CHARGING) || poller == null) {
             return;
@@ -147,12 +145,7 @@ public class DirectChargeController implements DirectChargeKeyboard.Actions {
     @Override
     public void pressKeypad(String key) {
         messageLabel.setText("");
-        switch (key) {
-            case DirectChargeKeyboard.BACKSPACE_KEY -> input.backspace();
-            case DirectChargeKeyboard.CLEAR_KEY -> input.clear();
-            case DirectChargeKeyboard.COMMA_KEY -> input.comma();
-            default -> input.digit(key.charAt(0));
-        }
+        DirectChargeKeyboard.apply(input, key);
         displayLabel.setText("R$ " + input.display());
     }
 
@@ -165,6 +158,7 @@ public class DirectChargeController implements DirectChargeKeyboard.Actions {
             return;
         }
         DirectChargeRequest sentRequest = new DirectChargeRequest(amount, chosenMethod, chosenCardType, note());
+        reissue.hide();
         chargingTitleLabel.setText("Cobrança no " + sentRequest.methodLabel());
         chargingAmountLabel.setText(MoneyFormat.format(sentRequest.amount()));
         statusLabel.setText("Enviando a cobrança para a maquininha...");
@@ -175,13 +169,19 @@ public class DirectChargeController implements DirectChargeKeyboard.Actions {
 
     private void approved(DirectChargeRequest approvedRequest) {
         poller = null;
-        String outcome = approvedRequest.registerApproved(directChargeService, userSession.getLoggedUser(),
-                userSession.getCaixaAtual());
+        DirectChargeRequest.Registration registration = approvedRequest.registerApproved(directChargeService,
+                userSession.getLoggedUser(), userSession.getCaixaAtual());
         input.clear();
         noteField.clear();
         displayLabel.setText("R$ " + input.display());
         show(State.INPUT);
-        messageLabel.setText(outcome);
+        messageLabel.setText(registration.message());
+        reissue.offer(registration.charge());
+    }
+
+    @FXML
+    public void onReissue() {
+        reissue.print();
     }
 
     private void ended(String message) {

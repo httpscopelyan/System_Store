@@ -3,11 +3,9 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
-import br.com.scopel.pfv.beta.controller.support.BackgroundPrinting;
 import br.com.scopel.pfv.beta.controller.support.ChargeCancellation;
 import br.com.scopel.pfv.beta.controller.support.CardChargePoller;
 import br.com.scopel.pfv.beta.controller.support.ChargeScreen;
-import br.com.scopel.pfv.beta.service.ReceiptPayment;
 import br.com.scopel.pfv.beta.exception.PixNotConfiguredException;
 import br.com.scopel.pfv.beta.hardware.CardPaymentGateway;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
@@ -182,8 +180,6 @@ public class PagamentoPixController {
             screen.showRegistrationFailure(failure.getMessage());
             return;
         }
-        BackgroundPrinting.run(() -> receiptService.printSaleReceipt(finalizada, ReceiptPayment.pix()),
-                message -> navigator.notice("Venda gravada. Aviso: impressão falhou (" + message + ")"));
         userSession.setUltimaVenda(finalizada);
         userSession.setUltimaForma(PaymentMethod.PIX);
         userSession.setUltimoTroco(null);
