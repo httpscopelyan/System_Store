@@ -49,6 +49,7 @@ public class MainController {
     @FXML private BorderPane root;
     @FXML private Button updateButton;
     @FXML private Button configButton;
+    @FXML private Button adminButton;
     @FXML private Button moreButton;
     @FXML private javafx.scene.layout.TilePane blocksBar;
     @FXML private Button backButton;
@@ -89,8 +90,10 @@ public class MainController {
         roleLabel.setText("Grupo: " + (user != null ? user.getRole() : "-"));
         terminalLabel.setText("Terminal: CAIXA 01");
         refreshCaixaStatus();
-        boolean gerente = user != null && user.getRole() == User.Role.GERENTE;
-        moreBlocks = new MoreBlocks(blocksBar, moreButton, button -> button != configButton || gerente);
+        boolean gerente = user != null && user.hasManagerAccess();
+        boolean dev = user != null && user.getRole() == User.Role.DEV;
+        moreBlocks = new MoreBlocks(blocksBar, moreButton,
+                button -> (button != configButton || gerente) && (button != adminButton || dev));
 
         ShellClock.restart(dateTimeLabel, DATE_TIME);
         setupShortcuts();

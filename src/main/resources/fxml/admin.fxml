@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.scopel.pfv.beta.controller.AdminController"
+            stylesheets="@../css/styles.css"
+            styleClass="inicio-root">
+
+    <top>
+        <VBox spacing="4">
+            <padding>
+                <Insets top="16" right="28" bottom="4" left="28"/>
+            </padding>
+            <Label text="Administração (DEV)" styleClass="form-section-title"/>
+            <Label text="Histórico completo do sistema, permissões, contas e caixa unificado. Somente a conta DEV acessa esta página."
+                   styleClass="form-label" wrapText="true"/>
+        </VBox>
+    </top>
+
+    <center>
+        <TabPane fx:id="tabs" tabClosingPolicy="UNAVAILABLE">
+            <padding>
+                <Insets top="8" right="20" bottom="8" left="20"/>
+            </padding>
+            <Tab text="Histórico">
+                <content>
+                    <fx:include fx:id="adminHistory" source="admin_history.fxml"/>
+                </content>
+            </Tab>
+            <Tab text="Permissões">
+                <content>
+                    <fx:include fx:id="adminPermissions" source="admin_permissions.fxml"/>
+                </content>
+            </Tab>
+            <Tab text="Contas">
+                <content>
+                    <fx:include fx:id="adminAccounts" source="admin_accounts.fxml"/>
+                </content>
+            </Tab>
+            <Tab text="Caixa unificado">
+                <content>
+                    <fx:include fx:id="adminCashGroups" source="admin_cash_groups.fxml"/>
+                </content>
+            </Tab>
+            <Tab text="Acesso web">
+                <content>
+                    <fx:include fx:id="adminWeb" source="admin_web.fxml"/>
+                </content>
+            </Tab>
+        </TabPane>
+    </center>
+
+    <bottom>
+        <fx:include source="back_bar.fxml"/>
+    </bottom>
+
+</BorderPane>

@@ -63,5 +63,6 @@ public class UserSession {
 
     public void setLoggedUser(User loggedUser) {
         this.loggedUser = loggedUser;
+        br.com.scopel.pfv.beta.service.audit.AuditActorContext.set(loggedUser);
     }
 }

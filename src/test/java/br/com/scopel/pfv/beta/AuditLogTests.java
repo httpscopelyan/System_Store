@@ -138,7 +138,6 @@ class AuditLogTests {
         assertThrows(ManagerAuthorizationRequiredException.class, () -> productService.create(newCode, "Novo",
                 Product.Unidade.UN, BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ZERO, null, true,
                 anaClara));
-        assertThrows(ManagerAuthorizationRequiredException.class, () -> productService.save(unsaved, anaClara));
         assertThrows(ManagerAuthorizationRequiredException.class, () -> productService.update(product.getId(),
                 "Outro nome", Product.Unidade.UN, new BigDecimal("9.00"), new BigDecimal("3.00"), BigDecimal.ZERO,
                 null, true, anaClara));

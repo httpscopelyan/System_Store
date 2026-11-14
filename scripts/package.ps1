@@ -31,7 +31,7 @@ Remove-Item (Join-Path $OutDir "Scopel Store*") -Recurse -Force -ErrorAction Sil
 # Módulos do runtime embutido. O JAR do Spring Boot é "fat", então o jdeps não enxerga o que ele usa:
 # java.se (java.desktop p/ impressão, java.sql...), jdk.unsupported, jdk.crypto.ec (TLS),
 # jdk.localedata (formatação pt-BR), jdk.management/net/naming.dns/zipfs/charsets (Spring/Hikari/Postgres).
-$modules = "java.se,jdk.unsupported,jdk.crypto.ec,jdk.localedata,jdk.management,jdk.net,jdk.naming.dns,jdk.zipfs,jdk.charsets"
+$modules = "java.se,jdk.unsupported,jdk.crypto.ec,jdk.localedata,jdk.management,jdk.net,jdk.naming.dns,jdk.zipfs,jdk.charsets,jdk.httpserver"
 
 $args = @(
     "--type", $Type,

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.AdminPermissionsController"
+      spacing="16">
+    <padding>
+        <Insets top="12" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <VBox spacing="6" prefWidth="280" minWidth="240">
+        <Label text="Contas" styleClass="form-label"/>
+        <ListView fx:id="accountList" VBox.vgrow="ALWAYS" minHeight="320"/>
+    </VBox>
+
+    <VBox styleClass="form-card" spacing="12" HBox.hgrow="ALWAYS">
+        <Label fx:id="titleLabel" text="Escolha uma conta" styleClass="form-section-title"/>
+        <VBox fx:id="permissionsBox" spacing="10"/>
+        <Label fx:id="noteLabel" styleClass="form-label" wrapText="true"/>
+        <HBox spacing="12">
+            <Button fx:id="saveButton" text="Salvar permissões" onAction="#onSave" styleClass="success-button"/>
+            <Button fx:id="defaultsButton" text="Restaurar padrão do perfil" onAction="#onRestoreDefaults"
+                    styleClass="secondary-button"/>
+        </HBox>
+        <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+    </VBox>
+</HBox>

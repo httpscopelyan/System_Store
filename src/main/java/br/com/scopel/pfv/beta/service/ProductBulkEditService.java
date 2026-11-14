@@ -173,7 +173,7 @@ public class ProductBulkEditService {
     }
 
     private void requireManager(User actor) {
-        if (actor == null || actor.getRole() != User.Role.GERENTE) {
+        if (actor == null || !actor.hasManagerAccess()) {
             throw new ManagerAuthorizationRequiredException();
         }
     }

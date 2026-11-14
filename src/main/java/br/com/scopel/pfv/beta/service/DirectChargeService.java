@@ -1,11 +1,14 @@
 package br.com.scopel.pfv.beta.service;
 
+import br.com.scopel.pfv.beta.model.AuditAction;
+import br.com.scopel.pfv.beta.model.AuditEntityType;
 import br.com.scopel.pfv.beta.model.CardType;
 import br.com.scopel.pfv.beta.model.CashRegister;
 import br.com.scopel.pfv.beta.model.DirectCharge;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.repository.DirectChargeRepository;
+import br.com.scopel.pfv.beta.service.audit.AuditLogService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +23,11 @@ public class DirectChargeService {
     public static final int MAX_NOTE_LENGTH = 155;
 
     private final DirectChargeRepository repository;
+    private final AuditLogService auditLogService;
 
-    public DirectChargeService(DirectChargeRepository repository) {
+    public DirectChargeService(DirectChargeRepository repository, AuditLogService auditLogService) {
         this.repository = repository;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -55,7 +60,12 @@ public class DirectChargeService {
         charge.setCashRegister(cashRegister);
         charge.setCreatedAt(LocalDateTime.now());
         charge.setNote(normalizedNote);
-        return repository.save(charge);
+        DirectCharge saved = repository.save(charge);
+        auditLogService.record(operator, AuditAction.DIRECT_CHARGE, AuditEntityType.DIRECT_CHARGE, saved.getId(),
+                "Cobranca de R$ " + saved.getAmount().toPlainString() + " no " + method
+                        + (normalizedNote == null ? "" : " - obs: " + normalizedNote),
+                null, saved.getAmount().toPlainString());
+        return saved;
     }
 
     public List<DirectCharge> recent() {

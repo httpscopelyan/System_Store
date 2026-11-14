@@ -84,7 +84,7 @@ public class EstoqueController {
     @FXML
     public void initialize() {
         User user = userSession.getLoggedUser();
-        boolean manager = user != null && user.getRole() == User.Role.GERENTE;
+        boolean manager = user != null && user.hasManagerAccess();
         selection = new ProductSelection(table);
         presenter = new ProductTablePresenter(table,
                 new ProductTablePresenter.Columns(colHandle, colCode, colDesc, colCost, colProfit,

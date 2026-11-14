@@ -122,7 +122,7 @@ public class StockService {
 
     @Transactional
     public Product rectify(String code, BigDecimal correctQuantity, String reason, User authorizedBy) {
-        if (authorizedBy == null || authorizedBy.getRole() != User.Role.GERENTE) {
+        if (authorizedBy == null || !authorizedBy.hasManagerAccess()) {
             throw new ManagerAuthorizationRequiredException();
         }
         String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);

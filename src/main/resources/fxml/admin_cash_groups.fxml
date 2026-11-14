@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.AdminCashGroupsController"
+      spacing="16">
+    <padding>
+        <Insets top="12" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <VBox spacing="6" prefWidth="280" minWidth="240">
+        <Label text="Caixas unificados" styleClass="form-label"/>
+        <ListView fx:id="groupList" VBox.vgrow="ALWAYS" minHeight="320"/>
+        <Button text="Novo caixa unificado" onAction="#onNew" styleClass="secondary-button"/>
+    </VBox>
+
+    <VBox styleClass="form-card" spacing="12" HBox.hgrow="ALWAYS">
+        <Label fx:id="titleLabel" text="Novo caixa unificado" styleClass="form-section-title"/>
+        <Label text="As contas marcadas abrem, vendem e fecham no mesmo caixa. Cada conta participa de um só caixa unificado."
+               styleClass="form-label" wrapText="true"/>
+        <TextField fx:id="nameField" promptText="Nome (ex.: Caixa da manhã)" styleClass="text-input"/>
+        <VBox fx:id="membersBox" spacing="8"/>
+        <HBox spacing="12">
+            <Button text="Salvar" onAction="#onSave" styleClass="success-button"/>
+            <Button fx:id="dissolveButton" text="Desfazer este caixa unificado" onAction="#onDissolve"
+                    styleClass="danger-button"/>
+        </HBox>
+        <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+    </VBox>
+</HBox>

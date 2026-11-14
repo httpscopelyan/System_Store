@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.AdminHistoryController"
+      spacing="10" VBox.vgrow="ALWAYS">
+    <padding>
+        <Insets top="12" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <HBox spacing="12" alignment="BOTTOM_LEFT">
+        <VBox spacing="4">
+            <Label text="Histórico" styleClass="form-label"/>
+            <ComboBox fx:id="tabBox" prefWidth="260"/>
+        </VBox>
+        <VBox spacing="4">
+            <Label text="A partir de" styleClass="form-label"/>
+            <DatePicker fx:id="sincePicker" prefWidth="150"/>
+        </VBox>
+        <VBox spacing="4" HBox.hgrow="ALWAYS">
+            <Label text="Buscar" styleClass="form-label"/>
+            <TextField fx:id="searchField" promptText="Nome, produto, código, valor..."
+                       styleClass="text-input" maxWidth="Infinity"/>
+        </VBox>
+        <Button text="Atualizar" onAction="#onRefresh" styleClass="primary-button"/>
+    </HBox>
+
+    <TableView fx:id="table" VBox.vgrow="ALWAYS" minHeight="360"/>
+
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Button fx:id="previousButton" text="◀ Anterior" onAction="#onPrevious" styleClass="secondary-button"/>
+        <Button fx:id="nextButton" text="Próxima ▶" onAction="#onNext" styleClass="secondary-button"/>
+        <Label fx:id="pageLabel" styleClass="form-label"/>
+        <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+    </HBox>
+</VBox>

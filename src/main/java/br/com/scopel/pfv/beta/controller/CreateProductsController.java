@@ -12,11 +12,16 @@ import br.com.scopel.pfv.beta.service.PricingSuggestionService;
 import br.com.scopel.pfv.beta.service.ProductService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Component
 public class CreateProductsController {
@@ -38,6 +43,10 @@ public class CreateProductsController {
     @FXML private ComboBox<Product.Unidade> unitBox;
     @FXML private CheckBox activeBox;
     @FXML private Label messageLabel;
+    @FXML private Label priceFormationLabel;
+    @FXML private Node costBox;
+    @FXML private Node marginBox;
+    @FXML private Node minStockBox;
 
     public CreateProductsController(ProductService productService,
                                     PricingSuggestionService pricingSuggestionService,
@@ -49,8 +58,21 @@ public class CreateProductsController {
 
     @FXML
     public void initialize() {
-        EnterToNextField.install(this::onSave, codeField, descriptionField, costField, marginField, priceField, quantityField,
-                minStockField, unitBox, categoryField);
+        boolean seesCostFields = StaffPermissions.canSeeCostFields(userSession.getLoggedUser());
+        Stream.of(costBox, marginBox, minStockBox, priceFormationLabel).forEach(node -> {
+            node.setVisible(seesCostFields);
+            node.setManaged(seesCostFields);
+        });
+        List<Node> enterOrder = new ArrayList<>(List.of(codeField, descriptionField));
+        if (seesCostFields) {
+            enterOrder.addAll(List.of(costField, marginField));
+        }
+        enterOrder.addAll(List.of(priceField, quantityField));
+        if (seesCostFields) {
+            enterOrder.add(minStockField);
+        }
+        enterOrder.addAll(List.of(unitBox, categoryField));
+        EnterToNextField.install(this::onSave, enterOrder.toArray(Node[]::new));
         unitBox.getItems().setAll(Product.Unidade.values());
         unitBox.setValue(Product.Unidade.UN);
         activeBox.setSelected(true);

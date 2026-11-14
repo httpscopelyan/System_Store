@@ -7,6 +7,7 @@ import br.com.scopel.pfv.beta.exception.SaleItemNotFoundException;
 import br.com.scopel.pfv.beta.exception.SplitPaymentInProgressException;
 import br.com.scopel.pfv.beta.model.*;
 import br.com.scopel.pfv.beta.repository.SaleRepository;
+import br.com.scopel.pfv.beta.service.audit.AuditLogService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +27,12 @@ public class SaleService {
     private final SalePaymentService salePaymentService;
     private final AppSettingService appSettingService;
     private final SplitPaymentService splitPaymentService;
+    private final AuditLogService auditLogService;
 
     public SaleService(SaleRepository saleRepository, ProductService productService,
                        SalePaymentService salePaymentService, AppSettingService appSettingService,
-                       SplitPaymentService splitPaymentService) {
+                       SplitPaymentService splitPaymentService, AuditLogService auditLogService) {
+        this.auditLogService = auditLogService;
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.salePaymentService = salePaymentService;
@@ -190,7 +193,10 @@ public class SaleService {
 
         sale.setStatus(Sale.Status.CANCELADA);
         sale.setCanceledAt(LocalDateTime.now());
-        return saleRepository.save(sale);
+        Sale canceled = saleRepository.save(sale);
+        auditLogService.record(sale.getOperator(), AuditAction.SALE_CANCELLED, AuditEntityType.SALE, canceled.getId(),
+                "Venda #" + canceled.getId() + " cancelada", null, "R$ " + canceled.getTotal().toPlainString());
+        return canceled;
     }
 
     @Transactional

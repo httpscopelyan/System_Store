@@ -5,8 +5,11 @@ import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.UserDuplicatedException;
 import br.com.scopel.pfv.beta.exception.UserNotFindException;
 import br.com.scopel.pfv.beta.model.AccountSummary;
+import br.com.scopel.pfv.beta.model.AuditAction;
+import br.com.scopel.pfv.beta.model.AuditEntityType;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.repository.UserRepository;
+import br.com.scopel.pfv.beta.service.audit.AuditLogService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +23,12 @@ public class UserService {
     private static final int MIN_PASSWORD_LENGTH = 4;
 
     private final UserRepository repository;
-    private final PasswordEncoder passwordEncoder; 
+    private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
-    public UserService(UserRepository repository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository repository, PasswordEncoder passwordEncoder,
+                       AuditLogService auditLogService) {
+        this.auditLogService = auditLogService;
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -32,16 +38,22 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFindException());
     }
 
+    @Transactional
     public User save(User newUser) {
         if (repository.findByLogin(newUser.getLogin()).isPresent()) {
             throw new UserDuplicatedException();
         }
         String hash = passwordEncoder.encode(newUser.getPassword());
         newUser.setPassword(hash);
+        applyDefaultPermissions(newUser);
 
-        return repository.save(newUser);
+        User saved = repository.save(newUser);
+        auditLogService.record(null, AuditAction.USER_CREATED, AuditEntityType.USER, saved.getId(),
+                "Usuario " + saved.getLogin() + " criado como " + saved.getRole(), null, saved.getRole().name());
+        return saved;
     }
 
+    @Transactional
     public boolean registerWithPasswordHash(String login, String name, String passwordHash, User.Role role) {
         if (repository.findByLogin(login).isPresent()) {
             return false;
@@ -51,7 +63,10 @@ public class UserService {
         user.setName(name);
         user.setPassword(passwordHash);
         user.setRole(role);
-        repository.save(user);
+        applyDefaultPermissions(user);
+        User saved = repository.save(user);
+        auditLogService.record(null, AuditAction.USER_CREATED, AuditEntityType.USER, saved.getId(),
+                "Usuario " + login + " criado como " + role, null, role.name());
         return true;
     }
 
@@ -81,6 +96,7 @@ public class UserService {
         if (takenByAnother) {
             throw new UserDuplicatedException();
         }
+        String previousLogin = user.getLogin();
         user.setLogin(login);
         user.setName(login);
         if (newPassword != null && !newPassword.isEmpty()) {
@@ -89,7 +105,12 @@ public class UserService {
             }
             user.setPassword(passwordEncoder.encode(newPassword));
         }
-        return repository.save(user);
+        User updated = repository.save(user);
+        auditLogService.record(updated, AuditAction.USER_UPDATED, AuditEntityType.USER, updated.getId(),
+                "Usuario " + previousLogin + " alterou os proprios dados"
+                        + (newPassword != null && !newPassword.isEmpty() ? " (senha trocada)" : ""),
+                previousLogin, login);
+        return updated;
     }
 
     public boolean hasUsers() {
@@ -100,8 +121,31 @@ public class UserService {
         return repository.findActiveAccounts();
     }
 
+    @Transactional
     public User login(String login, String rawPassword) {
+        User user = authenticate(login, rawPassword);
+        auditLogService.record(user, AuditAction.LOGIN, AuditEntityType.USER, user.getId(),
+                "Login de " + user.getLogin(), null, null);
+        return user;
+    }
+
+    public User authenticateDev(String login, String rawPassword) {
+        User user = authenticate(login, rawPassword);
+        if (user.getRole() != User.Role.DEV) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+        return user;
+    }
+
+    private void applyDefaultPermissions(User user) {
+        if (user.getPermissions().isEmpty()) {
+            user.setPermissions(PermissionDefaults.forAccount(user.getLogin(), user.getName(), user.getRole()));
+        }
+    }
+
+    private User authenticate(String login, String rawPassword) {
         User user = repository.findByLogin(login)
+                .filter(found -> Boolean.TRUE.equals(found.getActive()))
                 .orElseThrow(() -> new UserNotFindException());
 
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
@@ -118,20 +162,25 @@ public class UserService {
      * Nenhuma mensagem de exceção carrega a senha informada.
      */
     public User authenticateManager(String managerLogin, String rawPassword) {
-        User authenticatedUser = login(managerLogin, rawPassword);
-        if (authenticatedUser.getRole() != User.Role.GERENTE) {
+        User authenticatedUser = authenticate(managerLogin, rawPassword);
+        if (!authenticatedUser.hasManagerAccess()) {
             throw new ManagerAuthorizationRequiredException();
         }
         return authenticatedUser;
     }
 
+    @Transactional
     public User modificationRole(String login, User.Role role) {
         User n = repository.findByLogin(login)
                 .orElseThrow(() -> new UserNotFindException());
         if (StaffPermissions.isAdministrator(n)) {
             throw new IllegalArgumentException("A conta administradora não pode ter o perfil alterado.");
         }
+        User.Role previousRole = n.getRole();
         n.setRole(role);
-        return repository.save(n);
+        User changed = repository.save(n);
+        auditLogService.record(null, AuditAction.USER_ROLE_CHANGED, AuditEntityType.USER, changed.getId(),
+                "Perfil de " + changed.getLogin() + " alterado", String.valueOf(previousRole), String.valueOf(role));
+        return changed;
     }
 }

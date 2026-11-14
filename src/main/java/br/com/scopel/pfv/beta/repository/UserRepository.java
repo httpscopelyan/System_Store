@@ -12,6 +12,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByLogin(String login);
 
+    List<User> findByCashGroup_IdAndActiveTrue(Long cashGroupId);
+
+    List<User> findAllByOrderByNameAsc();
+
     @Query("""
             select new br.com.scopel.pfv.beta.model.AccountSummary(u.id, u.name, u.login, u.role) from User u
             where u.active = true

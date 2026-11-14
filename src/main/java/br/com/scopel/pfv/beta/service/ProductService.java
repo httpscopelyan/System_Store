@@ -98,6 +98,7 @@ public class ProductService {
                           BigDecimal costPrice, BigDecimal quantity, BigDecimal minStock,
                           String category, boolean active, User actor) {
         requireProductRegistrationAllowed(actor);
+        requireCostFieldsAllowed(actor, costPrice, minStock);
         String normalizedCode = normalizeCode(code);
         requireDescription(description);
         requireUnit(unit);
@@ -230,7 +231,7 @@ public class ProductService {
 
     @Transactional
     public Product inactivate(String code, User actor) {
-        if (actor == null || actor.getRole() != User.Role.GERENTE) {
+        if (actor == null || !actor.hasManagerAccess()) {
             throw new ManagerAuthorizationRequiredException();
         }
         Product product = findCode(code);
@@ -303,6 +304,14 @@ public class ProductService {
 
     private void requireProductRegistrationAllowed(User actor) {
         if (actor != null && !StaffPermissions.canRegisterProducts(actor)) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+    }
+
+    private void requireCostFieldsAllowed(User actor, BigDecimal costPrice, BigDecimal minStock) {
+        boolean fillsCostFields = (costPrice != null && costPrice.signum() != 0)
+                || (minStock != null && minStock.signum() != 0);
+        if (actor != null && fillsCostFields && !StaffPermissions.canSeeCostFields(actor)) {
             throw new ManagerAuthorizationRequiredException();
         }
     }

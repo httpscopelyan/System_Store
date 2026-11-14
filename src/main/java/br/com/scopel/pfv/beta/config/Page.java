@@ -34,7 +34,8 @@ public enum Page {
     PAGAMENTO_PIX("/fxml/pagamento_pix.fxml"),
     PAGAMENTO_DIVIDIDO("/fxml/pagamento_dividido.fxml"),
     VENDA_FINALIZADA("/fxml/venda_finalizada.fxml"),
-    HISTORICO_VENDAS("/fxml/historico_vendas.fxml");
+    HISTORICO_VENDAS("/fxml/historico_vendas.fxml"),
+    ADMIN("/fxml/admin.fxml");
 
     private final String path;
 

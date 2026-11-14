@@ -71,6 +71,7 @@ class SwitchAccountScreenTests {
         BetaApplication.springContext = previousSpringContext;
         screen.close();
         jdbc.update("delete from cash_register where operator_id = ?", targetAccount.getId());
+        jdbc.update("delete from audit_log where actor_id = ?", targetAccount.getId());
         jdbc.update("delete from users where id = ?", targetAccount.getId());
     }
 

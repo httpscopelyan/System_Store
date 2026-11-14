@@ -13,6 +13,7 @@ class StaffPermissionsTests {
         user.setLogin(login);
         user.setName(login);
         user.setRole(role);
+        user.setPermissions(PermissionDefaults.forAccount(login, login, role));
         return user;
     }
 
@@ -33,9 +34,11 @@ class StaffPermissionsTests {
     }
 
     @Test
-    void anaClaraCannotRegisterProductsButOthersCan() {
-        assertFalse(StaffPermissions.canRegisterProducts(user("Ana Clara", User.Role.OPERADOR)));
-        assertFalse(StaffPermissions.canRegisterProducts(user("ana  clara", User.Role.OPERADOR)));
+    void anaClaraRegistersProductsWithoutSeeingCostFields() {
+        assertTrue(StaffPermissions.canRegisterProducts(user("Ana Clara", User.Role.OPERADOR)));
+        assertTrue(StaffPermissions.canRegisterProducts(user("ana  clara", User.Role.OPERADOR)));
+        assertFalse(StaffPermissions.canSeeCostFields(user("Ana Clara", User.Role.OPERADOR)));
+        assertTrue(StaffPermissions.canSeeCostFields(user("Dayana", User.Role.OPERADOR)));
         assertTrue(StaffPermissions.canRegisterProducts(user("Dayana", User.Role.OPERADOR)));
         assertTrue(StaffPermissions.canRegisterProducts(user("Chefe", User.Role.GERENTE)));
     }

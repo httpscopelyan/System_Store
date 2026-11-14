@@ -78,6 +78,7 @@ class BulkCellEditorTests {
     void prepare() {
         User manager = new User();
         manager.setRole(User.Role.GERENTE);
+        manager.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.GERENTE));
         userSession.setLoggedUser(manager);
         dialogAnswer = Optional.of(manager);
         a = product("Monster A", "10.00", "7.00");
@@ -222,6 +223,7 @@ class BulkCellEditorTests {
     void operatorPriceEditNeedsManagerAuthorizationAndIsRefusedWhenCancelled_RN26() {
         User operator = new User();
         operator.setRole(User.Role.OPERADOR);
+        operator.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.OPERADOR));
         userSession.setLoggedUser(operator);
         dialogAnswer = Optional.empty();
         table.getSelectionModel().select(0, columns.price());
@@ -235,6 +237,7 @@ class BulkCellEditorTests {
     void operatorPriceEditSucceedsWhenAManagerAuthorizes_RN26() {
         User operator = new User();
         operator.setRole(User.Role.OPERADOR);
+        operator.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.OPERADOR));
         userSession.setLoggedUser(operator);
         table.getSelectionModel().select(0, columns.price());
         BulkCellEditor.Outcome outcome = editor().commit(edit(EditableColumn.PRICE, columns.price(), a, "1"));
@@ -246,6 +249,7 @@ class BulkCellEditorTests {
     void operatorMinimumStockEditNeedsNoManager_RN26() {
         User operator = new User();
         operator.setRole(User.Role.OPERADOR);
+        operator.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.OPERADOR));
         userSession.setLoggedUser(operator);
         dialogAnswer = Optional.empty();
         table.getSelectionModel().select(0, columns.minStock());

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.AdminWebController"
+      spacing="12">
+    <padding>
+        <Insets top="12" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <VBox styleClass="form-card" spacing="10">
+        <Label text="Painel de administração pela web" styleClass="form-section-title"/>
+        <Label fx:id="statusLabel" styleClass="form-label" wrapText="true"/>
+        <Label fx:id="addressLabel" styleClass="form-label" wrapText="true"/>
+        <Label fx:id="guideLabel" styleClass="form-label" wrapText="true"/>
+    </VBox>
+</VBox>

@@ -29,7 +29,7 @@ public class AdministratorYanSeed implements ApplicationRunner {
         if (settings.getBoolean(DONE_FLAG, false) || !userService.hasUsers()) {
             return;
         }
-        if (userService.registerWithPasswordHash(LOGIN, LOGIN, PASSWORD_HASH, User.Role.GERENTE)) {
+        if (userService.registerWithPasswordHash(LOGIN, LOGIN, PASSWORD_HASH, User.Role.DEV)) {
             log.info("[AdministratorYanSeed] Administrador '{}' criado.", LOGIN);
         } else {
             log.warn("[AdministratorYanSeed] Já existe um usuário '{}'; a conta não foi alterada.", LOGIN);

@@ -41,8 +41,10 @@ class ProductBulkEditServiceTests {
     void prepare() {
         manager = new User();
         manager.setRole(User.Role.GERENTE);
+        manager.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.GERENTE));
         operator = new User();
         operator.setRole(User.Role.OPERADOR);
+        operator.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.OPERADOR));
         monsterA = product("Monster A", "10.00", "7.00");
         monsterB = product("Monster B", "10.00", "8.00");
         monsterC = product("Monster C", "10.00", "5.00");

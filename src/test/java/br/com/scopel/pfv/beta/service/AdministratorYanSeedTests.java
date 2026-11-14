@@ -30,7 +30,7 @@ class AdministratorYanSeedTests {
     }
 
     @Test
-    void createsYanAsManagerOnceAndMarksTheSeedDone() {
+    void createsYanAsDevOnceAndMarksTheSeedDone() {
         UserService userService = mock(UserService.class);
         AppSettingService settings = mock(AppSettingService.class);
         when(userService.hasUsers()).thenReturn(true);
@@ -40,7 +40,7 @@ class AdministratorYanSeedTests {
         new AdministratorYanSeed(userService, settings).run(null);
 
         verify(userService).registerWithPasswordHash("Yan", "Yan", AdministratorYanSeed.PASSWORD_HASH,
-                User.Role.GERENTE);
+                User.Role.DEV);
         verify(settings).set(AdministratorYanSeed.DONE_FLAG, "true");
         assertEquals("seed.administrator_yan.done", AdministratorYanSeed.DONE_FLAG);
     }

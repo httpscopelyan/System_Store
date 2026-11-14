@@ -42,6 +42,7 @@ class StockPermissionTests {
         user.setLogin(name);
         user.setName(name);
         user.setRole(role);
+        user.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(user.getLogin(), user.getName(), role));
         return user;
     }
 

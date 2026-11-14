@@ -51,6 +51,9 @@ class SharedCashRegisterTests {
     @Autowired private ProductRepository productRepository;
     @Autowired private CashRegisterRepository cashRegisterRepository;
     @Autowired private JdbcTemplate jdbc;
+    @Autowired private br.com.scopel.pfv.beta.repository.CashGroupRepository cashGroupRepository;
+
+    private br.com.scopel.pfv.beta.model.CashGroup sharedGroup;
 
     private User dayana;
     private User anaClara;
@@ -60,8 +63,13 @@ class SharedCashRegisterTests {
     void prepare() {
         jdbc.update("update cash_register set status = 'CLOSED' where status = 'OPEN' and operator_id in "
                 + SHARED_REGISTER_OPERATORS_SQL);
+        sharedGroup = cashGroupRepository.save(new br.com.scopel.pfv.beta.model.CashGroup("Teste " + UUID.randomUUID()));
         dayana = persistedUser("Dayana");
         anaClara = persistedUser("Ana Clara");
+        dayana.setCashGroup(sharedGroup);
+        anaClara.setCashGroup(sharedGroup);
+        userRepository.save(dayana);
+        userRepository.save(anaClara);
         product = new Product();
         product.setCode(UUID.randomUUID().toString().substring(0, 13));
         product.setDescription("Produto do caixa unico");

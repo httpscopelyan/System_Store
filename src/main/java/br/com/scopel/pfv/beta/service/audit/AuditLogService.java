@@ -5,6 +5,7 @@ import br.com.scopel.pfv.beta.model.AuditEntityType;
 import br.com.scopel.pfv.beta.model.AuditLog;
 import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.repository.AuditLogRepository;
+import br.com.scopel.pfv.beta.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +25,11 @@ public class AuditLogService {
     private static final int MAX_TEXT_LENGTH = 255;
 
     private final AuditLogRepository repository;
+    private final UserRepository users;
 
-    public AuditLogService(AuditLogRepository repository) {
+    public AuditLogService(AuditLogRepository repository, UserRepository users) {
         this.repository = repository;
+        this.users = users;
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
@@ -38,10 +41,21 @@ public class AuditLogService {
         if (description == null || description.isBlank()) {
             throw new IllegalArgumentException("A descrição do registro de auditoria é obrigatória.");
         }
-        User persistedActor = actor != null && actor.getId() != null ? actor : null;
-        return repository.save(new AuditLog(LocalDateTime.now(), persistedActor, actorNameOf(actor), action,
+        User resolvedActor = actor != null ? actor : AuditActorContext.get();
+        User persistedActor = resolvedActor != null && resolvedActor.getId() != null
+                && users.existsById(resolvedActor.getId()) ? resolvedActor : null;
+        return repository.save(new AuditLog(LocalDateTime.now(), persistedActor, actorNameOf(resolvedActor), action,
                 entityType, entityId, clip(description.trim(), MAX_TEXT_LENGTH), clip(previousValue, MAX_TEXT_LENGTH),
                 clip(newValue, MAX_TEXT_LENGTH)));
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public AuditLog recordExternal(String actorName, AuditAction action, AuditEntityType entityType, Long entityId,
+                                   String description) {
+        String name = actorName == null || actorName.isBlank() ? SYSTEM_ACTOR_NAME : clip(actorName.trim(),
+                MAX_ACTOR_NAME_LENGTH);
+        return repository.save(new AuditLog(LocalDateTime.now(), null, name, action, entityType, entityId,
+                clip(description.trim(), MAX_TEXT_LENGTH), null, null));
     }
 
     @Transactional(readOnly = true)

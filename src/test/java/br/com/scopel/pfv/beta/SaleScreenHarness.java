@@ -67,6 +67,8 @@ final class SaleScreenHarness {
         newOperator.setLogin("fx_" + UUID.randomUUID());
         newOperator.setPassword("x");
         newOperator.setRole(role);
+        newOperator.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(
+                newOperator.getLogin(), operatorName, role));
         newOperator.setActive(true);
         operator = context.getBean(UserRepository.class).save(newOperator);
         CashRegisterService cashRegisterService = context.getBean(CashRegisterService.class);

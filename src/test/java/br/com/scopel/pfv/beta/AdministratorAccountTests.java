@@ -65,8 +65,8 @@ class AdministratorAccountTests {
     }
 
     @Test
-    void seedCreatesTheAdministratorAsManagerWithABcryptHash() {
-        assertEquals(User.Role.GERENTE, administrator.getRole());
+    void seedCreatesTheAdministratorAsDevWithABcryptHash() {
+        assertEquals(User.Role.DEV, administrator.getRole());
         assertEquals(ADMINISTRATOR_LOGIN, administrator.getName());
         assertTrue(administrator.getActive());
         assertTrue(administrator.getPassword().matches(BCRYPT_FORMAT));
@@ -123,7 +123,7 @@ class AdministratorAccountTests {
     }
 
     @Test
-    void administratorAccountKeepsItsNameAndItsManagerRole() {
+    void administratorAccountKeepsItsNameAndItsDevRole() {
         String knownPasswordHash = newUser(unique("tmp"), "senha1", User.Role.OPERADOR).getPassword();
         administrator.setPassword(knownPasswordHash);
         userRepository.save(administrator);
@@ -134,7 +134,7 @@ class AdministratorAccountTests {
                 () -> userService.modificationRole(ADMINISTRATOR_LOGIN, User.Role.OPERADOR));
 
         User reloaded = userService.findLogin(ADMINISTRATOR_LOGIN);
-        assertEquals(User.Role.GERENTE, reloaded.getRole());
+        assertEquals(User.Role.DEV, reloaded.getRole());
         assertEquals(ADMINISTRATOR_LOGIN, reloaded.getName());
     }
 
@@ -152,7 +152,7 @@ class AdministratorAccountTests {
         assertTrue(accounts.stream().anyMatch(account -> account.login().equals(firstLogin)
                 && account.role() == User.Role.OPERADOR && account.id() != null));
         assertTrue(accounts.stream().anyMatch(account -> account.login().equals(ADMINISTRATOR_LOGIN)
-                && account.role() == User.Role.GERENTE));
+                && account.role() == User.Role.DEV));
         assertFalse(accounts.stream().anyMatch(account -> account.login().equals(inactiveLogin)));
         List<String> loginsInOrder = accounts.stream().map(AccountSummary::login).toList();
         assertTrue(loginsInOrder.indexOf(firstLogin) < loginsInOrder.indexOf(ADMINISTRATOR_LOGIN));

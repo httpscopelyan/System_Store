@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.scopel.pfv.beta.controller.AdminAccountsController"
+      spacing="16">
+    <padding>
+        <Insets top="12" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <VBox spacing="6" HBox.hgrow="ALWAYS">
+        <Label text="Contas do sistema" styleClass="form-label"/>
+        <TableView fx:id="table" VBox.vgrow="ALWAYS" minHeight="320">
+            <columns>
+                <TableColumn fx:id="nameColumn" text="Nome" prefWidth="200"/>
+                <TableColumn fx:id="roleColumn" text="Perfil" prefWidth="110"/>
+                <TableColumn fx:id="statusColumn" text="Situação" prefWidth="110"/>
+                <TableColumn fx:id="groupColumn" text="Caixa unificado" prefWidth="170"/>
+            </columns>
+        </TableView>
+    </VBox>
+
+    <VBox spacing="14" prefWidth="340" minWidth="300">
+        <VBox styleClass="form-card" spacing="8">
+            <Label text="Nova conta" styleClass="form-section-title"/>
+            <TextField fx:id="newNameField" promptText="Nome (usado para entrar)" styleClass="text-input"/>
+            <PasswordField fx:id="newPasswordField" promptText="Senha (mín. 6 caracteres)" styleClass="text-input"/>
+            <ComboBox fx:id="newRoleBox" maxWidth="Infinity"/>
+            <Button text="Criar conta" onAction="#onCreate" styleClass="success-button"/>
+        </VBox>
+
+        <VBox styleClass="form-card" spacing="8">
+            <Label fx:id="selectedLabel" text="Conta selecionada" styleClass="form-section-title"/>
+            <HBox spacing="8">
+                <ComboBox fx:id="roleBox" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="Mudar perfil" onAction="#onChangeRole" styleClass="secondary-button"/>
+            </HBox>
+            <HBox spacing="8">
+                <PasswordField fx:id="resetPasswordField" promptText="Nova senha" HBox.hgrow="ALWAYS"
+                               styleClass="text-input"/>
+                <Button text="Redefinir" onAction="#onResetPassword" styleClass="secondary-button"/>
+            </HBox>
+            <HBox spacing="8">
+                <Button fx:id="toggleActiveButton" text="Inativar" onAction="#onToggleActive"
+                        styleClass="secondary-button"/>
+                <Button text="Excluir" onAction="#onDelete" styleClass="danger-button"/>
+            </HBox>
+        </VBox>
+
+        <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
+    </VBox>
+</HBox>

@@ -98,7 +98,8 @@ class SplitPaymentGuardsTests {
 
         assertEquals(Sale.Status.ABERTA, reopened.getStatus());
         assertTrue(partsOf(sale).isEmpty());
-        List<AuditLog> removals = auditLogService.byActor(operator.getId(), 0, 10).getContent();
+        List<AuditLog> removals = auditLogService.byActor(operator.getId(), 0, 10).getContent().stream()
+                .filter(entry -> entry.getAction() == AuditAction.PAYMENT_PART_REMOVED).toList();
         assertEquals(2, removals.size());
         assertEquals(AuditAction.PAYMENT_PART_REMOVED, removals.get(0).getAction());
         assertEquals(sale.getId(), removals.get(0).getEntityId());

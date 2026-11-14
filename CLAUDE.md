@@ -183,6 +183,12 @@ direto com repository.
 - **Rodada de 2026-11-11**: ver os itens de uma venda no Histórico e na Movimentação do Caixa (`SaleDetailDialog`);
   caixa único Dayana/Ana Clara (`SharedCashRegisterMembers`, ADR 0021) com operador gravado em cada movimentação (V37) e
   no cupom da venda; Voltar funciona no fluxo de pagamento (`Navigator.setPageBackHandler`, ADR 0022).
+- **Rodada de 2026-11-14 (conta DEV e administração)**: perfil `DEV` (Yan) com acesso ao PDV e à página *Administração*
+  (`admin.fxml`, abas Histórico/Permissões/Contas/Caixa unificado/Acesso web; `service/admin/`); permissões por conta no
+  banco (`Permission`, `user_permission`, `StaffPermissions` lê `User.hasPermission`, padrões em `PermissionDefaults`);
+  caixa unificado configurável (`cash_group`, `users.cash_group_id`, substitui `SharedCashRegisterMembers`); Ana Clara
+  cadastra produto vendo só 7 campos (`SEE_COST_FIELDS`); painel web embutido em `web/` (JDK `HttpServer`, desligado por
+  padrão, só DEV, CSRF + bloqueio por tentativas, HTTPS por keystore ou túnel). Migrations V38–V39. Conta inativa não loga.
 - UI básica: login, caixa (abrir/fechar), venda (bipar/finalizar). Navegação
   caixa→venda após abrir.
 

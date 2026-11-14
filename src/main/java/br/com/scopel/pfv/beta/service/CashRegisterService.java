@@ -6,9 +6,9 @@ import br.com.scopel.pfv.beta.exception.InsufficientCashException;
 import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.RegisterNotFindException;
 import br.com.scopel.pfv.beta.exception.SplitPaymentInProgressException;
-import br.com.scopel.pfv.beta.model.AccountSummary;
 import br.com.scopel.pfv.beta.model.AuditAction;
 import br.com.scopel.pfv.beta.model.AuditEntityType;
+import br.com.scopel.pfv.beta.model.CashGroup;
 import br.com.scopel.pfv.beta.model.CashMovement;
 import br.com.scopel.pfv.beta.model.CashRegister;
 import br.com.scopel.pfv.beta.model.Payment;
@@ -64,10 +64,11 @@ public class CashRegisterService {
     }
 
     public List<CashRegister> history(User operator) {
-        if (!SharedCashRegisterMembers.includes(operator)) {
+        Optional<CashGroup> group = cashGroupOf(operator);
+        if (group.isEmpty()) {
             return registerRepository.findTop20ByOperatorOrderByOpenedAtDesc(operator);
         }
-        return registerRepository.findTop20ByOperator_IdInOrderByOpenedAtDesc(sharedRegisterOperatorIds(operator));
+        return registerRepository.findTop20ByOperator_IdInOrderByOpenedAtDesc(groupOperatorIds(operator, group.get()));
     }
 
     public List<CashMovement> movements(CashRegister cashRegister) {
@@ -78,6 +79,7 @@ public class CashRegisterService {
         return saleRepository.findByCashRegister_IdOrderByCreatedAtAsc(cashRegister.getId());
     }
 
+    @Transactional
     public CashRegister open(User operator, BigDecimal openingAmount) {
         if (findOpenByOperator(operator).isPresent()) {
             throw new CashRegisterAlreadyOpenException(operator);
@@ -90,28 +92,39 @@ public class CashRegisterService {
         cashRegister.setOpeningAmount(openingAmount);
         cashRegister.setOpenedAt(LocalDateTime.now());
 
-        return registerRepository.save(cashRegister);
-
+        CashRegister opened = registerRepository.save(cashRegister);
+        auditLogService.record(operator, AuditAction.CASH_OPENED, AuditEntityType.CASH_REGISTER, opened.getId(),
+                "Caixa #" + opened.getId() + " aberto", null, "R$ " + money(openingAmount));
+        return opened;
     }
 
     public Optional<CashRegister> findOpenByOperator(User operator) {
-        if (!SharedCashRegisterMembers.includes(operator)) {
+        Optional<CashGroup> group = cashGroupOf(operator);
+        if (group.isEmpty()) {
             return registerRepository.findByOperatorAndStatus(operator, CashRegister.Status.OPEN);
         }
         return registerRepository.findFirstByOperator_IdInAndStatusOrderByOpenedAtAsc(
-                sharedRegisterOperatorIds(operator), CashRegister.Status.OPEN);
+                groupOperatorIds(operator, group.get()), CashRegister.Status.OPEN);
     }
 
-    private Set<Long> sharedRegisterOperatorIds(User operator) {
-        Set<Long> sharedRegisterOperatorIds = userRepository.findActiveAccounts().stream()
-                .filter(account -> SharedCashRegisterMembers.includesName(account.name())
-                        || SharedCashRegisterMembers.includesName(account.login()))
-                .map(AccountSummary::id)
+    private Optional<CashGroup> cashGroupOf(User operator) {
+        if (operator == null) {
+            return Optional.empty();
+        }
+        if (operator.getId() == null) {
+            return Optional.ofNullable(operator.getCashGroup());
+        }
+        return userRepository.findById(operator.getId()).map(User::getCashGroup);
+    }
+
+    private Set<Long> groupOperatorIds(User operator, CashGroup group) {
+        Set<Long> operatorIds = userRepository.findByCashGroup_IdAndActiveTrue(group.getId()).stream()
+                .map(User::getId)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         if (operator.getId() != null) {
-            sharedRegisterOperatorIds.add(operator.getId());
+            operatorIds.add(operator.getId());
         }
-        return sharedRegisterOperatorIds;
+        return operatorIds;
     }
 
     private void requireOperator(User operator) {
@@ -144,6 +157,7 @@ public class CashRegisterService {
         return v == null ? BigDecimal.ZERO : v;
     }
 
+    @Transactional
     public CashMovement supplement(Long cashRegisterId, BigDecimal amount, String reason, User operator) {
         requireOperator(operator);
         String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);
@@ -162,10 +176,14 @@ public class CashRegisterService {
 
         cashMovement.setCashRegister(r);
         cashMovement.setOperator(operator);
-        return movementRepository.save(cashMovement);
-
+        CashMovement saved = movementRepository.save(cashMovement);
+        auditLogService.record(operator, AuditAction.CASH_SUPPLY, AuditEntityType.CASH_MOVEMENT, saved.getId(),
+                "Suprimento de R$ " + money(amount) + " no caixa #" + r.getId() + " - motivo: " + normalizedReason,
+                null, money(amount));
+        return saved;
     }
 
+    @Transactional
     public CashMovement withdrawal(Long cashRegisterId, BigDecimal amount, String reason, User operator) {
         requireOperator(operator);
         String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);
@@ -190,12 +208,16 @@ public class CashRegisterService {
         cashMovement.setCashRegister(r);
         cashMovement.setOperator(operator);
 
-        return movementRepository.save(cashMovement);
+        CashMovement saved = movementRepository.save(cashMovement);
+        auditLogService.record(operator, AuditAction.CASH_WITHDRAWAL, AuditEntityType.CASH_MOVEMENT, saved.getId(),
+                "Sangria de R$ " + money(amount) + " no caixa #" + r.getId() + " - motivo: " + normalizedReason,
+                null, money(amount));
+        return saved;
     }
 
     @Transactional
     public CashMovement rectify(Long movementId, BigDecimal correctAmount, String reason, User authorizedBy) {
-        if (authorizedBy == null || authorizedBy.getRole() != User.Role.GERENTE) {
+        if (authorizedBy == null || !authorizedBy.hasManagerAccess()) {
             throw new ManagerAuthorizationRequiredException();
         }
         String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);
@@ -242,6 +264,7 @@ public class CashRegisterService {
         return savedRectification;
     }
 
+    @Transactional
     public CashRegister close(Long cashRegisterId, BigDecimal countedAmount) {
 
         CashRegister r = registerRepository.findById(cashRegisterId)
@@ -262,6 +285,15 @@ public class CashRegisterService {
         r.setClosedAt(LocalDateTime.now());
         r.setStatus(CashRegister.Status.CLOSED);
 
-        return registerRepository.save(r);
+        CashRegister closed = registerRepository.save(r);
+        auditLogService.record(null, AuditAction.CASH_CLOSED, AuditEntityType.CASH_REGISTER, closed.getId(),
+                "Caixa #" + closed.getId() + " fechado - esperado R$ " + money(expected) + ", contado R$ "
+                        + money(countedAmount) + ", diferenca R$ " + money(closed.getDifference()),
+                money(expected), money(countedAmount));
+        return closed;
+    }
+
+    private String money(BigDecimal value) {
+        return value == null ? "0.00" : value.setScale(2, RoundingMode.HALF_UP).toPlainString();
     }
 }

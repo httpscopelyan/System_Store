@@ -3,13 +3,17 @@ package br.com.scopel.pfv.beta.model;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "users")
 public class User {
 
     public enum Role {
         OPERADOR,
-        GERENTE
+        GERENTE,
+        DEV
     }
 
     @Id
@@ -26,6 +30,21 @@ public class User {
     private Role role;
     @Column(nullable = false)
     private Boolean active = true;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "cash_group_id")
+    private CashGroup cashGroup;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_permission", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "permission", nullable = false, length = 40)
+    @Enumerated(EnumType.STRING)
+    private Set<Permission> permissions = new HashSet<>();
+
+    @PrePersist
+    void applyDefaultPermissionsWhenMissing() {
+        if (permissions.isEmpty() && role != null) {
+            permissions.addAll(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(login, name, role));
+        }
+    }
 
     // getters
 
@@ -45,12 +64,28 @@ public class User {
         return password;
     }
 
+    public boolean hasManagerAccess() {
+        return role == Role.GERENTE || role == Role.DEV;
+    }
+
     public Role getRole() {
         return role;
     }
 
     public Boolean getActive() {
         return active;
+    }
+
+    public CashGroup getCashGroup() {
+        return cashGroup;
+    }
+
+    public Set<Permission> getPermissions() {
+        return permissions;
+    }
+
+    public boolean hasPermission(Permission permission) {
+        return role == Role.DEV || permissions.contains(permission);
     }
 
 
@@ -78,5 +113,14 @@ public class User {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public void setCashGroup(CashGroup cashGroup) {
+        this.cashGroup = cashGroup;
+    }
+
+    public void setPermissions(Set<Permission> permissions) {
+        this.permissions.clear();
+        this.permissions.addAll(permissions);
     }
 }

@@ -31,15 +31,15 @@
                                styleClass="text-input" maxWidth="Infinity"/>
                 </VBox>
 
-                <Label text="Formação de preço — o preço de venda é sugerido pelo custo + margem; digite por cima para definir o seu"
+                <Label fx:id="priceFormationLabel" text="Formação de preço — o preço de venda é sugerido pelo custo + margem; digite por cima para definir o seu"
                        styleClass="form-label"/>
                 <HBox spacing="16">
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <VBox fx:id="costBox" spacing="6" HBox.hgrow="ALWAYS">
                         <Label text="Custo" styleClass="form-label"/>
                         <TextField fx:id="costField" promptText="Ex: 6,50"
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <VBox fx:id="marginBox" spacing="6" HBox.hgrow="ALWAYS">
                         <Label text="Margem (%)" styleClass="form-label"/>
                         <TextField fx:id="marginField" promptText="Ex: 30"
                                    styleClass="text-input" maxWidth="Infinity"/>
@@ -57,7 +57,7 @@
                         <TextField fx:id="quantityField" promptText="Ex: 10"
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <VBox fx:id="minStockBox" spacing="6" HBox.hgrow="ALWAYS">
                         <Label text="Estoque mínimo" styleClass="form-label"/>
                         <TextField fx:id="minStockField" promptText="Ex: 5"
                                    styleClass="text-input" maxWidth="Infinity"/>
