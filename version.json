@@ -1,10 +1,10 @@
 {
-  "version": "1.3.3",
+  "version": "1.3.4",
   "releaseDate": "2026-11-14",
   "minJavaVersion": 24,
-  "changelog": "feat(caixa): consultar caixas anteriores pelo histórico, somente leitura quando fechado",
+  "changelog": "feat(admin): conta DEV com página de administração (histórico, permissões, contas, caixa unificado) e painel web",
   "mandatory": false,
-  "sha256": "11854c3d5125a6e0c26233b7403af3b89fdbdb644d529b0af21eda2e5919156b",
-  "size": 59723687,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.3/scopel-store.jar"
+  "sha256": "c1fe06386e62e92b85d93c621c65eafd43e0612e760293e7abe3e68e7e3c6cea",
+  "size": 59831659,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.4/scopel-store.jar"
 }
