@@ -1,9 +1,8 @@
 package br.com.scopel.pfv.beta.web;
 
-import com.sun.net.httpserver.HttpExchange;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -27,14 +26,13 @@ public final class WebRequest {
         this.cookieHeader = cookieHeader;
     }
 
-    public static WebRequest from(HttpExchange exchange) throws IOException {
+    public static WebRequest parse(String method, URI uri, InputStream body, String cookieHeader) throws IOException {
         Map<String, List<String>> parameters = new LinkedHashMap<>();
-        parse(exchange.getRequestURI().getRawQuery(), parameters);
-        if ("POST".equals(exchange.getRequestMethod())) {
-            parse(readBody(exchange.getRequestBody()), parameters);
+        parse(uri.getRawQuery(), parameters);
+        if ("POST".equals(method)) {
+            parse(readBody(body), parameters);
         }
-        return new WebRequest(exchange.getRequestMethod(), exchange.getRequestURI().getPath(), parameters,
-                exchange.getRequestHeaders().getFirst("Cookie"));
+        return new WebRequest(method, uri.getPath(), parameters, cookieHeader);
     }
 
     public String method() {
