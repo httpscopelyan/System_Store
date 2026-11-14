@@ -1,10 +1,10 @@
 {
-  "version": "1.3.4",
+  "version": "1.3.5",
   "releaseDate": "2026-11-14",
   "minJavaVersion": 24,
-  "changelog": "feat(admin): conta DEV com página de administração (histórico, permissões, contas, caixa unificado) e painel web",
+  "changelog": "fix(admin): painel web não carrega jdk.httpserver quando desligado; runtime dos PDVs não tem o módulo e o app não iniciava",
   "mandatory": false,
-  "sha256": "c1fe06386e62e92b85d93c621c65eafd43e0612e760293e7abe3e68e7e3c6cea",
-  "size": 59831659,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.4/scopel-store.jar"
+  "sha256": "bf570f8883ad0ebf298af3581ada17fc5e184e3b7ebd944cca5ef72ef2beaa50",
+  "size": 59832986,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.5/scopel-store.jar"
 }
