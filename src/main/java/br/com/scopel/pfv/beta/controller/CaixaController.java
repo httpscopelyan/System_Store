@@ -20,6 +20,7 @@ import br.com.scopel.pfv.beta.service.cash.CashClosingService;
 import br.com.scopel.pfv.beta.service.cash.CashSummaryService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -35,6 +36,7 @@ import java.util.List;
 @Component
 public class CaixaController {
 
+    private static final String READ_ONLY_MESSAGE = "Caixa fechado: somente consulta.";
     private static final String OTHER_REASON = "Outro";
     private static final List<String> REASONS = List.of("Troco inicial", "Depósito bancário",
             "Pagamento a fornecedor", "Retirada do proprietário", OTHER_REASON);
@@ -47,6 +49,7 @@ public class CaixaController {
     private final ManagerAuthorizationController managerAuthorizationController;
 
     private CashRegister displayed;
+    private Long pinnedRegisterId;
     private ScenePoller poller;
     private CashHistoryPresenter history;
     private CashStatusPanel statusPanel;
@@ -67,6 +70,9 @@ public class CaixaController {
     @FXML private TextField movementAmountField;
     @FXML private ComboBox<String> movementReasonBox;
     @FXML private Label statusLabel;
+    @FXML private Button supplementButton;
+    @FXML private Button withdrawalButton;
+    @FXML private Button rectifyButton;
 
     public CaixaController(CashRegisterService cashRegisterService, CashSummaryService cashSummaryService,
                            CashClosingService cashClosingService, UserSession userSession, ReceiptService receiptService,
@@ -84,6 +90,10 @@ public class CaixaController {
         terminalBox.setItems(FXCollections.observableArrayList("CAIXA 01"));
         terminalBox.setValue("CAIXA 01");
         history = new CashHistoryPresenter(historyTable, colHistDate, colHistBalance);
+        history.onUserSelection(selected -> {
+            pinnedRegisterId = selected.getId();
+            onRefresh();
+        });
         statusPanel = new CashStatusPanel(statusBigLabel, openingInfoLabel, closingInfoLabel, periodLabel);
         closingFlow = new CashClosingFlow(cashClosingService, cashRegisterService, receiptService, userSession);
         cashSummaryController.bind(closingFlow, this::finishClosing);
@@ -108,9 +118,16 @@ public class CaixaController {
     public void onRefresh() {
         User operator = userSession.getLoggedUser();
         List<CashRegister> registers = operator == null ? List.of() : cashRegisterService.history(operator);
-        history.show(registers);
         CashRegister current = userSession.getCaixaAtual();
-        displayed = current != null ? current : (registers.isEmpty() ? null : registers.get(0));
+        CashRegister pinned = pinnedRegisterId == null ? null : registers.stream()
+                .filter(register -> pinnedRegisterId.equals(register.getId())).findFirst().orElse(null);
+        if (pinned == null) {
+            pinnedRegisterId = null;
+        }
+        displayed = pinned != null ? pinned
+                : current != null ? current : (registers.isEmpty() ? null : registers.get(0));
+        history.show(registers, displayed == null ? null : displayed.getId());
+        updateActionAvailability();
         if (displayed == null) {
             statusPanel.showEmpty();
             cashMovementsController.show(List.of());
@@ -128,6 +145,7 @@ public class CaixaController {
         try {
             BigDecimal openingAmount = DecimalInput.parseRequired(openingAmountField.getText());
             userSession.setCaixaAtual(cashRegisterService.open(userSession.getLoggedUser(), openingAmount));
+            pinnedRegisterId = null;
             openingAmountField.clear();
             statusLabel.setText("Caixa aberto!");
             onRefresh();
@@ -150,6 +168,10 @@ public class CaixaController {
 
     @FXML
     public void onRectify() {
+        if (isViewingClosedRegister()) {
+            statusLabel.setText(READ_ONLY_MESSAGE);
+            return;
+        }
         CashMovementActions.Result result = movementActions.rectify(cashMovementsController.selected());
         if (!result.message().isEmpty()) {
             statusLabel.setText(result.message());
@@ -175,7 +197,24 @@ public class CaixaController {
         onRefresh();
     }
 
+    private boolean isViewingClosedRegister() {
+        return displayed != null && displayed.getStatus() != CashRegister.Status.OPEN;
+    }
+
+    private void updateActionAvailability() {
+        boolean readOnly = isViewingClosedRegister();
+        supplementButton.setDisable(readOnly);
+        withdrawalButton.setDisable(readOnly);
+        rectifyButton.setDisable(readOnly);
+        movementAmountField.setDisable(readOnly);
+        movementReasonBox.setDisable(readOnly);
+    }
+
     private void registerMovement(boolean supplement) {
+        if (isViewingClosedRegister()) {
+            statusLabel.setText(READ_ONLY_MESSAGE);
+            return;
+        }
         CashMovementActions.Result result = movementActions.register(openRegister(), supplement,
                 movementAmountField.getText(), movementReasonBox.getEditor().getText(), userSession.getLoggedUser());
         statusLabel.setText(result.message());

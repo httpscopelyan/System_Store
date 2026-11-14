@@ -26,7 +26,7 @@
 
                 <Label fx:id="statusBigLabel" text="FECHADO" styleClass="status-closed"/>
 
-                <Label text="Últimas Aberturas" styleClass="win-label"/>
+                <Label text="Últimas Aberturas (clique para consultar)" styleClass="win-label"/>
                 <TableView fx:id="historyTable" prefHeight="170" styleClass="win-grid">
                     <columns>
                         <TableColumn fx:id="colHistDate" text="Data" prefWidth="150"/>
@@ -71,9 +71,9 @@
                 <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
                 <TextField fx:id="movementAmountField" promptText="Valor" styleClass="win-input" prefWidth="90"/>
                 <ComboBox fx:id="movementReasonBox" editable="true" promptText="Motivo (obrigatório)" prefWidth="190"/>
-                <Button text="💲 Suprimento" onAction="#onSupplement" styleClass="win-button"/>
-                <Button text="💲 Sangria (F9)" onAction="#onWithdrawal" styleClass="win-button"/>
-                <Button text="🧮 Retificar" onAction="#onRectify" styleClass="win-button"/>
+                <Button fx:id="supplementButton" text="💲 Suprimento" onAction="#onSupplement" styleClass="win-button"/>
+                <Button fx:id="withdrawalButton" text="💲 Sangria (F9)" onAction="#onWithdrawal" styleClass="win-button"/>
+                <Button fx:id="rectifyButton" text="🧮 Retificar" onAction="#onRectify" styleClass="win-button"/>
                 <Button text="🔍 Ver itens" onAction="#onViewItems" styleClass="win-button"/>
                 <Button text="🖨 Imprimir Movimentação (F7)" onAction="#onPrintMovimentacao" styleClass="win-button"/>
                 <Button text="🔄 Atualizar (F5)" onAction="#onRefresh" styleClass="win-button"/>
