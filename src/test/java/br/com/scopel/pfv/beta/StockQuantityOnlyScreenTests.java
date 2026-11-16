@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisabledIf("isHeadless")
 class StockQuantityOnlyScreenTests {
 
-    private static final List<String> LOCKED_ACTIONS = List.of("＋ Novo", "✎ Alterar", "－ Apagar", "➕ Entrada", "📅 Lotes");
+    private static final List<String> LOCKED_ACTIONS = List.of("✎ Alterar", "－ Apagar", "➕ Entrada", "📅 Lotes");
 
     @Autowired private ApplicationContext context;
 
@@ -84,6 +84,7 @@ class StockQuantityOnlyScreenTests {
         screen.showPage("estoque");
 
         assertTrue(isActionVisible("⚖ Ajuste"));
+        assertTrue(isActionVisible("＋ Novo"), "quem pode cadastrar produtos mantém o botão Novo");
         for (String lockedAction : LOCKED_ACTIONS) {
             assertFalse(isActionVisible(lockedAction), "ação deve ficar oculta: " + lockedAction);
         }

@@ -114,7 +114,7 @@ class SplitPaymentScreenTests {
         screen.fixture.press(KeyCode.ENTER);
 
         verify(screen.fixture.navigator, timeout(3000)).navigate(Page.VENDA_FINALIZADA);
-        verify(screen.fixture.receiptService, timeout(3000)).printSplitSaleReceipt(any(), any());
+        verify(screen.fixture.receiptService, never()).printSplitSaleReceipt(any(), any());
         assertEquals(null, screen.fixture.session.getUltimaForma());
         assertEquals(0, new BigDecimal("4.10").compareTo(screen.fixture.session.getUltimoTroco()));
         assertEquals(null, screen.fixture.session.getVendaAtual());
