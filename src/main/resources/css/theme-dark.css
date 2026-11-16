@@ -60,3 +60,4 @@
 .secondary-button:hover { -fx-background-color: #2f3b44; }
 
 .brand-bar { -fx-background-color: #0a5a61; }
+.check-box, .radio-button { -fx-text-fill: #dde6ec; }

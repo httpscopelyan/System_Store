@@ -8,6 +8,10 @@
 }
 
 
+.check-box, .radio-button {
+    -fx-text-fill: #1f2933;
+}
+
 .app-shell {
     -fx-background-color: #f4f6f9;
 }
