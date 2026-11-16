@@ -10,12 +10,14 @@ public final class ViewOnlyMode {
 
     private static final String EDIT_ACTION_STYLE = "edit-action";
     private static final String QUANTITY_ACTION_STYLE = "quantity-action";
+    private static final String REGISTER_ACTION_STYLE = "register-action";
 
     private ViewOnlyMode() {
     }
 
     public static void apply(User user, TableView<?> table, TableColumn<?, ?> stockQuantityColumn) {
         boolean stockQuantityOnly = StaffPermissions.isStockQuantityOnly(user);
+        boolean canRegister = StaffPermissions.canRegisterProducts(user);
         if (!stockQuantityOnly && !StaffPermissions.isFullyReadOnly(user)) {
             return;
         }
@@ -32,6 +34,7 @@ public final class ViewOnlyMode {
         }
         top.lookupAll("." + EDIT_ACTION_STYLE).stream()
                 .filter(node -> !(stockQuantityOnly && node.getStyleClass().contains(QUANTITY_ACTION_STYLE)))
+                .filter(node -> !(canRegister && node.getStyleClass().contains(REGISTER_ACTION_STYLE)))
                 .forEach(node -> {
                     node.setVisible(false);
                     node.setManaged(false);
