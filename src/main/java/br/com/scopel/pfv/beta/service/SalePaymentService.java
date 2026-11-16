@@ -54,15 +54,25 @@ public class SalePaymentService {
 
     @Transactional
     public Sale payCard(Sale sale, CardType cardType) {
+        return payCard(sale, cardType, null);
+    }
+
+    @Transactional
+    public Sale payCard(Sale sale, CardType cardType, String gatewayOrderId) {
         requireInPayment(sale);
-        savePayment(sale, PaymentMethod.CARTAO, cardType, sale.getTotal(), noChange());
+        savePayment(sale, PaymentMethod.CARTAO, cardType, sale.getTotal(), noChange(), gatewayOrderId);
         return saleFinalizer.finalizeSale(sale);
     }
 
     @Transactional
     public Sale payPix(Sale sale) {
+        return payPix(sale, null);
+    }
+
+    @Transactional
+    public Sale payPix(Sale sale, String gatewayOrderId) {
         requireInPayment(sale);
-        savePayment(sale, PaymentMethod.PIX, null, sale.getTotal(), noChange());
+        savePayment(sale, PaymentMethod.PIX, null, sale.getTotal(), noChange(), gatewayOrderId);
         return saleFinalizer.finalizeSale(sale);
     }
 
@@ -130,12 +140,18 @@ public class SalePaymentService {
 
     private void savePayment(Sale sale, PaymentMethod method, CardType cardType, BigDecimal amountReceived,
                              BigDecimal change) {
+        savePayment(sale, method, cardType, amountReceived, change, null);
+    }
+
+    private void savePayment(Sale sale, PaymentMethod method, CardType cardType, BigDecimal amountReceived,
+                             BigDecimal change, String gatewayOrderId) {
         Payment payment = new Payment();
         payment.setSale(sale);
         payment.setMethod(method);
         payment.setCardType(cardType);
         payment.setAmountReceived(amountReceived);
         payment.setChange(change);
+        payment.setGatewayOrderId(gatewayOrderId);
         payment.setCreatedAt(LocalDateTime.now());
         paymentRepository.save(payment);
     }

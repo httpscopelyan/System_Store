@@ -173,7 +173,7 @@ public class PagamentoPixController {
         cancellation.dismiss();
         Sale finalizada;
         try {
-            finalizada = saleService.payPix(vendaAtual);
+            finalizada = saleService.payPix(vendaAtual, poller == null ? null : poller.chargeId());
         } catch (RuntimeException failure) {
             done = false;
             awaitingRegistration = true;

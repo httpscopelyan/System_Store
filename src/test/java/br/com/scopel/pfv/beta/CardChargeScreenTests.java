@@ -53,7 +53,7 @@ class CardChargeScreenTests {
         PaymentScreenFixture screen = new PaymentScreenFixture();
         screen.load("pagamento_espera.fxml", fixture -> new PagamentoEsperaController(fixture.saleService,
                 fixture.session, fixture.navigator, fixture.receiptService, gateway));
-        when(screen.saleService.payCard(any(), any())).thenReturn(screen.sale);
+        when(screen.saleService.payCard(any(), any(), any())).thenReturn(screen.sale);
         return screen;
     }
 
@@ -61,7 +61,7 @@ class CardChargeScreenTests {
     void customerPaysOnTheMachineAndTheSaleIsRegisteredOnceWithoutLeavingThroughSelection() throws Exception {
         PaymentScreenFixture screen = open(new ScriptedGateway(true).script(PENDING, APPROVED));
 
-        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payCard(screen.sale, CardType.DEBITO);
+        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payCard(eq(screen.sale), eq(CardType.DEBITO), any());
         verify(screen.navigator, timeout(2000)).navigate(Page.VENDA_FINALIZADA);
         verify(screen.navigator, never()).navigate(Page.PAGAMENTO);
         verify(screen.navigator, atLeastOnce()).unlock();
@@ -87,7 +87,7 @@ class CardChargeScreenTests {
 
         assertEquals(0, gateway.cancels.get(), "operador desistiu de cancelar");
         verify(screen.navigator, never()).navigate(Page.PAGAMENTO);
-        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payCard(screen.sale, CardType.DEBITO);
+        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payCard(eq(screen.sale), eq(CardType.DEBITO), any());
     }
 
     @Test
@@ -101,7 +101,7 @@ class CardChargeScreenTests {
 
         verify(screen.navigator, timeout(5000)).navigate(Page.PAGAMENTO);
         assertEquals(1, gateway.cancels.get());
-        verify(screen.saleService, never()).payCard(any(), any());
+        verify(screen.saleService, never()).payCard(any(), any(), any());
     }
 
     @Test
@@ -113,7 +113,7 @@ class CardChargeScreenTests {
 
         screen.press(KeyCode.ESCAPE);
 
-        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payCard(screen.sale, CardType.DEBITO);
+        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payCard(eq(screen.sale), eq(CardType.DEBITO), any());
         verify(screen.navigator, timeout(2000)).navigate(Page.VENDA_FINALIZADA);
         verify(screen.navigator, never()).navigate(Page.PAGAMENTO);
     }
@@ -129,7 +129,7 @@ class CardChargeScreenTests {
         screen.press(KeyCode.ENTER);
 
         verify(screen.navigator, timeout(2000)).navigate(Page.PAGAMENTO);
-        verify(screen.saleService, never()).payCard(any(), any());
+        verify(screen.saleService, never()).payCard(any(), any(), any());
     }
 
     @Test
@@ -145,7 +145,7 @@ class CardChargeScreenTests {
     void aSingleDeclinedReadingFollowedByApprovalStillRegistersTheSale() throws Exception {
         PaymentScreenFixture screen = open(new ScriptedGateway(true).script(DECLINED, APPROVED));
 
-        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payCard(screen.sale, CardType.DEBITO);
+        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payCard(eq(screen.sale), eq(CardType.DEBITO), any());
         verify(screen.navigator, never()).navigate(Page.PAGAMENTO);
     }
 
@@ -153,7 +153,7 @@ class CardChargeScreenTests {
     void ifSavingTheSaleFailsAfterPaymentTheOperatorRetriesWithEnterAndTheCustomerIsNotChargedAgain() throws Exception {
         ScriptedGateway gateway = new ScriptedGateway(true).script(APPROVED);
         PaymentScreenFixture screen = new PaymentScreenFixture();
-        when(screen.saleService.payCard(any(), any())).thenThrow(new IllegalSaleStateException())
+        when(screen.saleService.payCard(any(), any(), any())).thenThrow(new IllegalSaleStateException())
                 .thenReturn(screen.sale);
         screen.load("pagamento_espera.fxml", fixture -> new PagamentoEsperaController(fixture.saleService,
                 fixture.session, fixture.navigator, fixture.receiptService, gateway));
@@ -163,7 +163,7 @@ class CardChargeScreenTests {
 
         screen.press(KeyCode.ENTER);
 
-        verify(screen.saleService, timeout(3000).times(2)).payCard(screen.sale, CardType.DEBITO);
+        verify(screen.saleService, timeout(3000).times(2)).payCard(eq(screen.sale), eq(CardType.DEBITO), any());
         verify(screen.navigator, timeout(2000)).navigate(Page.VENDA_FINALIZADA);
         assertEquals(1, gateway.charges.get(), "a maquininha só pode ser cobrada uma vez");
     }
@@ -175,7 +175,7 @@ class CardChargeScreenTests {
         screen.press(KeyCode.ENTER);
         screen.press(KeyCode.ENTER);
 
-        verify(screen.saleService, never()).payCard(any(), any());
+        verify(screen.saleService, never()).payCard(any(), any(), any());
         verify(screen.navigator, never()).navigate(any());
     }
 
@@ -183,7 +183,7 @@ class CardChargeScreenTests {
     void approvedCardSaleDoesNotPrintTheReceiptAutomatically() throws Exception {
         PaymentScreenFixture screen = new PaymentScreenFixture();
         screen.session.setCardTypeSelecionado(CardType.CREDITO);
-        when(screen.saleService.payCard(any(), any())).thenReturn(screen.sale);
+        when(screen.saleService.payCard(any(), any(), any())).thenReturn(screen.sale);
         ScriptedGateway gateway = new ScriptedGateway(true).script(APPROVED);
         screen.load("pagamento_espera.fxml", fixture -> new PagamentoEsperaController(fixture.saleService,
                 fixture.session, fixture.navigator, fixture.receiptService, gateway));
@@ -200,12 +200,12 @@ class CardChargeScreenTests {
         screen.onFx(() -> ((TextField) screen.node("receivedField")).setText("10,00"));
         screen.press(KeyCode.ENTER);
         assertTrue(screen.status().contains("não confere"));
-        verify(screen.saleService, never()).payCard(any(), any());
+        verify(screen.saleService, never()).payCard(any(), any(), any());
 
         screen.onFx(() -> ((TextField) screen.node("receivedField")).setText("25,90"));
         screen.press(KeyCode.ENTER);
 
-        verify(screen.saleService, times(1)).payCard(screen.sale, CardType.DEBITO);
+        verify(screen.saleService, times(1)).payCard(eq(screen.sale), eq(CardType.DEBITO), any());
         verify(screen.navigator).navigate(Page.VENDA_FINALIZADA);
         assertFalse(screen.session.getUltimaVenda() == null);
     }

@@ -99,6 +99,16 @@ public class MercadoPagoCardPaymentGateway implements CardPaymentGateway {
         }
     }
 
+    @Override
+    public void refund(String chargeId) {
+        requireIntegrated();
+        ApiResponse response = api.send("POST", ORDERS_PATH + "/" + chargeId + "/refund", null,
+                Map.of("X-Idempotency-Key", UUID.randomUUID().toString()));
+        if (!response.isSuccess()) {
+            throw MercadoPagoOrders.refundFailure(response);
+        }
+    }
+
     private void requireIntegrated() {
         if (!hasTerminal()) {
             throw new CardGatewayException(

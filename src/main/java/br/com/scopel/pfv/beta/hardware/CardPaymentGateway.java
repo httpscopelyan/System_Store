@@ -54,4 +54,8 @@ public interface CardPaymentGateway {
      * @param chargeId id devolvido por {@link #createCharge}.
      */
     void cancel(String chargeId);
+
+    default void refund(String chargeId) {
+        throw new CardGatewayException("Reembolso pela maquininha indisponível.");
+    }
 }

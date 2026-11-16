@@ -51,6 +51,10 @@ public final class CardChargePoller {
         });
     }
 
+    public String chargeId() {
+        return chargeId;
+    }
+
     public void cancel(Runnable onCanceled, Consumer<String> onError) {
         try {
             executor.execute(() -> cancelNow(onCanceled, onError));

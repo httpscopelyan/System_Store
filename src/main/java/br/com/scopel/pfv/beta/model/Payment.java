@@ -35,6 +35,12 @@ public class Payment {
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal change;
 
+    @Column(name = "gateway_order_id", length = 80)
+    private String gatewayOrderId;
+
+    @Column(name = "refunded_at")
+    private LocalDateTime refundedAt;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 }

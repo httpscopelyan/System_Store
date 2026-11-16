@@ -7,6 +7,7 @@ import br.com.scopel.pfv.beta.controller.support.CashMovementActions;
 import br.com.scopel.pfv.beta.controller.support.CashStatusPanel;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.controller.support.ManagerAuthorizedAction;
+import br.com.scopel.pfv.beta.controller.support.SaleRefundAction;
 import br.com.scopel.pfv.beta.controller.support.ScenePoller;
 import br.com.scopel.pfv.beta.exception.CashRegisterAlreadyOpenException;
 import br.com.scopel.pfv.beta.model.CashRegister;
@@ -18,6 +19,7 @@ import br.com.scopel.pfv.beta.service.cash.CashOverview;
 import br.com.scopel.pfv.beta.service.cash.CashSummary;
 import br.com.scopel.pfv.beta.service.cash.CashClosingService;
 import br.com.scopel.pfv.beta.service.cash.CashSummaryService;
+import br.com.scopel.pfv.beta.service.refund.SaleRefundService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -47,7 +49,9 @@ public class CaixaController {
     private final UserSession userSession;
     private final ReceiptService receiptService;
     private final ManagerAuthorizationController managerAuthorizationController;
+    private final SaleRefundService saleRefundService;
 
+    private SaleRefundAction refundAction;
     private CashRegister displayed;
     private Long pinnedRegisterId;
     private ScenePoller poller;
@@ -73,10 +77,13 @@ public class CaixaController {
     @FXML private Button supplementButton;
     @FXML private Button withdrawalButton;
     @FXML private Button rectifyButton;
+    @FXML private Button refundButton;
 
     public CaixaController(CashRegisterService cashRegisterService, CashSummaryService cashSummaryService,
                            CashClosingService cashClosingService, UserSession userSession, ReceiptService receiptService,
-                           ManagerAuthorizationController managerAuthorizationController) {
+                           ManagerAuthorizationController managerAuthorizationController,
+                           SaleRefundService saleRefundService) {
+        this.saleRefundService = saleRefundService;
         this.cashRegisterService = cashRegisterService;
         this.cashSummaryService = cashSummaryService;
         this.cashClosingService = cashClosingService;
@@ -99,6 +106,8 @@ public class CaixaController {
         cashSummaryController.bind(closingFlow, this::finishClosing);
         cashMovementsController.onMessage(statusLabel::setText);
         movementActions = new CashMovementActions(cashRegisterService,
+                new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window), this::window);
+        refundAction = new SaleRefundAction(saleRefundService,
                 new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window), this::window);
         movementReasonBox.setItems(FXCollections.observableArrayList(REASONS));
         movementReasonBox.valueProperty().addListener((observable, previous, current) -> {
@@ -182,6 +191,20 @@ public class CaixaController {
     }
 
     @FXML
+    public void onRefund() {
+        if (isViewingClosedRegister()) {
+            statusLabel.setText(READ_ONLY_MESSAGE);
+            return;
+        }
+        CashMovementRow row = cashMovementsController.selected();
+        SaleRefundAction.Result result = refundAction.refund(row == null ? null : row.saleId(), row != null);
+        statusLabel.setText(result.message());
+        if (result.success()) {
+            onRefresh();
+        }
+    }
+
+    @FXML
     public void onViewItems() {
         cashMovementsController.showItemsOfSelected();
     }
@@ -206,6 +229,7 @@ public class CaixaController {
         supplementButton.setDisable(readOnly);
         withdrawalButton.setDisable(readOnly);
         rectifyButton.setDisable(readOnly);
+        refundButton.setDisable(readOnly);
         movementAmountField.setDisable(readOnly);
         movementReasonBox.setDisable(readOnly);
     }

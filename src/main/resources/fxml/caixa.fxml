@@ -74,6 +74,7 @@
                 <Button fx:id="supplementButton" text="💲 Suprimento" onAction="#onSupplement" styleClass="win-button"/>
                 <Button fx:id="withdrawalButton" text="💲 Sangria (F9)" onAction="#onWithdrawal" styleClass="win-button"/>
                 <Button fx:id="rectifyButton" text="🧮 Retificar" onAction="#onRectify" styleClass="win-button"/>
+                <Button fx:id="refundButton" text="↩ Reembolsar" onAction="#onRefund" styleClass="win-button"/>
                 <Button text="🔍 Ver itens" onAction="#onViewItems" styleClass="win-button"/>
                 <Button text="🖨 Imprimir Movimentação (F7)" onAction="#onPrintMovimentacao" styleClass="win-button"/>
                 <Button text="🔄 Atualizar (F5)" onAction="#onRefresh" styleClass="win-button"/>

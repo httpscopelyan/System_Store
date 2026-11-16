@@ -63,6 +63,9 @@ public class Sale {
     @Column(name = "canceled_at")
     private LocalDateTime canceledAt;
 
+    @Column(name = "refunded_at")
+    private LocalDateTime refundedAt;
+
     // Gerente que autorizou operação sensível (desconto acima do limite, cancelamento).
     @ManyToOne
     @JoinColumn(name = "authorized_by_id")

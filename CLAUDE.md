@@ -189,6 +189,7 @@ direto com repository.
   caixa unificado configurável (`cash_group`, `users.cash_group_id`, substitui `SharedCashRegisterMembers`); Ana Clara
   cadastra produto vendo só 7 campos (`SEE_COST_FIELDS`); painel web embutido em `web/` (JDK `HttpServer`, desligado por
   padrão, só DEV, CSRF + bloqueio por tentativas, HTTPS por keystore ou túnel). Migrations V38–V39. Conta inativa não loga.
+- **Rodada de 2026-11-16**: legibilidade (fonte base 14px, cinzas escurecidos em `styles.css`); botão *Novo* do Estoque visível para quem tem `REGISTER_PRODUCTS` sem `EDIT_PRODUCT_DATA`; **reembolso de venda** na aba Caixa (`service/refund/`: `SaleRefundService` + `SaleRefundBooking`, `SaleRefundAction/Dialog`). Só gerente, motivo obrigatório, caixa aberto; dinheiro mostra o valor a devolver e a venda sai da movimentação (vira `CANCELADA` com `refundedAt`, estoque volta, auditoria `SALE_REFUNDED`); cartão/PIX com id do pedido Mercado Pago (`payment.gateway_order_id`, gravado nos pagamentos únicos) usam `POST /v1/orders/{id}/refund`, o resto (vendas antigas, partes de pagamento dividido) exige confirmar a devolução manual no app. Migration V40. Venda a prazo não reembolsa por aqui.
 - UI básica: login, caixa (abrir/fechar), venda (bipar/finalizar). Navegação
   caixa→venda após abrir.
 

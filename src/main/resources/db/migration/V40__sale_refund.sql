@@ -1,0 +1,3 @@
+ALTER TABLE payment ADD COLUMN gateway_order_id VARCHAR(80);
+ALTER TABLE payment ADD COLUMN refunded_at TIMESTAMP;
+ALTER TABLE sale ADD COLUMN refunded_at TIMESTAMP;

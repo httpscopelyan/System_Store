@@ -233,8 +233,18 @@ public class SaleService {
     }
 
     @Transactional
+    public Sale payCard(Sale sale, CardType cardType, String gatewayOrderId) {
+        return salePaymentService.payCard(sale, cardType, gatewayOrderId);
+    }
+
+    @Transactional
     public Sale payPix(Sale sale) {
         return salePaymentService.payPix(sale);
+    }
+
+    @Transactional
+    public Sale payPix(Sale sale, String gatewayOrderId) {
+        return salePaymentService.payPix(sale, gatewayOrderId);
     }
 
     @Transactional

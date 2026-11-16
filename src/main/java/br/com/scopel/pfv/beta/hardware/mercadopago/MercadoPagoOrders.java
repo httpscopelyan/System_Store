@@ -78,6 +78,16 @@ final class MercadoPagoOrders {
         });
     }
 
+    static CardGatewayException refundFailure(ApiResponse response) {
+        String code = firstErrorCode(response.body());
+        return new CardGatewayException(switch (code) {
+            case "order_already_refunded" -> "Este pagamento já foi reembolsado no Mercado Pago.";
+            case "refund_period_exceeded" -> "O prazo de reembolso no Mercado Pago já passou.";
+            case "cannot_refund_order" -> "O Mercado Pago não permite reembolsar este pagamento agora.";
+            default -> failure(response).getMessage();
+        });
+    }
+
     private static String firstErrorCode(String body) {
         try {
             return MAPPER.readTree(body == null ? "" : body).path("errors").path(0).path("code").asText("");

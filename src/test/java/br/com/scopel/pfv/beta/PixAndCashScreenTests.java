@@ -49,7 +49,7 @@ class PixAndCashScreenTests {
         PaymentScreenFixture screen = new PaymentScreenFixture();
         PixService pixService = mock(PixService.class);
         when(pixService.buildFromSettings(any(), anyString())).thenReturn("00020126PAYLOAD");
-        when(screen.saleService.payPix(any())).thenReturn(screen.sale);
+        when(screen.saleService.payPix(any(), any())).thenReturn(screen.sale);
         screen.load("pagamento_pix.fxml", fixture -> new PagamentoPixController(fixture.saleService,
                 fixture.session, fixture.navigator, pixService, fixture.receiptService, gateway));
         return screen;
@@ -59,7 +59,7 @@ class PixAndCashScreenTests {
     void pixPaidOnTheMachineRegistersTheSaleOnceAndDoesNotPrintAutomatically() throws Exception {
         PaymentScreenFixture screen = openPix(new ScriptedGateway(true).script(PENDING, APPROVED));
 
-        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payPix(screen.sale);
+        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payPix(eq(screen.sale), any());
         verify(screen.navigator, timeout(2000)).navigate(Page.VENDA_FINALIZADA);
         verify(screen.receiptService, never()).printSaleReceipt(any(br.com.scopel.pfv.beta.model.Sale.class),
                 any(br.com.scopel.pfv.beta.service.ReceiptPayment.class));
@@ -90,7 +90,7 @@ class PixAndCashScreenTests {
         screen.press(KeyCode.ESCAPE);
 
         verify(screen.navigator, timeout(5000)).navigate(Page.PAGAMENTO);
-        verify(screen.saleService, never()).payPix(any());
+        verify(screen.saleService, never()).payPix(any(), any());
     }
 
     @Test
@@ -104,7 +104,7 @@ class PixAndCashScreenTests {
         screen.press(KeyCode.ENTER);
 
         verify(screen.navigator, timeout(2000)).navigate(Page.PAGAMENTO);
-        verify(screen.saleService, never()).payPix(any());
+        verify(screen.saleService, never()).payPix(any(), any());
     }
 
     @Test
@@ -115,7 +115,7 @@ class PixAndCashScreenTests {
 
         screen.press(KeyCode.ESCAPE);
 
-        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payPix(screen.sale);
+        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payPix(eq(screen.sale), any());
         verify(screen.navigator, never()).navigate(Page.PAGAMENTO);
     }
 
@@ -126,7 +126,7 @@ class PixAndCashScreenTests {
 
         screen.onFx(() -> screen.button("confirmButton").fire());
 
-        verify(screen.saleService).payPix(screen.sale);
+        verify(screen.saleService).payPix(eq(screen.sale), any());
         verify(screen.navigator).navigate(Page.VENDA_FINALIZADA);
     }
 

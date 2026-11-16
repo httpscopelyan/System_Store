@@ -171,7 +171,7 @@ public class PagamentoEsperaController {
         cancellation.dismiss();
         Sale finalizada;
         try {
-            finalizada = saleService.payCard(vendaAtual, cardType);
+            finalizada = saleService.payCard(vendaAtual, cardType, poller == null ? null : poller.chargeId());
         } catch (RuntimeException failure) {
             done = false;
             awaitingRegistration = true;
