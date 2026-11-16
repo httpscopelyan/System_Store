@@ -331,6 +331,10 @@ public class ReceiptService {
                 .toPlainString().replace('.', ',');
     }
 
+    public void printText(String text) {
+        printer.print(text);
+    }
+
     public void printCashCloseReceipt(CashRegister cr) {
         printer.print(buildCashCloseReceipt(cr));
     }

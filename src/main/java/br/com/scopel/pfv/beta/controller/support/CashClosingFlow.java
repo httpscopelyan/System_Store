@@ -9,6 +9,8 @@ import br.com.scopel.pfv.beta.service.cash.CashClosingService;
 import br.com.scopel.pfv.beta.service.cash.CashOverview;
 import br.com.scopel.pfv.beta.service.cash.ClosingCount;
 
+import java.util.function.Consumer;
+
 public final class CashClosingFlow {
 
     public static final String CLOSED_PREFIX = "Caixa FECHADO";
@@ -17,9 +19,12 @@ public final class CashClosingFlow {
     private final CashRegisterService cashRegisterService;
     private final ReceiptService receiptService;
     private final UserSession userSession;
+    private final Consumer<String> printFailureNotice;
 
     public CashClosingFlow(CashClosingService closingService, CashRegisterService cashRegisterService,
-                           ReceiptService receiptService, UserSession userSession) {
+                           ReceiptService receiptService, UserSession userSession,
+                           Consumer<String> printFailureNotice) {
+        this.printFailureNotice = printFailureNotice;
         this.closingService = closingService;
         this.cashRegisterService = cashRegisterService;
         this.receiptService = receiptService;
@@ -46,7 +51,8 @@ public final class CashClosingFlow {
             return "Nenhum caixa para imprimir a movimentação.";
         }
         try {
-            receiptService.printCashMovementsReceipt(register, overview);
+            String text = receiptService.buildCashMovementsReceipt(register, overview);
+            sendToPrinter(text);
             return "Movimentação enviada para impressão.";
         } catch (Exception failure) {
             return "Não foi possível imprimir: " + failure.getMessage();
@@ -55,10 +61,16 @@ public final class CashClosingFlow {
 
     private String printSuffix(CashRegister closed) {
         try {
-            receiptService.printCashCloseReceipt(closed, cashRegisterService.movements(closed));
-            return "  |  Fechamento impresso.";
+            String text = receiptService.buildCashCloseReceipt(closed, cashRegisterService.movements(closed));
+            sendToPrinter(text);
+            return "  |  Fechamento enviado para impressão.";
         } catch (Exception printFailure) {
             return "  |  Aviso: impressão falhou (" + printFailure.getMessage() + ")";
         }
+    }
+
+    private void sendToPrinter(String text) {
+        BackgroundPrinting.run(() -> receiptService.printText(text),
+                message -> printFailureNotice.accept("Aviso: impressão falhou (" + message + ")"));
     }
 }

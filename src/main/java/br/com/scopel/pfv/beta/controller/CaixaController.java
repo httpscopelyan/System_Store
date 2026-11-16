@@ -102,7 +102,8 @@ public class CaixaController {
             onRefresh();
         });
         statusPanel = new CashStatusPanel(statusBigLabel, openingInfoLabel, closingInfoLabel, periodLabel);
-        closingFlow = new CashClosingFlow(cashClosingService, cashRegisterService, receiptService, userSession);
+        closingFlow = new CashClosingFlow(cashClosingService, cashRegisterService, receiptService, userSession,
+                statusLabel::setText);
         cashSummaryController.bind(closingFlow, this::finishClosing);
         cashMovementsController.onMessage(statusLabel::setText);
         movementActions = new CashMovementActions(cashRegisterService,

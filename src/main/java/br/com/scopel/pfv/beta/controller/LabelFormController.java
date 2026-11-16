@@ -1,5 +1,6 @@
 package br.com.scopel.pfv.beta.controller;
 
+import br.com.scopel.pfv.beta.controller.support.BackgroundPrinting;
 import br.com.scopel.pfv.beta.controller.support.ProductCodeInput;
 import br.com.scopel.pfv.beta.exception.ProductNotfindException;
 import br.com.scopel.pfv.beta.model.Product;
@@ -55,7 +56,8 @@ public class LabelFormController {
                 messageLabel.setText("Informe ao menos 1 cópia");
                 return;
             }
-            labelService.printLabels(p, copies);
+            BackgroundPrinting.run(() -> labelService.printLabels(p, copies),
+                    message -> messageLabel.setText("Falha ao imprimir: " + message));
             messageLabel.setText(copies + " etiqueta(s) enviada(s) à impressora");
         } catch (NumberFormatException e) {
             messageLabel.setText("Número de cópias inválido");
