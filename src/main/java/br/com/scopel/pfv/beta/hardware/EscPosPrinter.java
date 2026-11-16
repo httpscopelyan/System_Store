@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import javax.print.PrintService;
 import javax.print.attribute.standard.PrinterIsAcceptingJobs;
-import javax.print.attribute.standard.QueuedJobCount;
 import java.io.IOException;
 
 /**
@@ -23,7 +22,7 @@ import java.io.IOException;
 @ConditionalOnProperty(name = "pdv.printer.enabled", havingValue = "true")
 public class EscPosPrinter implements PrinterPort {
 
-    private static final int MAX_QUEUED_JOBS_FOR_DRAWER = 1;
+    private static final long JOB_TIMEOUT_MILLIS = 6000;
 
     private final String printerName;
     private final int drawerPin;
@@ -35,7 +34,8 @@ public class EscPosPrinter implements PrinterPort {
     }
 
     @Override
-    public void print(String content) {
+    public synchronized void print(String content) {
+        prepare();
         try (EscPos escpos = open()) {
             for (String line : content.split("\n", -1)) {
                 escpos.writeLF(line);
@@ -45,11 +45,12 @@ public class EscPosPrinter implements PrinterPort {
         } catch (IOException e) {
             throw new PrinterException("Falha ao imprimir: " + e.getMessage(), e);
         }
+        WindowsPrintSpool.requireJobConsumed(printerName, JOB_TIMEOUT_MILLIS);
     }
 
     @Override
-    public void openDrawer() {
-        requireHealthyQueue();
+    public synchronized void openDrawer() {
+        prepare();
         try (EscPos escpos = open()) {
             EscPos.PinConnector pin = (drawerPin == 5)
                     ? EscPos.PinConnector.Pin_5
@@ -58,19 +59,16 @@ public class EscPosPrinter implements PrinterPort {
         } catch (IOException e) {
             throw new PrinterException("Falha ao abrir a gaveta: " + e.getMessage(), e);
         }
+        WindowsPrintSpool.requireJobConsumed(printerName, JOB_TIMEOUT_MILLIS);
     }
 
-    private void requireHealthyQueue() {
+    private void prepare() {
         PrintService service = findService();
         PrinterIsAcceptingJobs accepting = service.getAttribute(PrinterIsAcceptingJobs.class);
-        if (accepting != null && accepting == PrinterIsAcceptingJobs.NOT_ACCEPTING_JOBS) {
+        if (accepting == PrinterIsAcceptingJobs.NOT_ACCEPTING_JOBS) {
             throw new PrinterException("A impressora não está aceitando trabalhos (desligada ou offline).", null);
         }
-        QueuedJobCount queued = service.getAttribute(QueuedJobCount.class);
-        if (queued != null && queued.getValue() > MAX_QUEUED_JOBS_FOR_DRAWER) {
-            throw new PrinterException("A fila da impressora está travada (" + queued.getValue()
-                    + " trabalhos pendentes). Reinicie a impressora; a gaveta não foi acionada para evitar acionamentos atrasados.", null);
-        }
+        WindowsPrintSpool.clearAndRequireOnline(printerName);
     }
 
     private PrintService findService() {
