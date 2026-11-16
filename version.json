@@ -1,10 +1,10 @@
 {
-  "version": "1.3.6",
+  "version": "1.3.7",
   "releaseDate": "2026-11-16",
   "minJavaVersion": 24,
-  "changelog": "feat(caixa): reembolso de venda (dinheiro mostra o valor a devolver; cartão/PIX pela API do Mercado Pago ou confirmação manual), V40",
+  "changelog": "fix(impressora): sem fila no spooler do Windows; limpa pendências antes de imprimir, não envia se offline e cancela trabalho não consumido",
   "mandatory": false,
-  "sha256": "ef7095804de2edcc1d871bccddc1c493f352a3d246b5456c152f73f6545d234a",
-  "size": 59854172,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.6/scopel-store.jar"
+  "sha256": "b22c13b1daf592c24d4b497722e057390ea958fed5916e1a5ad7d879eda5214d",
+  "size": 59857234,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.7/scopel-store.jar"
 }
