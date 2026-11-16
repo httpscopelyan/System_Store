@@ -343,3 +343,25 @@ CARTAO/PIX e pagamento múltiplo (RN18) ficam na F4.
 - **Mudança no cupom:** a venda agora imprime `Operador: <nome>`; os cupons de caixa trocaram `Operador:` por `Abertura por:`.
 - **Pendente:** estorno de venda com parte em cartão/PIX já recebida (continua sem fluxo); painel admin web (RF85); validação
   manual com `mvn javafx:run` — principalmente as duas contas no mesmo caixa e o Voltar a partir de cada forma de pagamento.
+
+## 2026-11-16 — Impressora sem fila no spooler e impressão fora da thread da tela (v1.3.7 e v1.3.8)
+
+- **Problema:** com a impressora travada ou offline, os cupons e os pulsos da gaveta ficavam na fila do Windows e saíam todos de uma
+  vez quando ela reiniciava (gaveta abrindo sozinha). A regra antiga só barrava a gaveta quando havia mais de 1 trabalho na fila.
+- **Entregue:** `EscPosPrinter` + novo `WindowsPrintSpool`. Antes de cada impressão/pulso: remove os trabalhos pendentes da impressora
+  e recusa se ela estiver offline (`WorkOffline`/`PrinterStatus`). Depois: espera até 6 s o trabalho sair da fila; se não sair,
+  cancela e lança `PrinterException` ("use o botão de imprimir novamente"). Em não-Windows o guarda não faz nada.
+- **Lição (v1.3.7 → v1.3.8):** a primeira versão rodava um PowerShell por chamada (~1,4 s cada, ~3 s no F12) e o fechamento do caixa
+  imprimia na thread da tela, o que congelava o app e derrubou `CaixaScreenTests` (timeout). Correções: sessão PowerShell persistente
+  (aquecida no construtor, encerrada por shutdown hook); `CashClosingFlow` monta o texto na tela e envia por `BackgroundPrinting`
+  (aviso de falha na barra de status; a mensagem agora diz "Fechamento enviado para impressão"); `LabelFormController` imprime em
+  segundo plano; `ReceiptService.printText`.
+- **Como funciona hoje:** F12 em thread própria, ignora pressões enquanto uma abertura está em andamento; venda em dinheiro continua
+  abrindo a gaveta (falha vira aviso, nada fica pendente); reimpressão por 2ª via na Venda finalizada, Histórico e Movimentação do
+  Caixa. Resta a fila interna do app (`BackgroundPrinting`, 1 thread): cliques repetidos com a impressora offline falham um a um,
+  sem imprimir depois.
+- **Testes:** suíte completa 752/752 verde. Sem teste automatizado do guarda do spooler (depende da impressora do Windows).
+- **Pendente:** validar na loja com a POS-80 (desligar, vender em dinheiro, F12, religar: nada deve sair nem abrir sozinho);
+  impressora ligada sem papel/tampa aberta pode não aparecer como offline (cai no cancelamento em ~6 s); a limpeza apaga todos os
+  trabalhos da impressora configurada, inclusive de outros programas; opcional: eliminar a fila interna (botão ignora clique
+  enquanto imprime, exigindo juntar gaveta e cupom do pagamento em dinheiro num único trabalho).
