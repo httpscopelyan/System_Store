@@ -31,6 +31,7 @@ public class EscPosPrinter implements PrinterPort {
                          @Value("${pdv.printer.drawer-pin:2}") int drawerPin) {
         this.printerName = printerName;
         this.drawerPin = drawerPin;
+        WindowsPrintSpool.warmUp(printerName);
     }
 
     @Override
