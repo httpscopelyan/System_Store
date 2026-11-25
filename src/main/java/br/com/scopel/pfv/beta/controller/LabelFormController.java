@@ -22,6 +22,7 @@ public class LabelFormController {
     @FXML private TextField copiesField;
     @FXML private Label previewLabel;
     @FXML private Label messageLabel;
+    @FXML private javafx.scene.Node printButton;
 
     public LabelFormController(ProductService productService, LabelService labelService) {
         this.productService = productService;
@@ -31,6 +32,7 @@ public class LabelFormController {
     @FXML
     public void initialize() {
         ProductCodeInput.attach(codeField, productService);
+        printButton.disableProperty().bind(BackgroundPrinting.printingProperty());
         Platform.runLater(() -> codeField.requestFocus());
     }
 
@@ -56,9 +58,10 @@ public class LabelFormController {
                 messageLabel.setText("Informe ao menos 1 cópia");
                 return;
             }
-            BackgroundPrinting.run(() -> labelService.printLabels(p, copies),
-                    message -> messageLabel.setText("Falha ao imprimir: " + message));
-            messageLabel.setText(copies + " etiqueta(s) enviada(s) à impressora");
+            if (BackgroundPrinting.run(() -> labelService.printLabels(p, copies),
+                    message -> messageLabel.setText("Falha ao imprimir: " + message))) {
+                messageLabel.setText(copies + " etiqueta(s) enviada(s) à impressora");
+            }
         } catch (NumberFormatException e) {
             messageLabel.setText("Número de cópias inválido");
         } catch (ProductNotfindException e) {

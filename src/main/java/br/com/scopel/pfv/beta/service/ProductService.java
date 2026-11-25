@@ -173,6 +173,9 @@ public class ProductService {
         requireProductDataEditor(actor);
         Product product = findById(id);
         ProductSnapshot beforeChange = ProductSnapshot.of(product);
+        if (price != null && product.getPrice() != null && price.compareTo(product.getPrice()) != 0) {
+            requirePriceEditor(actor);
+        }
 
         requireDescription(description);
         requireUnit(unit);
@@ -259,11 +262,6 @@ public class ProductService {
     }
 
     @Transactional
-    public Product modificationPrice(String code, BigDecimal value) {
-        return modificationPrice(code, value, null);
-    }
-
-    @Transactional
     public Product modificationPrice(String code, BigDecimal value, User actor) {
         requirePriceEditor(actor);
         Product product = findCode(code);
@@ -272,11 +270,6 @@ public class ProductService {
         Product repriced = repository.save(product);
         productChangeAudit.recordChanges(actor, beforeChange, repriced);
         return repriced;
-    }
-
-    @Transactional
-    public int adjustPricesByPercent(BigDecimal percent, String category) {
-        return adjustPricesByPercent(percent, category, null);
     }
 
     @Transactional

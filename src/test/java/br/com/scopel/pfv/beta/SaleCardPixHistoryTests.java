@@ -1,6 +1,7 @@
 package br.com.scopel.pfv.beta;
 
 import br.com.scopel.pfv.beta.exception.IllegalSaleStateException;
+import br.com.scopel.pfv.beta.model.AuditAction;
 import br.com.scopel.pfv.beta.model.CardType;
 import br.com.scopel.pfv.beta.model.CashRegister;
 import br.com.scopel.pfv.beta.model.Payment;
@@ -12,6 +13,7 @@ import br.com.scopel.pfv.beta.repository.PaymentRepository;
 import br.com.scopel.pfv.beta.repository.ProductRepository;
 import br.com.scopel.pfv.beta.repository.UserRepository;
 import br.com.scopel.pfv.beta.service.CashRegisterService;
+import br.com.scopel.pfv.beta.service.audit.AuditLogService;
 import br.com.scopel.pfv.beta.service.ProductService;
 import br.com.scopel.pfv.beta.service.SaleService;
 import org.junit.jupiter.api.Test;
@@ -52,6 +54,9 @@ class SaleCardPixHistoryTests {
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private AuditLogService auditLogService;
 
     private User newOperator() {
         User user = new User();
@@ -120,6 +125,39 @@ class SaleCardPixHistoryTests {
         assertEquals(0, new BigDecimal("0.00").compareTo(payment.getChange()));
         assertEquals(2, payment.getChange().scale(), "troco com escala 2");
         assertNotNull(payment.getCreatedAt());
+    }
+
+    @Test
+    void payCardConfirmedManuallyFinalizesWithoutGatewayOrderAndLeavesAnAuditTrail() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Product product = newProduct("Leite", new BigDecimal("7.50"), new BigDecimal("30.000"), Product.Unidade.UN);
+
+        Sale sale = saleInPayment(operator, caixa, product, new BigDecimal("2"));
+        sale = saleService.payCardConfirmedManually(sale, CardType.DEBITO);
+
+        assertEquals(Sale.Status.FINALIZADA, sale.getStatus());
+        assertEquals(0, new BigDecimal("28.000").compareTo(productService.findCode(product.getCode()).getQuantity()));
+        Payment payment = onlyPaymentForSale(sale);
+        assertEquals(PaymentMethod.CARTAO, payment.getMethod());
+        assertEquals(CardType.DEBITO, payment.getCardType());
+        assertNull(payment.getGatewayOrderId());
+        Long saleId = sale.getId();
+        assertTrue(auditLogService.recent(0, 50).getContent().stream()
+                .anyMatch(entry -> entry.getAction() == AuditAction.CARD_MANUALLY_CONFIRMED
+                        && saleId.equals(entry.getEntityId())));
+    }
+
+    @Test
+    void payCardConfirmedManuallyOnFinalizedSaleThrows() {
+        User operator = newOperator();
+        CashRegister caixa = newOpenCashRegister(operator);
+        Product product = newProduct("Pao", new BigDecimal("1.00"), new BigDecimal("30.000"), Product.Unidade.UN);
+        final Sale finalized = saleService.payCard(saleInPayment(operator, caixa, product, BigDecimal.ONE),
+                CardType.DEBITO);
+
+        assertThrows(IllegalSaleStateException.class,
+                () -> saleService.payCardConfirmedManually(finalized, CardType.DEBITO));
     }
 
     @Test

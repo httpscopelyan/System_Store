@@ -14,8 +14,15 @@ class PermissionDefaultsTests {
 
     @Test
     void anaClaraRegistersProductsAndEditsQuantityOnly() {
-        assertEquals(EnumSet.of(Permission.REGISTER_PRODUCTS, Permission.EDIT_STOCK_QUANTITY),
+        assertEquals(EnumSet.of(Permission.REGISTER_PRODUCTS, Permission.EDIT_PRICES, Permission.EDIT_STOCK_QUANTITY),
                 PermissionDefaults.forAccount("Ana Clara", "Ana Clara", User.Role.OPERADOR));
+    }
+
+    @Test
+    void beatrizEditsPricesWithoutStockQuantity() {
+        assertEquals(EnumSet.of(Permission.REGISTER_PRODUCTS, Permission.SEE_COST_FIELDS,
+                        Permission.EDIT_PRODUCT_DATA, Permission.EDIT_PRICES),
+                PermissionDefaults.forAccount("Beatriz", "Beatriz", User.Role.OPERADOR));
     }
 
     @Test

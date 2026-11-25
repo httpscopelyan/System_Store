@@ -52,8 +52,9 @@ public final class CashClosingFlow {
         }
         try {
             String text = receiptService.buildCashMovementsReceipt(register, overview);
-            sendToPrinter(text);
-            return "Movimentação enviada para impressão.";
+            return sendToPrinter(text)
+                    ? "Movimentação enviada para impressão."
+                    : "Já existe uma impressão em andamento. Tente de novo quando terminar.";
         } catch (Exception failure) {
             return "Não foi possível imprimir: " + failure.getMessage();
         }
@@ -62,15 +63,16 @@ public final class CashClosingFlow {
     private String printSuffix(CashRegister closed) {
         try {
             String text = receiptService.buildCashCloseReceipt(closed, cashRegisterService.movements(closed));
-            sendToPrinter(text);
-            return "  |  Fechamento enviado para impressão.";
+            return sendToPrinter(text)
+                    ? "  |  Fechamento enviado para impressão."
+                    : "  |  Aviso: havia outra impressão em andamento; use Imprimir Movimentação.";
         } catch (Exception printFailure) {
             return "  |  Aviso: impressão falhou (" + printFailure.getMessage() + ")";
         }
     }
 
-    private void sendToPrinter(String text) {
-        BackgroundPrinting.run(() -> receiptService.printText(text),
+    private boolean sendToPrinter(String text) {
+        return BackgroundPrinting.run(() -> receiptService.printText(text),
                 message -> printFailureNotice.accept("Aviso: impressão falhou (" + message + ")"));
     }
 }

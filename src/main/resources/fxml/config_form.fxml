@@ -76,6 +76,15 @@
                     <CheckBox fx:id="fullscreenBox" text="Tela cheia (sem bordas) — ESC sai"/>
                 </VBox>
 
+                <VBox styleClass="form-card" spacing="12" maxWidth="Infinity">
+                    <Label text="Atualização do sistema" styleClass="form-section-title"/>
+                    <Label fx:id="versionLabel" styleClass="form-label"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Button fx:id="checkUpdateButton" onAction="#onCheckUpdate" text="Verificar atualização agora"/>
+                        <Label fx:id="updateStatusLabel" styleClass="form-label" wrapText="true"/>
+                    </HBox>
+                </VBox>
+
                 <HBox spacing="12" alignment="CENTER_LEFT">
                     <Button onAction="#onSave" text="Salvar configurações" styleClass="success-button"/>
                 </HBox>

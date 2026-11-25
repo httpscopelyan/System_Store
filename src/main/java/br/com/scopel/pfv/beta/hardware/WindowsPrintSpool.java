@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 final class WindowsPrintSpool {
 
@@ -18,10 +19,24 @@ final class WindowsPrintSpool {
     private static final long SCRIPT_TIMEOUT_MILLIS = 15_000;
     private static final long SETTLE_MILLIS = 300;
 
-    private static final String PURGE_AND_CHECK_SCRIPT =
-            "Get-PrintJob -PrinterName $n -ErrorAction SilentlyContinue | Remove-PrintJob -ErrorAction SilentlyContinue;"
-                    + "$p=Get-Printer -Name $n -ErrorAction SilentlyContinue;"
-                    + "if($p -and ($p.WorkOffline -or $p.PrinterStatus -eq 'Offline')){'OFFLINE'}else{'OK'}";
+    private static final long RECOVERY_TIMEOUT_MILLIS = 2_500;
+    private static final long LOCK_WAIT_MILLIS = 500;
+    private static final long STALE_JOB_SECONDS = 20;
+
+    private static final String OFFLINE_CONDITION =
+            "$p -and ($p.WorkOffline -or $p.PrinterStatus -eq 'Offline')";
+
+    private static final String RECOVER_AND_CHECK_SCRIPT =
+            "$p=Get-Printer -Name $n -ErrorAction SilentlyContinue;"
+                    + "if(" + OFFLINE_CONDITION + "){"
+                    + "Set-Printer -Name $n -WorkOffline $false -ErrorAction SilentlyContinue;"
+                    + "Start-Sleep -Milliseconds 400;"
+                    + "$p=Get-Printer -Name $n -ErrorAction SilentlyContinue};"
+                    + "$old=(Get-Date).AddSeconds(-" + STALE_JOB_SECONDS + ");"
+                    + "Get-PrintJob -PrinterName $n -ErrorAction SilentlyContinue"
+                    + " | Where-Object {$_.SubmittedTime -lt $old}"
+                    + " | Remove-PrintJob -ErrorAction SilentlyContinue;"
+                    + "if(" + OFFLINE_CONDITION + "){'OFFLINE'}else{'OK'}";
 
     private static final String WAIT_DRAIN_SCRIPT =
             "Start-Sleep -Milliseconds " + SETTLE_MILLIS + ";$t=0;$r='STUCK';"
@@ -31,6 +46,7 @@ final class WindowsPrintSpool {
                     + "if($r -eq 'STUCK'){Get-PrintJob -PrinterName $n -ErrorAction SilentlyContinue | Remove-PrintJob -ErrorAction SilentlyContinue};"
                     + "$r";
 
+    private static final ReentrantLock LOCK = new ReentrantLock();
     private static Session session;
     private static String sessionPrinter;
 
@@ -45,19 +61,19 @@ final class WindowsPrintSpool {
         if (!isWindows() || printerName == null || printerName.isBlank()) {
             return;
         }
-        Thread thread = new Thread(() -> run(printerName, "'OK'", SCRIPT_TIMEOUT_MILLIS), "print-spool-warmup");
+        Thread thread = new Thread(() -> run(printerName, "'OK'", SCRIPT_TIMEOUT_MILLIS, SCRIPT_TIMEOUT_MILLIS), "print-spool-warmup");
         thread.setDaemon(true);
         thread.start();
     }
 
-    static void clearAndRequireOnline(String printerName) {
+    static void recoverAndRequireOnline(String printerName) {
         if (!isWindows()) {
             return;
         }
-        String result = run(printerName, PURGE_AND_CHECK_SCRIPT, SCRIPT_TIMEOUT_MILLIS);
+        String result = run(printerName, RECOVER_AND_CHECK_SCRIPT, RECOVERY_TIMEOUT_MILLIS, LOCK_WAIT_MILLIS);
         if ("OFFLINE".equals(result)) {
             throw new EscPosPrinter.PrinterException(
-                    "A impressora está offline. Nada foi enviado; use o botão de imprimir quando ela voltar.", null);
+                    "A impressora está offline. Nada foi enviado; ligue-a e tente de novo.", null);
         }
     }
 
@@ -66,18 +82,28 @@ final class WindowsPrintSpool {
             return;
         }
         String script = String.format(WAIT_DRAIN_SCRIPT, timeoutMillis);
-        String result = run(printerName, script, timeoutMillis + SCRIPT_TIMEOUT_MILLIS);
+        String result = run(printerName, script, timeoutMillis + SCRIPT_TIMEOUT_MILLIS, SCRIPT_TIMEOUT_MILLIS);
         if ("STUCK".equals(result)) {
             throw new EscPosPrinter.PrinterException(
                     "A impressora não respondeu e o trabalho foi cancelado. Use o botão de imprimir novamente.", null);
         }
     }
 
-    private static synchronized String run(String printerName, String script, long timeoutMillis) {
+    private static String run(String printerName, String script, long timeoutMillis, long lockWaitMillis) {
+        boolean locked;
+        try {
+            locked = LOCK.tryLock(lockWaitMillis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "";
+        }
+        if (!locked) {
+            return "";
+        }
         try {
             if (session == null || !session.isAlive() || !printerName.equals(sessionPrinter)) {
                 closeSession();
-                session = Session.start(printerName);
+                session = Session.start(printerName, Math.min(STARTUP_TIMEOUT_MILLIS, timeoutMillis));
                 sessionPrinter = printerName;
             }
             String result = session.execute(script, timeoutMillis);
@@ -93,6 +119,8 @@ final class WindowsPrintSpool {
             Thread.currentThread().interrupt();
             closeSession();
             return "";
+        } finally {
+            LOCK.unlock();
         }
     }
 
@@ -115,7 +143,7 @@ final class WindowsPrintSpool {
             this.input = new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8);
         }
 
-        static Session start(String printerName) throws IOException, InterruptedException {
+        static Session start(String printerName, long startupTimeoutMillis) throws IOException, InterruptedException {
             ProcessBuilder builder = new ProcessBuilder("powershell.exe", "-NoProfile", "-NonInteractive",
                     "-ExecutionPolicy", "Bypass", "-Command", "-");
             builder.environment().put(PRINTER_ENV, printerName);
@@ -123,7 +151,7 @@ final class WindowsPrintSpool {
             Session created = new Session(builder.start());
             Runtime.getRuntime().addShutdownHook(new Thread(created::close));
             created.startReader();
-            String ready = created.execute("$n=$env:" + PRINTER_ENV + ";'OK'", STARTUP_TIMEOUT_MILLIS);
+            String ready = created.execute("$n=$env:" + PRINTER_ENV + ";'OK'", startupTimeoutMillis);
             if (ready == null) {
                 created.close();
                 throw new IOException("PowerShell não iniciou");

@@ -1,6 +1,9 @@
 package br.com.scopel.pfv.beta;
 
+import br.com.scopel.pfv.beta.config.Navigator;
+import br.com.scopel.pfv.beta.config.SingleInstanceGuard;
 import br.com.scopel.pfv.beta.config.ThemeManager;
+import br.com.scopel.pfv.beta.controller.support.ScannerGate;
 import br.com.scopel.pfv.beta.service.AppSettingService;
 import br.com.scopel.pfv.beta.service.UpdateService;
 import javafx.application.Application;
@@ -13,8 +16,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import java.awt.*;
 
 @SpringBootApplication
 public class BetaApplication extends Application{
@@ -35,10 +36,11 @@ public class BetaApplication extends Application{
 		Parent homeRoot = loader.load();
 		springContext.getBean(ThemeManager.class).apply(homeRoot);
 		Scene scene = new Scene(homeRoot, 1365, 720);
+		Navigator navigator = springContext.getBean(Navigator.class);
+		new ScannerGate(navigator::getCurrentPage, navigator::notice).install(scene);
 		stage.setScene(scene);
 		stage.setTitle("SCOPEL STORE");
 
-		// Tela cheia sem bordas, se configurado.
 		if (springContext.getBean(AppSettingService.class).getBoolean("ui.fullscreen", false)) {
 			stage.setFullScreenExitHint("Pressione ESC para sair da tela cheia");
 			stage.setFullScreen(true);
@@ -46,8 +48,10 @@ public class BetaApplication extends Application{
 
 		stage.show();
 
-		// Confirma ao atualizador que esta versão subiu de verdade (rollback se não houver).
-		springContext.getBean(UpdateService.class).markStarted();
+		Thread startedMarker = new Thread(() -> springContext.getBean(UpdateService.class).markStarted(),
+				"update-started-marker");
+		startedMarker.setDaemon(true);
+		startedMarker.start();
 	}
 
 	@Override
@@ -56,6 +60,9 @@ public class BetaApplication extends Application{
 	}
 
 	public static void main(String[] args) {
+		if (!SingleInstanceGuard.acquire()) {
+			return;
+		}
 		launch(args);
 	}
 

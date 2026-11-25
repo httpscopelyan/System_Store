@@ -17,6 +17,7 @@ public final class ChargeReissue {
         this.receiptService = receiptService;
         this.button = button;
         this.statusLabel = statusLabel;
+        button.disableProperty().bind(BackgroundPrinting.printingProperty());
         hide();
     }
 

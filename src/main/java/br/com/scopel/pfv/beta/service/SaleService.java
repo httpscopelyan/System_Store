@@ -238,6 +238,11 @@ public class SaleService {
     }
 
     @Transactional
+    public Sale payCardConfirmedManually(Sale sale, CardType cardType) {
+        return salePaymentService.payCardConfirmedManually(sale, cardType);
+    }
+
+    @Transactional
     public Sale payPix(Sale sale) {
         return salePaymentService.payPix(sale);
     }

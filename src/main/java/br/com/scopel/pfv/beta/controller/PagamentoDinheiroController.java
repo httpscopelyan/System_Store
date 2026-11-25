@@ -112,7 +112,7 @@ public class PagamentoDinheiroController {
     }
 
     private void openDrawer() {
-        BackgroundPrinting.run(printer::openDrawer,
+        BackgroundPrinting.runDrawer(printer::openDrawer,
                 message -> navigator.notice("Venda gravada. Aviso: gaveta falhou (" + message + ")"));
     }
 

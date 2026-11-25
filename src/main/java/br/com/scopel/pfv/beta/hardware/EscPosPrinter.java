@@ -9,21 +9,15 @@ import org.springframework.stereotype.Component;
 import javax.print.PrintService;
 import javax.print.attribute.standard.PrinterIsAcceptingJobs;
 import java.io.IOException;
+import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * Impressão física em impressora térmica ESC/POS (cupom) e abertura da gaveta
- * de dinheiro (pulso no conector RJ). Ativa com {@code pdv.printer.enabled=true}.
- *
- * Usa o serviço de impressão instalado no Windows pelo nome
- * ({@code pdv.printer.name}). A gaveta abre pelo pino {@code pdv.printer.drawer-pin}
- * (2 ou 5).
- */
 @Component
 @ConditionalOnProperty(name = "pdv.printer.enabled", havingValue = "true")
 public class EscPosPrinter implements PrinterPort {
 
     private static final long JOB_TIMEOUT_MILLIS = 6000;
 
+    private final ReentrantLock printLock = new ReentrantLock();
     private final String printerName;
     private final int drawerPin;
 
@@ -35,23 +29,31 @@ public class EscPosPrinter implements PrinterPort {
     }
 
     @Override
-    public synchronized void print(String content) {
-        prepare();
-        try (EscPos escpos = open()) {
-            for (String line : content.split("\n", -1)) {
-                escpos.writeLF(line);
+    public void print(String content) {
+        printLock.lock();
+        try {
+            prepare();
+            try (EscPos escpos = open()) {
+                for (String line : content.split("\n", -1)) {
+                    escpos.writeLF(line);
+                }
+                escpos.feed(4);
+                escpos.cut(EscPos.CutMode.FULL);
+            } catch (IOException e) {
+                throw new PrinterException("Falha ao imprimir: " + e.getMessage(), e);
             }
-            escpos.feed(4);
-            escpos.cut(EscPos.CutMode.FULL);
-        } catch (IOException e) {
-            throw new PrinterException("Falha ao imprimir: " + e.getMessage(), e);
+            WindowsPrintSpool.requireJobConsumed(printerName, JOB_TIMEOUT_MILLIS);
+        } finally {
+            printLock.unlock();
         }
-        WindowsPrintSpool.requireJobConsumed(printerName, JOB_TIMEOUT_MILLIS);
     }
 
     @Override
-    public synchronized void openDrawer() {
+    public void openDrawer() {
         prepare();
+        if (Thread.interrupted()) {
+            return;
+        }
         try (EscPos escpos = open()) {
             EscPos.PinConnector pin = (drawerPin == 5)
                     ? EscPos.PinConnector.Pin_5
@@ -60,16 +62,15 @@ public class EscPosPrinter implements PrinterPort {
         } catch (IOException e) {
             throw new PrinterException("Falha ao abrir a gaveta: " + e.getMessage(), e);
         }
-        WindowsPrintSpool.requireJobConsumed(printerName, JOB_TIMEOUT_MILLIS);
     }
 
     private void prepare() {
+        WindowsPrintSpool.recoverAndRequireOnline(printerName);
         PrintService service = findService();
         PrinterIsAcceptingJobs accepting = service.getAttribute(PrinterIsAcceptingJobs.class);
         if (accepting == PrinterIsAcceptingJobs.NOT_ACCEPTING_JOBS) {
             throw new PrinterException("A impressora não está aceitando trabalhos (desligada ou offline).", null);
         }
-        WindowsPrintSpool.clearAndRequireOnline(printerName);
     }
 
     private PrintService findService() {
@@ -88,7 +89,6 @@ public class EscPosPrinter implements PrinterPort {
         return new EscPos(new PrinterOutputStream(service));
     }
 
-    /** Erro de hardware de impressão; não deve derrubar a venda já gravada (RNF06). */
     public static class PrinterException extends RuntimeException {
         public PrinterException(String message, Throwable cause) {
             super(message, cause);

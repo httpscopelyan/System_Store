@@ -68,12 +68,13 @@ class StockQuantityOnlyScreenTests {
     }
 
     @Test
-    void anaClaraCanEditOnlyTheStockQuantityColumn() throws Exception {
+    void anaClaraEditsOnlyTheStockQuantityAndTheSalePriceColumns() throws Exception {
         screen = SaleScreenHarness.open(context, User.Role.OPERADOR, "Ana Clara");
         screen.showPage("estoque");
 
         assertTrue(isColumnEditable("Qtd. Atual"));
-        for (String lockedColumn : List.of("Código", "Nome", "Vr. Venda", "Qtd. Mín.")) {
+        assertTrue(isColumnEditable("Vr. Venda"));
+        for (String lockedColumn : List.of("Código", "Nome", "Qtd. Mín.")) {
             assertFalse(isColumnEditable(lockedColumn), "coluna deve ficar bloqueada: " + lockedColumn);
         }
     }

@@ -143,12 +143,13 @@ class AuditLogTests {
                 null, true, anaClara));
         assertThrows(ManagerAuthorizationRequiredException.class,
                 () -> productService.changeCode(product.getId(), newCode, anaClara));
+        User maria = persistedUser("Maria", User.Role.OPERADOR);
         assertThrows(ManagerAuthorizationRequiredException.class,
-                () -> productService.modificationPrice(product.getCode(), new BigDecimal("9.00"), anaClara));
+                () -> productService.modificationPrice(product.getCode(), new BigDecimal("9.00"), maria));
         assertThrows(ManagerAuthorizationRequiredException.class,
-                () -> productService.adjustPricesByPercent(BigDecimal.TEN, "categoria-inexistente", anaClara));
+                () -> productService.adjustPricesByPercent(BigDecimal.TEN, "categoria-inexistente", maria));
         assertThrows(ManagerAuthorizationRequiredException.class,
-                () -> bulkEditService.applyPrice(List.of(product.getId()), new BigDecimal("9.00"), anaClara));
+                () -> bulkEditService.applyPrice(List.of(product.getId()), new BigDecimal("9.00"), maria));
         assertThrows(ManagerAuthorizationRequiredException.class,
                 () -> bulkEditService.applyDescription(List.of(product.getId()), "Outro nome", anaClara));
         assertThrows(ManagerAuthorizationRequiredException.class,
@@ -250,7 +251,8 @@ class AuditLogTests {
     @Test
     void changeWithoutAnIdentifiedUserIsRecordedAsSystem() {
         LocalDateTime before = LocalDateTime.now().minusSeconds(1);
-        bulkEditService.applyMinStock(List.of(product.getId()), new BigDecimal("4"));
+        productService.update(product.getId(), "Produto auditado", Product.Unidade.UN, new BigDecimal("5.00"),
+                new BigDecimal("3.00"), new BigDecimal("4"), null, true);
 
         AuditLog systemRecord = auditLogService.byPeriod(before, LocalDateTime.now().plusSeconds(1), 0, 50)
                 .getContent().stream()

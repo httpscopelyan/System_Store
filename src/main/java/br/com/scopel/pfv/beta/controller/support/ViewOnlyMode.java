@@ -15,7 +15,8 @@ public final class ViewOnlyMode {
     private ViewOnlyMode() {
     }
 
-    public static void apply(User user, TableView<?> table, TableColumn<?, ?> stockQuantityColumn) {
+    public static void apply(User user, TableView<?> table, TableColumn<?, ?> stockQuantityColumn,
+                             TableColumn<?, ?> priceColumn) {
         boolean stockQuantityOnly = StaffPermissions.isStockQuantityOnly(user);
         boolean canRegister = StaffPermissions.canRegisterProducts(user);
         if (!stockQuantityOnly && !StaffPermissions.isFullyReadOnly(user)) {
@@ -24,6 +25,7 @@ public final class ViewOnlyMode {
         if (stockQuantityOnly) {
             table.getColumns().stream()
                     .filter(column -> column != stockQuantityColumn)
+                    .filter(column -> column != priceColumn || !StaffPermissions.canEditPrices(user))
                     .forEach(column -> column.setEditable(false));
         } else {
             table.setEditable(false);

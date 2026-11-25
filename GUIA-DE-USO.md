@@ -60,3 +60,24 @@ Plano de 2026-10-31 (`TASKs/IMPLEMENTATION-PLAN.md`).
 **Testes**
 - `mvn test` precisa do Docker `db_scopel` e de uma sessão com tela (os testes de tela usam JavaFX real). Em
   servidor sem tela use `-DargLine=-Djava.awt.headless=true` para pular esses testes.
+
+---
+
+## Novidades de 2026-11-25
+
+**Gaveta (F12) e impressão**
+- F12 abre a gaveta na hora e nunca fica na fila. Apertar de novo em menos de 2 segundos é ignorado; depois disso, funciona de novo.
+- Se uma via ou cupom está sendo impresso, o botão de emitir via fica desabilitado até terminar e volta sozinho. Nesse tempo o F12 continua funcionando.
+- Se a impressora tinha ficado "offline" no Windows, o sistema tenta voltá-la sozinho antes de abrir a gaveta. Só reinicie a impressora se ela estiver de fato desligada ou sem papel.
+
+**Leitor de código de barras**
+- O leitor só vale nas telas que têm campo de código (Venda, Consulta de preço, Estoque, Entrada, Ajuste, Lotes, Etiquetas, Cadastro/Edição de produto, Compras, Orçamento, Tabelas de preço). Nelas, o código bipado vai para o campo de código mesmo que o foco esteja em outro lugar.
+- Nas demais telas (Caixa, Pagamento, Histórico etc.) o bip é descartado e aparece "Leitor desativado nesta tela".
+- A tecla **V** não volta mais a página; use **Esc** ou o botão Voltar.
+- Só uma cópia do Scopel Store abre por vez.
+- **Na máquina do caixa:** tire o instalador (`ScopelStore-Instalador-*.exe`) da área de trabalho e do Downloads, tire ou renomeie o atalho "Scopel Store" da área de trabalho, desative os atalhos de rotação de tela do driver gráfico (`Ctrl+Alt+setas`) e confira se o leitor envia só o código + Enter. O sistema não controla teclas quando outra janela está em foco.
+
+**Alterar preço sem gerente**
+- Dayana, Beatriz e Ana Clara alteram o preço na tabela do Estoque sem pedir gerente. Tudo fica no Histórico (valor anterior, novo e quem editou).
+- A conta DEV liga ou desliga isso em *Administração → Permissões → "Alterar preços"*. Vale no próximo login da pessoa.
+- Quem não tem a permissão continua precisando da autorização de um gerente, inclusive na tela "Alterar produto" e no reajuste em massa.

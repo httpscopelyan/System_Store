@@ -2,6 +2,7 @@ package br.com.scopel.pfv.beta;
 
 import br.com.scopel.pfv.beta.model.PriceTable;
 import br.com.scopel.pfv.beta.model.Product;
+import br.com.scopel.pfv.beta.model.User;
 import br.com.scopel.pfv.beta.service.PriceTableService;
 import br.com.scopel.pfv.beta.service.ProductService;
 import org.junit.jupiter.api.Test;
@@ -52,11 +53,14 @@ class PriceTableServiceTests {
 
     @Test
     void bulkAdjustByCategoryRaisesPrices() {
+        User manager = new User();
+        manager.setRole(User.Role.GERENTE);
+        manager.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.GERENTE));
         String cat = "CAT" + UUID.randomUUID().toString().substring(0, 6);
         Product a = product(new BigDecimal("10.00"), cat);
         Product b = product(new BigDecimal("20.00"), cat);
 
-        int changed = productService.adjustPricesByPercent(new BigDecimal("10"), cat);
+        int changed = productService.adjustPricesByPercent(new BigDecimal("10"), cat, manager);
 
         assertEquals(2, changed);
         assertEquals(0, new BigDecimal("11.00").compareTo(productService.findCode(a.getCode()).getPrice()));

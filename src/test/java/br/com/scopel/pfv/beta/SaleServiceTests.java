@@ -50,6 +50,13 @@ class SaleServiceTests {
     @Autowired
     private PaymentRepository paymentRepository;
 
+    private User priceEditor() {
+        User manager = new User();
+        manager.setRole(User.Role.GERENTE);
+        manager.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.GERENTE));
+        return manager;
+    }
+
     private User newOperator() {
         User user = new User();
         user.setName("Operador");
@@ -153,7 +160,7 @@ class SaleServiceTests {
         sale = saleService.addItem(sale, product.getCode(), new BigDecimal("2"));
 
         // RN19: change the product price AFTER adding the item
-        productService.modificationPrice(product.getCode(), new BigDecimal("99.99"));
+        productService.modificationPrice(product.getCode(), new BigDecimal("99.99"), priceEditor());
 
         SaleItem item = sale.getItems().get(0);
         assertEquals(0, new BigDecimal("10.00").compareTo(item.getUnitPrice()));

@@ -88,7 +88,7 @@ class ProductBulkEditServiceTests {
         assertThrows(IllegalArgumentException.class,
                 () -> bulkEditService.applyCost(ids(monsterA), new BigDecimal("-1"), manager));
         assertThrows(IllegalArgumentException.class,
-                () -> bulkEditService.applyMinStock(ids(monsterA), new BigDecimal("-1")));
+                () -> bulkEditService.applyMinStock(ids(monsterA), new BigDecimal("-1"), manager));
         assertThrows(IllegalArgumentException.class,
                 () -> bulkEditService.applyMarginPercent(ids(monsterA), new BigDecimal("-1"), manager));
     }
@@ -110,7 +110,7 @@ class ProductBulkEditServiceTests {
 
     @Test
     void minimumStockDoesNotRequireAManager_RN26() {
-        BulkResult result = bulkEditService.applyMinStock(ids(monsterA, monsterB), new BigDecimal("12"));
+        BulkResult result = bulkEditService.applyMinStock(ids(monsterA, monsterB), new BigDecimal("12"), manager);
         assertEquals(2, result.changed());
         assertEquals(0, new BigDecimal("12").compareTo(reload(monsterA).getMinStock()));
     }
@@ -165,8 +165,8 @@ class ProductBulkEditServiceTests {
 
     @Test
     void descriptionMustNotBeBlank_RN26() {
-        assertThrows(IllegalArgumentException.class, () -> bulkEditService.applyDescription(ids(monsterA), "  "));
-        bulkEditService.applyDescription(ids(monsterA), "  Monster Zero  ");
+        assertThrows(IllegalArgumentException.class, () -> bulkEditService.applyDescription(ids(monsterA), "  ", manager));
+        bulkEditService.applyDescription(ids(monsterA), "  Monster Zero  ", manager);
         assertEquals("Monster Zero", reload(monsterA).getDescription());
     }
 
@@ -175,7 +175,7 @@ class ProductBulkEditServiceTests {
         BigDecimal before = reload(monsterA).getQuantity();
         bulkEditService.applyPrice(ids(monsterA), new BigDecimal("1.00"), manager);
         bulkEditService.applyCost(ids(monsterA), new BigDecimal("1.00"), manager);
-        bulkEditService.applyMinStock(ids(monsterA), new BigDecimal("1"));
+        bulkEditService.applyMinStock(ids(monsterA), new BigDecimal("1"), manager);
         assertEquals(0, before.compareTo(reload(monsterA).getQuantity()));
     }
 }

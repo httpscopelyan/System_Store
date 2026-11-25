@@ -6,12 +6,15 @@ import br.com.scopel.pfv.beta.exception.InsufficientPaymentException;
 import br.com.scopel.pfv.beta.exception.InvalidDiscountException;
 import br.com.scopel.pfv.beta.exception.PaymentMethodNotAvailableException;
 import br.com.scopel.pfv.beta.exception.SplitPaymentInProgressException;
+import br.com.scopel.pfv.beta.model.AuditAction;
+import br.com.scopel.pfv.beta.model.AuditEntityType;
 import br.com.scopel.pfv.beta.model.CardType;
 import br.com.scopel.pfv.beta.model.Payment;
 import br.com.scopel.pfv.beta.model.PaymentInput;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.repository.PaymentRepository;
+import br.com.scopel.pfv.beta.service.audit.AuditLogService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +31,13 @@ public class SalePaymentService {
 
     private final PaymentRepository paymentRepository;
     private final SaleFinalizer saleFinalizer;
+    private final AuditLogService auditLogService;
 
-    public SalePaymentService(PaymentRepository paymentRepository, SaleFinalizer saleFinalizer) {
+    public SalePaymentService(PaymentRepository paymentRepository, SaleFinalizer saleFinalizer,
+                              AuditLogService auditLogService) {
         this.paymentRepository = paymentRepository;
         this.saleFinalizer = saleFinalizer;
+        this.auditLogService = auditLogService;
     }
 
     public BigDecimal calculateChange(BigDecimal total, BigDecimal amountReceived) {
@@ -62,6 +68,16 @@ public class SalePaymentService {
         requireInPayment(sale);
         savePayment(sale, PaymentMethod.CARTAO, cardType, sale.getTotal(), noChange(), gatewayOrderId);
         return saleFinalizer.finalizeSale(sale);
+    }
+
+    @Transactional
+    public Sale payCardConfirmedManually(Sale sale, CardType cardType) {
+        Sale finalized = payCard(sale, cardType, null);
+        auditLogService.record(sale.getOperator(), AuditAction.CARD_MANUALLY_CONFIRMED, AuditEntityType.SALE,
+                finalized.getId(), "Venda #" + finalized.getId() + " confirmada manualmente no cartão ("
+                        + cardType.name() + ") sem retorno da maquininha", null,
+                "R$ " + finalized.getTotal().toPlainString());
+        return finalized;
     }
 
     @Transactional

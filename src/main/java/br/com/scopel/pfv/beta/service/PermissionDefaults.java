@@ -9,7 +9,7 @@ import java.util.Set;
 public final class PermissionDefaults {
 
     private static final Set<String> STOCK_QUANTITY_EDITORS = Set.of("dayana", "joao", "ana clara");
-    private static final Set<String> PRICE_EDITORS = Set.of("dayana");
+    private static final Set<String> PRICE_EDITORS = Set.of("dayana", "beatriz", "ana clara");
     private static final String QUANTITY_ONLY = "ana clara";
 
     private PermissionDefaults() {
@@ -25,9 +25,9 @@ public final class PermissionDefaults {
         if (!quantityOnly) {
             permissions.add(Permission.SEE_COST_FIELDS);
             permissions.add(Permission.EDIT_PRODUCT_DATA);
-            if (role == User.Role.GERENTE || isNamed(login, name, PRICE_EDITORS)) {
-                permissions.add(Permission.EDIT_PRICES);
-            }
+        }
+        if (role == User.Role.GERENTE && !quantityOnly || isNamed(login, name, PRICE_EDITORS)) {
+            permissions.add(Permission.EDIT_PRICES);
         }
         if (isNamed(login, name, STOCK_QUANTITY_EDITORS)) {
             permissions.add(Permission.EDIT_STOCK_QUANTITY);

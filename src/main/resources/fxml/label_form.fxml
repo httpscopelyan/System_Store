@@ -25,7 +25,7 @@
             </VBox>
             <HBox spacing="12" alignment="CENTER_LEFT">
                 <Button onAction="#onPreview" text="Pré-visualizar"/>
-                <Button onAction="#onPrint" text="Imprimir" styleClass="success-button"/>
+                <Button fx:id="printButton" onAction="#onPrint" text="Imprimir" styleClass="success-button"/>
             </HBox>
             <Label fx:id="messageLabel" styleClass="form-message" wrapText="true"/>
         </VBox>

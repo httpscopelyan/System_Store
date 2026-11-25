@@ -43,7 +43,7 @@ import java.util.function.Consumer;
  * Atualização remota do PDV (GitHub Raw + Releases).
  *
  * Ciclo completo:
- *  1. 15 s após o boot e a cada N min, lê o version.json e compara por SemVer.
+ *  1. 20 s após o boot e a cada 60 min, lê o version.json e compara por SemVer.
  *  2. Havendo versão nova, avisa os ouvintes (UI) — o operador escolhe "Atualizar e reiniciar".
  *  3. {@link #applyUpdateAndRestart}: baixa para .part, valida status/tamanho/SHA-256/JAR,
  *     extrai o atualizador para uma pasta temporária, o executa em processo separado e
@@ -57,6 +57,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class UpdateService {
 
+    private static final long FIRST_CHECK_DELAY_SECONDS = 20;
     private static final String BLOCKED_FILE = "blocked-version.txt";
     private static final String UPDATER_CLASS = "br/com/scopel/pfv/updater/UpdaterMain.class";
 
@@ -110,7 +111,8 @@ public class UpdateService {
             return t;
         });
         long intervalSeconds = Math.max(1, config.getCheckIntervalSeconds());
-        scheduler.scheduleWithFixedDelay(this::checkQuietly, intervalSeconds, intervalSeconds, TimeUnit.SECONDS);
+        scheduler.scheduleWithFixedDelay(this::checkQuietly, Math.min(intervalSeconds, FIRST_CHECK_DELAY_SECONDS),
+                intervalSeconds, TimeUnit.SECONDS);
     }
 
     @PreDestroy

@@ -62,7 +62,8 @@ public class ProductChangeAudit {
                                    BigDecimal previousAmount, BigDecimal newAmount) {
         if (differs(previousAmount, newAmount)) {
             auditLogService.record(actor, action, AuditEntityType.PRODUCT, product.getId(),
-                    label + ": " + identify(product), money(previousAmount), money(newAmount));
+                    AuthorizationTrail.describe(actor, label + ": " + identify(product)), money(previousAmount),
+                    money(newAmount));
         }
     }
 

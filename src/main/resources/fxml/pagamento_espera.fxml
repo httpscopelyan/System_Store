@@ -38,6 +38,8 @@
 
             <HBox spacing="12" alignment="CENTER">
                 <Button fx:id="confirmButton" text="Confirmar (ENTER)" onAction="#onConfirm" styleClass="primary-button" defaultButton="true"/>
+                <Button fx:id="manualConfirmButton" text="Confirmar sem maquininha" onAction="#onManualConfirm"
+                        styleClass="secondary-button" visible="false" managed="false"/>
                 <Button text="Cancelar (ESC)" onAction="#onCancel" styleClass="danger-button"/>
             </HBox>
         </VBox>

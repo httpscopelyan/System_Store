@@ -5,8 +5,11 @@ import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.service.AppSettingService;
 import br.com.scopel.pfv.beta.service.PixService;
 import br.com.scopel.pfv.beta.service.StockCostMode;
+import br.com.scopel.pfv.beta.service.UpdateService;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -41,13 +44,49 @@ public class ConfigFormController {
 
     public static final String FULLSCREEN = "ui.fullscreen";
 
-    public ConfigFormController(AppSettingService settings, ThemeManager themeManager) {
+    @FXML private Label versionLabel;
+    @FXML private Label updateStatusLabel;
+    @FXML private Button checkUpdateButton;
+
+    private final UpdateService updateService;
+
+    public ConfigFormController(AppSettingService settings, ThemeManager themeManager,
+                                UpdateService updateService) {
         this.settings = settings;
         this.themeManager = themeManager;
+        this.updateService = updateService;
+    }
+
+    @FXML
+    public void onCheckUpdate() {
+        checkUpdateButton.setDisable(true);
+        updateStatusLabel.setText("Verificando...");
+        Thread worker = new Thread(() -> {
+            String result;
+            try {
+                result = updateService.checkNow()
+                        .map(info -> "Nova versão " + info.version()
+                                + " disponível. Use o botão \"Atualizar e reiniciar\" na barra superior.")
+                        .orElse("Você já está na versão mais recente.");
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                result = "Verificação cancelada.";
+            } catch (Exception failure) {
+                result = "Não foi possível verificar agora. Confira a conexão com a internet.";
+            }
+            String shown = result;
+            Platform.runLater(() -> {
+                updateStatusLabel.setText(shown);
+                checkUpdateButton.setDisable(false);
+            });
+        }, "update-check-manual");
+        worker.setDaemon(true);
+        worker.start();
     }
 
     @FXML
     public void initialize() {
+        versionLabel.setText("Versão instalada: " + updateService.getCurrentVersion());
         if (themeBox != null) {
             themeBox.setItems(FXCollections.observableArrayList(
                     "classic", "sky", "turquoise", "silver", "dark", "navy"));

@@ -124,6 +124,19 @@ final class PaymentScreenFixture {
         field.set(controller, scripted);
     }
 
+    void answerManualApproval(boolean confirmed) throws Exception {
+        Field field = controller.getClass().getDeclaredField("manualApproval");
+        field.setAccessible(true);
+        field.set(controller, new br.com.scopel.pfv.beta.controller.support.ManualCardApproval(message -> confirmed));
+    }
+
+    void clickManualConfirm() throws Exception {
+        onFx(() -> {
+            ((javafx.scene.control.Button) node("manualConfirmButton")).fire();
+            return null;
+        });
+    }
+
     <T> T onFx(Callable<T> action) throws Exception {
         if (javafx.application.Platform.isFxApplicationThread()) {
             return action.call();

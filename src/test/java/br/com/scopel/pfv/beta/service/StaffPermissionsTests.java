@@ -60,8 +60,8 @@ class StaffPermissionsTests {
         assertTrue(StaffPermissions.canEditPrices(user("Dayana", User.Role.OPERADOR)));
         assertTrue(StaffPermissions.canEditPrices(user("Chefe", User.Role.GERENTE)));
         assertFalse(StaffPermissions.canEditPrices(user("Joao", User.Role.OPERADOR)));
-        assertFalse(StaffPermissions.canEditPrices(user("Ana Clara", User.Role.OPERADOR)));
-        assertFalse(StaffPermissions.canEditPrices(user("Ana Clara", User.Role.GERENTE)));
+        assertTrue(StaffPermissions.canEditPrices(user("Ana Clara", User.Role.OPERADOR)));
+        assertTrue(StaffPermissions.canEditPrices(user("Beatriz", User.Role.OPERADOR)));
     }
 
     @Test

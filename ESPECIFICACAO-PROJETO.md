@@ -683,6 +683,15 @@ venda → bipar → somar → finalizar → baixa de estoque.
 
 ## 15. Convenções e como trabalhar no projeto
 
+- **0023 — Impressão e gaveta em pistas independentes, sem fila (2026-11-25):**
+  - **Status:** Aceito.
+  - **Decisão:** `BackgroundPrinting.run` aceita uma impressão por vez e recusa a seguinte (sem fila); `runDrawer` roda numa pista própria e um novo pedido interrompe e substitui o anterior. `EscPosPrinter.openDrawer` não compartilha trava nem dreno com `print`. O spooler falha aberto: se a trava não vier em 500 ms, a gaveta segue sem a checagem.
+  - **Consequências:** uma impressão travada não segura mais a gaveta; o estado offline do Windows é recuperado sozinho; os botões de via ficam desabilitados só durante a impressão.
+- **0024 — Leitor de código de barras por página (2026-11-25):**
+  - **Status:** Aceito.
+  - **Decisão:** `ScannerGate` (filtro na única Scene, o primeiro a ser registrado) detecta rajadas de teclas e as descarta fora de campo de texto em páginas sem leitor, ou as redireciona ao campo de código nas páginas com leitor (`Page.acceptsScanner()`).
+  - **Consequências:** o primeiro caractere de uma rajada ainda chega à tela (não há como saber antes); por isso códigos que começam com 1–4 em telas de pagamento exigem atenção. O app não intercepta teclas entregues à área de trabalho do Windows quando perde o foco.
+
 - **Regra de negócio só no service**; controller orquestra, repository só persiste.
 - **Dinheiro sempre BigDecimal**; **código de barras sempre String**.
 - **Senha sempre via service (BCrypt)** — nunca inserir usuário por SQL cru (fura

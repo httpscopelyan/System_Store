@@ -5,6 +5,30 @@ pontuais ficam em `FIXES.md`.
 
 ---
 
+## 2026-11-25 — Gaveta/impressora sem fila, leitor por página, preço sem gerente, boot
+
+### Entregue
+- **F1 gaveta/impressora:** `BackgroundPrinting` (pista de impressão que recusa, pista da gaveta que substitui), `EscPosPrinter.openDrawer` sem trava, `WindowsPrintSpool` com `tryLock` temporizado e recuperação do estado offline, purga só de trabalhos velhos (>20 s), debounce de 2 s no F12, botões de via desabilitados só enquanto imprime. Testes: `DrawerShortcutTests`, `BackgroundPrintingTests`.
+- **F2 leitor:** `ScannerGate`, `Page.acceptsScanner()`, `SingleInstanceGuard`, tecla `V` removida de `EscapeToBack`. Testes: `ScannerGateTests`, `SingleInstanceGuardTests`.
+- **F3 preço:** `EDIT_PRICES` para Beatriz e Ana Clara (V41 + `PermissionDefaults`), `ViewOnlyMode` libera a coluna "Vr. Venda" para quem tem a permissão, furo da tela "Alterar produto" fechado, overloads sem `actor` removidos, `AuthorizationTrail` para registrar quem editou e quem autorizou. O DEV continua ligando/desligando a permissão na aba Permissões.
+- **F4 boot:** `show-sql` desligado, Hikari 5/1, atualização checada a cada 60 min (1ª em 20 s; antes era a cada 20 s), `markStarted` em thread daemon.
+
+### Correções ao plano (verificadas lendo o código)
+- O "vazamento de filtros do `BackBarController`" **não existe**: `EscapeToBack` já remove o filtro quando a página sai da cena.
+- Excluir a autoconfiguração de e-mail não traria ganho: o `JavaMailSender` só é criado com `spring.mail.host`.
+- Cache no `AppSettingService` descartado: os testes revertem transações e o cache ficaria obsoleto.
+
+### Pendências (retomar daqui)
+- **Validação manual com a POS-80 e o leitor reais:** F12 com a impressora desligada e religada (deve abrir sem reiniciar); F12 durante a emissão de uma via (a gaveta abre e o cupom continua); bip em Caixa, Pagamento e Histórico (nada deve acontecer, aparece "Leitor desativado nesta tela"); bip na Venda com o foco em um botão.
+- **Checklist de máquina** (o app não controla teclas enviadas à área de trabalho): tirar `ScopelStore-Instalador-*.exe` da área de trabalho e do Downloads, tirar ou renomear o atalho "Scopel Store" da área de trabalho, desativar os atalhos de rotação de tela do driver gráfico (`Ctrl+Alt+setas`) e conferir que o leitor envia só código + Enter.
+- Registrar o motivo no log de preço (hoje só valor anterior/novo e quem editou/autorizou).
+- A tela "✎ Alterar produto" só mostra a mensagem de permissão ao recusar preço; não oferece autorização de gerente.
+- `ProductService.update` sem `actor` continua sem validar (usado pelo registro "Sistema" nos testes).
+- Cache de FXML no `Navigator` (recarrega o FXML a cada navegação); precisa de teste dedicado antes.
+- Medir o tempo de boot antes/depois na máquina da loja (não medido nesta rodada).
+
+---
+
 ## 2026-10-22 — Time de Validação PDV: #G3 (consulta de preço) + barra do último item
 
 Rodada do time de validação (`/validacao-pdv G3` + adição pedida pelo dev), esteira

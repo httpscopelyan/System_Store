@@ -4,6 +4,7 @@ import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.ManagerAuthorizationController;
 import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.model.User;
+import br.com.scopel.pfv.beta.service.audit.AuthorizationTrail;
 import javafx.stage.Window;
 
 import java.util.Optional;
@@ -35,7 +36,12 @@ public final class ManagerAuthorizedAction {
             if (authorizingManager.isEmpty()) {
                 return null;
             }
-            return action.run(authorizingManager.get());
+            AuthorizationTrail.begin(userSession.getLoggedUser());
+            try {
+                return action.run(authorizingManager.get());
+            } finally {
+                AuthorizationTrail.end();
+            }
         }
     }
 }

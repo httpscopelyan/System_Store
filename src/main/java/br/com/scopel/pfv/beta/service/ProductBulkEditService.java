@@ -87,11 +87,6 @@ public class ProductBulkEditService {
     }
 
     @Transactional
-    public BulkResult applyCode(Long productId, String code) {
-        return applyCode(productId, code, null);
-    }
-
-    @Transactional
     public BulkResult applyCode(Long productId, String code, User actor) {
         productService.changeCode(productId, code, actor);
         return new BulkResult(1, 0);
@@ -110,11 +105,6 @@ public class ProductBulkEditService {
     }
 
     @Transactional
-    public BulkResult applyMinStock(Collection<Long> productIds, BigDecimal minStock) {
-        return applyMinStock(productIds, minStock, null);
-    }
-
-    @Transactional
     public BulkResult applyMinStock(Collection<Long> productIds, BigDecimal minStock, User actor) {
         requireProductDataEditor(actor);
         requireNonNegative(minStock, "O estoque mínimo");
@@ -123,11 +113,6 @@ public class ProductBulkEditService {
             product.setMinStock(normalized);
             return true;
         });
-    }
-
-    @Transactional
-    public BulkResult applyDescription(Collection<Long> productIds, String description) {
-        return applyDescription(productIds, description, null);
     }
 
     @Transactional
@@ -167,7 +152,7 @@ public class ProductBulkEditService {
     }
 
     private void requireProductDataEditor(User actor) {
-        if (actor != null && !StaffPermissions.canEditProductData(actor)) {
+        if (actor == null || !StaffPermissions.canEditProductData(actor)) {
             throw new ManagerAuthorizationRequiredException();
         }
     }

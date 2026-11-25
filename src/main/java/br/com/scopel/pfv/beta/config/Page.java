@@ -46,4 +46,12 @@ public enum Page {
     public String getPath() {
         return path;
     }
+
+    public boolean acceptsScanner() {
+        return switch (this) {
+            case VENDA, CONSULTA_PRECO, PRODUTOS, EDITAR_PRODUTO, ESTOQUE, ENTRADA_ESTOQUE, AJUSTE_ESTOQUE,
+                 LOTES, ETIQUETAS, TABELAS_PRECO, COMPRAS, ORCAMENTO -> true;
+            default -> false;
+        };
+    }
 }

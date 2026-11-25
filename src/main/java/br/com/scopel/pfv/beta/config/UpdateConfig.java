@@ -28,7 +28,7 @@ public class UpdateConfig {
             "https://raw.githubusercontent.com/httpscopelyan/System_Store/main/version.json";
 
     /** Intervalo entre verificações automáticas, em segundos. */
-    private int checkIntervalSeconds = 20;
+    private int checkIntervalSeconds = 3600;
 
     /**
      * Pasta de estado do atualizador (download, marcador de partida, resultado,

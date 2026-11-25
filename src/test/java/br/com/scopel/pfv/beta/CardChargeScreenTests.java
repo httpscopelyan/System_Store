@@ -8,6 +8,7 @@ import br.com.scopel.pfv.beta.model.CardType;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.service.ReceiptPayment;
+import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.control.TextField;
 import org.junit.jupiter.api.BeforeAll;
@@ -208,5 +209,75 @@ class CardChargeScreenTests {
         verify(screen.saleService, times(1)).payCard(eq(screen.sale), eq(CardType.DEBITO), any());
         verify(screen.navigator).navigate(Page.VENDA_FINALIZADA);
         assertFalse(screen.session.getUltimaVenda() == null);
+    }
+
+    @Test
+    void manualConfirmWhileWaitingCancelsOnTheMachineAndRegistersTheSaleManually() throws Exception {
+        ScriptedGateway gateway = new ScriptedGateway(true).script(PENDING);
+        PaymentScreenFixture screen = open(gateway);
+        when(screen.saleService.payCardConfirmedManually(any(), any())).thenReturn(screen.sale);
+        Thread.sleep(300);
+        screen.answerManualApproval(true);
+
+        screen.clickManualConfirm();
+
+        verify(screen.saleService, timeout(5000)).payCardConfirmedManually(screen.sale, CardType.DEBITO);
+        verify(screen.navigator, timeout(2000)).navigate(Page.VENDA_FINALIZADA);
+        assertEquals(1, gateway.cancels.get(), "a cobrança pendente precisa ser cancelada na maquininha");
+        verify(screen.saleService, never()).payCard(any(), any(), any());
+        assertEquals(PaymentMethod.CARTAO, screen.session.getUltimaForma());
+    }
+
+    @Test
+    void manualConfirmRefusedByTheOperatorChangesNothing() throws Exception {
+        ScriptedGateway gateway = new ScriptedGateway(true).script(PENDING, PENDING);
+        PaymentScreenFixture screen = open(gateway);
+        Thread.sleep(300);
+        screen.answerManualApproval(false);
+
+        screen.clickManualConfirm();
+        Thread.sleep(500);
+
+        assertEquals(0, gateway.cancels.get());
+        verify(screen.saleService, never()).payCardConfirmedManually(any(), any());
+        verify(screen.saleService, never()).payCard(any(), any(), any());
+        verify(screen.navigator, never()).navigate(any());
+    }
+
+    @Test
+    void manualConfirmWhenTheCustomerHadAlreadyPaidRegistersTheNormalPaymentWithTheOrderId() throws Exception {
+        ScriptedGateway gateway = new ScriptedGateway(true).script(PENDING, APPROVED).cancelFails();
+        PaymentScreenFixture screen = open(gateway);
+        Thread.sleep(300);
+        screen.answerManualApproval(true);
+
+        screen.clickManualConfirm();
+
+        verify(screen.saleService, timeout(POLL_WAIT * 1000)).payCard(eq(screen.sale), eq(CardType.DEBITO),
+                eq("order-1"));
+        verify(screen.saleService, never()).payCardConfirmedManually(any(), any());
+    }
+
+    @Test
+    void manualConfirmAfterTheMachineDeclinedDoesNotTryToCancelAgain() throws Exception {
+        ScriptedGateway gateway = new ScriptedGateway(true).script(DECLINED, DECLINED);
+        PaymentScreenFixture screen = open(gateway);
+        when(screen.saleService.payCardConfirmedManually(any(), any())).thenReturn(screen.sale);
+        assertTrue(screen.statusContains("Nenhum valor foi registrado", POLL_WAIT));
+        screen.answerManualApproval(true);
+
+        screen.clickManualConfirm();
+
+        verify(screen.saleService, timeout(3000)).payCardConfirmedManually(screen.sale, CardType.DEBITO);
+        assertEquals(0, gateway.cancels.get());
+    }
+
+    @Test
+    void manualConfirmButtonIsOnlyVisibleWhileTheChargeGoesThroughTheMachine() throws Exception {
+        PaymentScreenFixture integrated = open(new ScriptedGateway(true).script(PENDING));
+        PaymentScreenFixture typed = open(new ScriptedGateway(false));
+
+        assertTrue(integrated.onFx(() -> ((Button) integrated.node("manualConfirmButton")).isVisible()));
+        assertFalse(typed.onFx(() -> ((Button) typed.node("manualConfirmButton")).isVisible()));
     }
 }

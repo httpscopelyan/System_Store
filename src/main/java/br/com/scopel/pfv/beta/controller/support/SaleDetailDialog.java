@@ -50,6 +50,7 @@ public final class SaleDetailDialog {
         Label printStatus = label("", "win-label");
         Button printButton = new Button("Imprimir nota");
         printButton.getStyleClass().add("primary-button");
+        printButton.disableProperty().bind(BackgroundPrinting.printingProperty());
         printButton.setOnAction(event -> {
             printStatus.setText("Nota enviada para a impressora.");
             printCopy.accept(saleId, message -> printStatus.setText("Falha ao imprimir a nota: " + message));

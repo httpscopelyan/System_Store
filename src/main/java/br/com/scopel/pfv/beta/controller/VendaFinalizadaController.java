@@ -41,6 +41,7 @@ public class VendaFinalizadaController {
     @FXML private Label changeLabel;
     @FXML private Label copyStatusLabel;
     @FXML private Node novaVendaButton;
+    @FXML private Node novaViaButton;
 
     public VendaFinalizadaController(UserSession userSession, Navigator navigator, ReceiptService receiptService,
                                      SplitPaymentService splitPaymentService) {
@@ -67,6 +68,8 @@ public class VendaFinalizadaController {
         if (mostrarTroco) {
             changeLabel.setText("R$ " + MONEY.format(troco));
         }
+
+        novaViaButton.disableProperty().bind(BackgroundPrinting.printingProperty());
 
         Platform.runLater(() -> {
             if (novaVendaButton != null) {
@@ -104,8 +107,9 @@ public class VendaFinalizadaController {
         Runnable printing = userSession.getUltimaForma() == null
                 ? splitCopyPrinting(venda)
                 : singleCopyPrinting(venda);
-        BackgroundPrinting.run(printing, message -> copyStatusLabel.setText("Falha ao imprimir a 2ª via: " + message));
-        copyStatusLabel.setText("2ª via enviada para a impressora.");
+        if (BackgroundPrinting.run(printing, message -> copyStatusLabel.setText("Falha ao imprimir a 2ª via: " + message))) {
+            copyStatusLabel.setText("2ª via enviada para a impressora.");
+        }
     }
 
     private Runnable splitCopyPrinting(Sale venda) {
