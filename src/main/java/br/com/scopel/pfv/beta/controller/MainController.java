@@ -12,6 +12,7 @@ import br.com.scopel.pfv.beta.controller.support.UpdateNotice;
 import br.com.scopel.pfv.beta.hardware.PrinterPort;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.User;
+import br.com.scopel.pfv.beta.service.StaffPermissions;
 import br.com.scopel.pfv.beta.service.UpdateService;
 import br.com.scopel.pfv.beta.service.alert.StockAlertService;
 import javafx.application.Platform;
@@ -50,6 +51,7 @@ public class MainController {
     @FXML private Button updateButton;
     @FXML private Button configButton;
     @FXML private Button adminButton;
+    @FXML private Button purchaseButton;
     @FXML private Button moreButton;
     @FXML private javafx.scene.layout.TilePane blocksBar;
     @FXML private Button backButton;
@@ -93,7 +95,8 @@ public class MainController {
         boolean gerente = user != null && user.hasManagerAccess();
         boolean dev = user != null && user.getRole() == User.Role.DEV;
         moreBlocks = new MoreBlocks(blocksBar, moreButton,
-                button -> (button != configButton || gerente) && (button != adminButton || dev));
+                button -> (button != configButton || gerente) && (button != adminButton || dev)
+                        && (button != purchaseButton || StaffPermissions.canSeeCostFields(user)));
 
         ShellClock.restart(dateTimeLabel, DATE_TIME);
         setupShortcuts();
@@ -154,7 +157,8 @@ public class MainController {
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F2), this::onVender);
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F3), () -> navigator.navigate(Page.ESTOQUE));
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F4), () -> navigator.navigate(Page.CAIXA));
-            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F5), () -> navigator.navigate(Page.COMPRAS));
+            scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F5), () -> {
+                if (StaffPermissions.canSeeCostFields(userSession.getLoggedUser())) navigator.navigate(Page.COMPRAS); });
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F6), () -> navigator.navigate(Page.CLIENTES));
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F7), () -> navigator.navigate(Page.FORNECEDORES));
             scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F8), () -> navigator.navigate(Page.RELATORIOS));

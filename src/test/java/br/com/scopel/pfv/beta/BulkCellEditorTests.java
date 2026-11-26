@@ -1,10 +1,7 @@
 package br.com.scopel.pfv.beta;
 
-import br.com.scopel.pfv.beta.config.ThemeManager;
 import br.com.scopel.pfv.beta.config.UserSession;
-import br.com.scopel.pfv.beta.controller.ManagerAuthorizationController;
 import br.com.scopel.pfv.beta.controller.support.BulkCellEditor;
-import br.com.scopel.pfv.beta.controller.support.ManagerAuthorizedAction;
 import br.com.scopel.pfv.beta.controller.support.ProductSelection;
 import br.com.scopel.pfv.beta.controller.support.ProductTablePresenter;
 import br.com.scopel.pfv.beta.controller.support.ProductTablePresenter.CellEdit;
@@ -16,10 +13,8 @@ import br.com.scopel.pfv.beta.repository.ProductRepository;
 import br.com.scopel.pfv.beta.service.PricingSuggestionService;
 import br.com.scopel.pfv.beta.service.ProductBulkEditService;
 import br.com.scopel.pfv.beta.service.ProductService;
-import br.com.scopel.pfv.beta.service.UserService;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.stage.Window;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +27,6 @@ import java.awt.GraphicsEnvironment;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,8 +44,6 @@ class BulkCellEditorTests {
     @Autowired private ProductRepository productRepository;
     @Autowired private PricingSuggestionService pricingSuggestionService;
     @Autowired private UserSession userSession;
-    @Autowired private UserService userService;
-    @Autowired private ThemeManager themeManager;
 
     private TableView<Product> table;
     private Columns columns;
@@ -59,7 +51,6 @@ class BulkCellEditorTests {
     private ProductTablePresenter presenter;
     private final List<String> confirmations = new ArrayList<>();
     private boolean confirmAnswer = true;
-    private Optional<User> dialogAnswer;
     private Product a;
     private Product b;
     private Product c;
@@ -80,7 +71,6 @@ class BulkCellEditorTests {
         manager.setRole(User.Role.GERENTE);
         manager.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.GERENTE));
         userSession.setLoggedUser(manager);
-        dialogAnswer = Optional.of(manager);
         a = product("Monster A", "10.00", "7.00");
         b = product("Monster B", "10.00", "8.00");
         c = product("Monster C", "10.00", "5.00");
@@ -109,14 +99,7 @@ class BulkCellEditorTests {
     }
 
     private BulkCellEditor editor() {
-        ManagerAuthorizationController dialog = new ManagerAuthorizationController(userService, themeManager) {
-            @Override
-            public Optional<User> requestAuthorization(Window ownerWindow) {
-                return dialogAnswer;
-            }
-        };
-        ManagerAuthorizedAction action = new ManagerAuthorizedAction(dialog, userSession, () -> null);
-        return new BulkCellEditor(bulkEditService, selection, action, message -> {
+        return new BulkCellEditor(bulkEditService, selection, message -> {
             confirmations.add(message);
             return confirmAnswer;
         }, userSession::getLoggedUser);
@@ -220,24 +203,23 @@ class BulkCellEditorTests {
     }
 
     @Test
-    void operatorPriceEditNeedsManagerAuthorizationAndIsRefusedWhenCancelled_RN26() {
+    void operatorWithoutEditPricesIsRefusedWithAMessageAndNoManagerWindow_RN26() {
         User operator = new User();
         operator.setRole(User.Role.OPERADOR);
         operator.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.OPERADOR));
         userSession.setLoggedUser(operator);
-        dialogAnswer = Optional.empty();
         table.getSelectionModel().select(0, columns.price());
         BulkCellEditor.Outcome outcome = editor().commit(edit(EditableColumn.PRICE, columns.price(), a, "1"));
         assertFalse(outcome.applied());
-        assertEquals("Alteração não autorizada.", outcome.message());
+        assertEquals("Seu usuário não tem permissão para esta alteração.", outcome.message());
         assertEquals(new BigDecimal("10.00"), reload(a).getPrice());
     }
 
     @Test
-    void operatorPriceEditSucceedsWhenAManagerAuthorizes_RN26() {
+    void operatorWithEditPricesChangesThePriceDirectly_RN26() {
         User operator = new User();
         operator.setRole(User.Role.OPERADOR);
-        operator.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.OPERADOR));
+        operator.setPermissions(java.util.EnumSet.of(br.com.scopel.pfv.beta.model.Permission.EDIT_PRICES));
         userSession.setLoggedUser(operator);
         table.getSelectionModel().select(0, columns.price());
         BulkCellEditor.Outcome outcome = editor().commit(edit(EditableColumn.PRICE, columns.price(), a, "1"));
@@ -251,7 +233,6 @@ class BulkCellEditorTests {
         operator.setRole(User.Role.OPERADOR);
         operator.setPermissions(br.com.scopel.pfv.beta.service.PermissionDefaults.forAccount(null, null, User.Role.OPERADOR));
         userSession.setLoggedUser(operator);
-        dialogAnswer = Optional.empty();
         table.getSelectionModel().select(0, columns.minStock());
         BulkCellEditor.Outcome outcome = editor().commit(edit(EditableColumn.MIN_STOCK, columns.minStock(), a, "4"));
         assertTrue(outcome.applied());

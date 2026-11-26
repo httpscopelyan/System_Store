@@ -3,6 +3,7 @@ package br.com.scopel.pfv.beta.controller;
 import br.com.scopel.pfv.beta.BetaApplication;
 import br.com.scopel.pfv.beta.config.ThemeManager;
 import br.com.scopel.pfv.beta.config.UserSession;
+import br.com.scopel.pfv.beta.controller.support.PriceByWeightHint;
 import br.com.scopel.pfv.beta.service.StaffPermissions;
 import br.com.scopel.pfv.beta.exception.RegisterProductDuplicateException;
 import br.com.scopel.pfv.beta.model.Product;
@@ -51,6 +52,8 @@ public class QuickProductController {
     @FXML private TextField priceField;
     @FXML private ComboBox<Product.Unidade> unitBox;
     @FXML private Label errorLabel;
+    @FXML private Label priceCaption;
+    @FXML private Label weightHintLabel;
 
     private Stage dialogStage;
     private Product registeredProduct;
@@ -67,6 +70,9 @@ public class QuickProductController {
     public void initialize() {
         unitBox.getItems().setAll(Product.Unidade.values());
         unitBox.setValue(Product.Unidade.UN);
+        PriceByWeightHint.install(unitBox, priceField, priceCaption, weightHintLabel);
+        unitBox.valueProperty().addListener((observable, previous, current) ->
+                Platform.runLater(() -> weightHintLabel.getScene().getWindow().sizeToScene()));
         codeField.setText(barcode == null ? "" : barcode);
         codeField.setEditable(false);
         errorLabel.setText("");

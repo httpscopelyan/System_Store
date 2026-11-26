@@ -81,8 +81,11 @@ public final class SaleDetailDialog {
         itemsTable.setPrefHeight(ITEMS_TABLE_HEIGHT);
         itemsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         itemsTable.getColumns().add(column("Produto", 280, item -> item.productDescription()));
-        itemsTable.getColumns().add(column("Qtd.", 70, item -> MoneyFormat.quantity(item.quantity())));
-        itemsTable.getColumns().add(column("Vr. Unit.", 100, item -> MoneyFormat.format(item.unitPrice())));
+        itemsTable.getColumns().add(column("Qtd.", 70, item -> item.unit().pricedPerHundredGrams()
+                ? item.unit().soldQuantityText(item.quantity())
+                : MoneyFormat.quantity(item.quantity())));
+        itemsTable.getColumns().add(column("Vr. Unit.", 100,
+                item -> MoneyFormat.format(item.unitPrice()) + item.unit().priceSuffix()));
         itemsTable.getColumns().add(column("Subtotal", 100, item -> MoneyFormat.format(item.subtotal())));
         itemsTable.getItems().setAll(items);
         return itemsTable;

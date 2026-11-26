@@ -112,7 +112,8 @@ public final class ProductSuggestionPopup {
 
     private String describe(Product product) {
         return product.getCode() + " — " + product.getDescription() + " — "
-                + MoneyFormat.format(product.getPrice()) + " — " + product.getUnit() + " — "
+                + MoneyFormat.format(product.getPrice()) + product.getUnit().priceSuffix() + " — "
+                + product.getUnit().stockSymbol() + " — "
                 + MoneyFormat.quantity(product.getQuantity()) + " em estoque";
     }
 

@@ -2,6 +2,7 @@ package br.com.scopel.pfv.beta.controller;
 
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
+import br.com.scopel.pfv.beta.controller.support.PriceByWeightHint;
 import br.com.scopel.pfv.beta.service.StaffPermissions;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
 import br.com.scopel.pfv.beta.controller.support.SuggestedPriceBinding;
@@ -47,6 +48,9 @@ public class CreateProductsController {
     @FXML private Node costBox;
     @FXML private Node marginBox;
     @FXML private Node minStockBox;
+    @FXML private Label priceCaption;
+    @FXML private Label costCaption;
+    @FXML private Label weightHintLabel;
 
     public CreateProductsController(ProductService productService,
                                     PricingSuggestionService pricingSuggestionService,
@@ -75,6 +79,8 @@ public class CreateProductsController {
         EnterToNextField.install(this::onSave, enterOrder.toArray(Node[]::new));
         unitBox.getItems().setAll(Product.Unidade.values());
         unitBox.setValue(Product.Unidade.UN);
+        PriceByWeightHint.install(unitBox, priceField, priceCaption, weightHintLabel);
+        PriceByWeightHint.captionCost(unitBox, costCaption);
         activeBox.setSelected(true);
         marginField.setPromptText("Padrão: "
                 + pricingSuggestionService.defaultMarginPercent().stripTrailingZeros().toPlainString());

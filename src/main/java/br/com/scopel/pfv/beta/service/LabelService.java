@@ -21,7 +21,8 @@ public class LabelService {
     public String buildLabel(Product product) {
         StringBuilder sb = new StringBuilder();
         sb.append(product.getDescription()).append('\n');
-        sb.append("R$ ").append(product.getPrice().toPlainString().replace('.', ',')).append('\n');
+        sb.append("R$ ").append(product.getPrice().toPlainString().replace('.', ','))
+                .append(product.getUnit() == null ? "" : product.getUnit().priceSuffix()).append('\n');
         sb.append("*").append(product.getCode()).append("*");   // marca de código de barras
         return sb.toString();
     }

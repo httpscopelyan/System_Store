@@ -1,6 +1,8 @@
 package br.com.scopel.pfv.beta.controller;
 
+import br.com.scopel.pfv.beta.controller.support.CostVisibility;
 import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
+import br.com.scopel.pfv.beta.controller.support.PriceByWeightHint;
 import br.com.scopel.pfv.beta.service.StaffPermissions;
 import br.com.scopel.pfv.beta.config.Navigator;
 import br.com.scopel.pfv.beta.config.Page;
@@ -13,6 +15,7 @@ import br.com.scopel.pfv.beta.service.PricingSuggestionService;
 import br.com.scopel.pfv.beta.service.ProductService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -30,6 +33,7 @@ public class EditProductController {
     private final UserSession userSession;
 
     private Long productId;
+    private boolean seesCostFields;
 
     @FXML private TextField codeField;
     @FXML private Label stockLabel;
@@ -43,6 +47,14 @@ public class EditProductController {
     @FXML private Label profitLabel;
     @FXML private CheckBox activeBox;
     @FXML private Label messageLabel;
+    @FXML private Label priceFormationLabel;
+    @FXML private Label priceCaption;
+    @FXML private Label costCaption;
+    @FXML private Label weightHintLabel;
+    @FXML private Label profitCaption;
+    @FXML private Node costBox;
+    @FXML private Node marginBox;
+    @FXML private Node minStockBox;
 
     public EditProductController(ProductService productService,
                                  PricingSuggestionService pricingSuggestionService,
@@ -55,9 +67,17 @@ public class EditProductController {
 
     @FXML
     public void initialize() {
-        EnterToNextField.install(codeField, descriptionField, unitBox, categoryField, minStockField, costField, marginField,
-                priceField);
+        seesCostFields = StaffPermissions.canSeeCostFields(userSession.getLoggedUser());
+        if (seesCostFields) {
+            EnterToNextField.install(codeField, descriptionField, unitBox, categoryField, minStockField, costField,
+                    marginField, priceField);
+        } else {
+            EnterToNextField.install(codeField, descriptionField, unitBox, categoryField, priceField);
+            CostVisibility.hide(priceFormationLabel, costBox, marginBox, minStockBox, profitCaption, profitLabel);
+        }
         unitBox.getItems().setAll(Product.Unidade.values());
+        PriceByWeightHint.install(unitBox, priceField, priceCaption, weightHintLabel);
+        PriceByWeightHint.captionCost(unitBox, costCaption);
 
         productId = userSession.getProdutoEmEdicaoId();
         if (productId == null) {
@@ -67,21 +87,16 @@ public class EditProductController {
 
         Product product = productService.findById(productId);
         codeField.setText(product.getCode());
-        stockLabel.setText(formatQuantity(product.getQuantity()));
+        stockLabel.setText(formatQuantity(product.getQuantity()) + " " + product.getUnit().stockSymbol());
         descriptionField.setText(product.getDescription());
         unitBox.setValue(product.getUnit());
         categoryField.setText(product.getCategory());
-        costField.setText(plain(product.getCostPrice()));
-        minStockField.setText(formatQuantity(product.getMinStock()));
         activeBox.setSelected(Boolean.TRUE.equals(product.getActive()));
-
-        SuggestedPriceBinding priceBinding =
-                new SuggestedPriceBinding(costField, marginField, priceField, pricingSuggestionService, false);
-        priceBinding.loadPrice(plain(product.getPrice()));
-
-        costField.textProperty().addListener((observable, previous, current) -> refreshProfit());
-        priceField.textProperty().addListener((observable, previous, current) -> refreshProfit());
-        refreshProfit();
+        if (seesCostFields) {
+            showCostFields(product);
+        } else {
+            priceField.setText(plain(product.getPrice()));
+        }
 
         Platform.runLater(() -> codeField.requestFocus());
     }
@@ -103,15 +118,15 @@ public class EditProductController {
                     descriptionField.getText(),
                     unitBox.getValue(),
                     DecimalInput.parseRequired(priceField.getText()),
-                    DecimalInput.parseRequired(costField.getText()),
-                    DecimalInput.parseRequired(minStockField.getText()),
+                    seesCostFields ? DecimalInput.parseRequired(costField.getText()) : null,
+                    seesCostFields ? DecimalInput.parseRequired(minStockField.getText()) : null,
                     categoryField.getText(),
                     activeBox.isSelected(),
                     userSession.getLoggedUser());
             userSession.setProdutoEmEdicaoId(null);
             navigator.navigate(Page.ESTOQUE);
         } catch (NumberFormatException invalidNumber) {
-            messageLabel.setText("Custo, preço ou estoque mínimo inválidos.");
+            messageLabel.setText(seesCostFields ? "Custo, preço ou estoque mínimo inválidos." : "Preço inválido.");
         } catch (ManagerAuthorizationRequiredException notAllowed) {
             messageLabel.setText("Seu usuário não tem permissão para esta alteração.");
         } catch (IllegalArgumentException invalidField) {
@@ -125,6 +140,17 @@ public class EditProductController {
     public void onCancel() {
         userSession.setProdutoEmEdicaoId(null);
         navigator.navigate(Page.ESTOQUE);
+    }
+
+    private void showCostFields(Product product) {
+        costField.setText(plain(product.getCostPrice()));
+        minStockField.setText(formatQuantity(product.getMinStock()));
+        SuggestedPriceBinding priceBinding =
+                new SuggestedPriceBinding(costField, marginField, priceField, pricingSuggestionService, false);
+        priceBinding.loadPrice(plain(product.getPrice()));
+        costField.textProperty().addListener((observable, previous, current) -> refreshProfit());
+        priceField.textProperty().addListener((observable, previous, current) -> refreshProfit());
+        refreshProfit();
     }
 
     private void refreshProfit() {

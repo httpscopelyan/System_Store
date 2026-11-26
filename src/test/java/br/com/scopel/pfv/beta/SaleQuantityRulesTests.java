@@ -100,13 +100,13 @@ class SaleQuantityRulesTests {
     @Test
     void previewLineTotalRoundsHalfUp_RF60() {
         assertEquals(new BigDecimal("29.93"),
-                saleService.previewLineTotal(new BigDecimal("39.90"), new BigDecimal("0.750")));
+                saleService.previewLineTotal(br.com.scopel.pfv.beta.model.Product.Unidade.KG, new BigDecimal("39.90"), new BigDecimal("0.750")));
     }
 
     @Test
     void previewLineTotalIsZeroForMissingOrNonPositiveInput_RF60() {
-        assertEquals(new BigDecimal("0.00"), saleService.previewLineTotal(null, BigDecimal.ONE));
-        assertEquals(new BigDecimal("0.00"), saleService.previewLineTotal(BigDecimal.ONE, BigDecimal.ZERO));
+        assertEquals(new BigDecimal("0.00"), saleService.previewLineTotal(br.com.scopel.pfv.beta.model.Product.Unidade.KG, null, BigDecimal.ONE));
+        assertEquals(new BigDecimal("0.00"), saleService.previewLineTotal(br.com.scopel.pfv.beta.model.Product.Unidade.KG, BigDecimal.ONE, BigDecimal.ZERO));
     }
 
     @Test

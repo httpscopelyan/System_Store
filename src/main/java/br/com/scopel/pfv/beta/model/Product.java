@@ -2,14 +2,70 @@ package br.com.scopel.pfv.beta.model;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 public class Product {
 
     public enum Unidade {
-        UN,
-        KG
-    };
+        UN("UN", "UN", BigDecimal.ONE),
+        KG("KG", "KG", BigDecimal.ONE),
+        G100("100 g", "KG", BigDecimal.TEN);
+
+        private static final int GRAMS_PER_KILO_DIGITS = 3;
+
+        private final String label;
+        private final String stockSymbol;
+        private final BigDecimal pricedPortionsPerStockUnit;
+
+        Unidade(String label, String stockSymbol, BigDecimal pricedPortionsPerStockUnit) {
+            this.label = label;
+            this.stockSymbol = stockSymbol;
+            this.pricedPortionsPerStockUnit = pricedPortionsPerStockUnit;
+        }
+
+        public String stockSymbol() {
+            return stockSymbol;
+        }
+
+        public boolean soldByWeight() {
+            return this != UN;
+        }
+
+        public boolean pricedPerHundredGrams() {
+            return this == G100;
+        }
+
+        public String priceSuffix() {
+            return pricedPerHundredGrams() ? "/100g" : "";
+        }
+
+        public BigDecimal amountFor(BigDecimal unitPrice, BigDecimal stockQuantity) {
+            return unitPrice.multiply(stockQuantity).multiply(pricedPortionsPerStockUnit);
+        }
+
+        public BigDecimal stockQuantityFromTyped(BigDecimal typed) {
+            return pricedPerHundredGrams() ? typed.movePointLeft(GRAMS_PER_KILO_DIGITS) : typed;
+        }
+
+        public String soldQuantityText(BigDecimal stockQuantity) {
+            BigDecimal shown = pricedPerHundredGrams()
+                    ? stockQuantity.movePointRight(GRAMS_PER_KILO_DIGITS)
+                    : stockQuantity;
+            String text = shown.stripTrailingZeros().toPlainString();
+            return pricedPerHundredGrams() ? text + "g" : text;
+        }
+
+        public BigDecimal rebaseAmount(BigDecimal amount, Unidade target) {
+            return amount.multiply(pricedPortionsPerStockUnit)
+                    .divide(target.pricedPortionsPerStockUnit, 2, RoundingMode.HALF_UP);
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +79,7 @@ public class Product {
     @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal quantity;
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 2)
+    @Column(nullable = false, length = 4)
     private Unidade unit;
     @Column(name = "cost_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal costPrice = BigDecimal.ZERO;

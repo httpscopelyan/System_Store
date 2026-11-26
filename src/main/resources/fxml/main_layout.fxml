@@ -21,7 +21,7 @@
                 <Button onAction="#onNavigate" styleClass="block-button" text="💰&#10;Caixa&#10;F4" userData="CAIXA" />
                 <Button onAction="#onNavigate" styleClass="block-button" text="📦&#10;Estoque&#10;F3" userData="ESTOQUE" />
                 <Button fx:id="shoppingListButton" onAction="#onNavigate" styleClass="block-button, block-extra" text="🧺&#10;Lista d/ Compras" userData="LISTA_COMPRAS" />
-                <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="🧾&#10;Compras&#10;F5" userData="COMPRAS" />
+                <Button fx:id="purchaseButton" onAction="#onNavigate" styleClass="block-button, block-extra" text="🧾&#10;Compras&#10;F5" userData="COMPRAS" />
                 <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="👥&#10;Clientes&#10;F6" userData="CLIENTES" />
                 <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="🚚&#10;Fornecedores&#10;F7" userData="FORNECEDORES" />
                 <Button onAction="#onNavigate" styleClass="block-button, block-extra" text="📝&#10;Orçamentos" userData="ORCAMENTO" />

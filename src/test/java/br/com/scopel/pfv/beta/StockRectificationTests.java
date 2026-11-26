@@ -1,8 +1,8 @@
 package br.com.scopel.pfv.beta;
 
-import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.MissingReasonException;
 import br.com.scopel.pfv.beta.exception.ProductNotfindException;
+import br.com.scopel.pfv.beta.model.Permission;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.StockMovement;
 import br.com.scopel.pfv.beta.model.User;
@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -48,6 +49,7 @@ class StockRectificationTests {
     @BeforeEach
     void prepare() {
         manager = persistedUser(User.Role.GERENTE);
+        manager.setPermissions(java.util.EnumSet.allOf(Permission.class));
         operator = persistedUser(User.Role.OPERADOR);
         code = "rect " + UUID.randomUUID().toString().substring(0, 8);
         productService.create(code, "Produto retificado", Product.Unidade.UN, new BigDecimal("5.00"),
@@ -80,12 +82,13 @@ class StockRectificationTests {
     }
 
     @Test
-    void rectificationRecordsReasonAuthorizerAndResultingStock_RN29() {
+    void rectificationRecordsReasonOperatorAndResultingStock_RN29() {
         stockService.adjust(code, new BigDecimal("50"), "contagem errada", manager);
         stockService.rectify(code, new BigDecimal("15"), "erro de contagem", manager);
         StockMovement rectification = stockService.history(code).get(0);
         assertEquals("erro de contagem", rectification.getReason());
-        assertEquals(manager, rectification.getAuthorizedBy());
+        assertEquals(manager, rectification.getOperator());
+        assertNull(rectification.getAuthorizedBy());
         assertEquals(0, new BigDecimal("15").compareTo(rectification.getResultingStock()));
         assertEquals(0, new BigDecimal("35").compareTo(rectification.getQuantity()));
         assertNotNull(rectification.getCorrectedMovement());
@@ -93,10 +96,22 @@ class StockRectificationTests {
     }
 
     @Test
-    void operatorCannotRectify_RN29() {
-        assertThrows(ManagerAuthorizationRequiredException.class,
+    void operatorRectifiesWithoutAManagerAndIsRecorded_RN29() {
+        operator.setPermissions(java.util.EnumSet.of(Permission.EDIT_STOCK_QUANTITY));
+
+        Product after = stockService.rectify(code, new BigDecimal("1"), "erro", operator);
+
+        assertEquals(0, new BigDecimal("1").compareTo(after.getQuantity()));
+        assertEquals(operator, stockService.history(code).get(0).getOperator());
+    }
+
+    @Test
+    void aViewOnlyAccountAndAnUnknownAuthorCannotRectify_RN29() {
+        operator.setPermissions(java.util.EnumSet.of(Permission.REGISTER_PRODUCTS));
+
+        assertThrows(IllegalArgumentException.class,
                 () -> stockService.rectify(code, new BigDecimal("1"), "erro", operator));
-        assertThrows(ManagerAuthorizationRequiredException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> stockService.rectify(code, new BigDecimal("1"), "erro", null));
     }
 

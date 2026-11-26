@@ -48,7 +48,8 @@ public class QuoteController {
     public void initialize() {
         colProduct.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getProduct().getDescription()));
         colQty.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getQuantity().toPlainString()));
-        colPrice.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUnitPrice().toPlainString()));
+        colPrice.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUnitPrice().toPlainString()
+                + c.getValue().getProduct().getUnit().priceSuffix()));
         colTotal.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTotalPrice().toPlainString()));
     }
 

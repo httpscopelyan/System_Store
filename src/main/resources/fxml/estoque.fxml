@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
@@ -37,6 +38,9 @@
                 <TableColumn fx:id="colHandle" text="" prefWidth="30"/>
                 <TableColumn fx:id="colCode" text="Código" prefWidth="130"/>
                 <TableColumn fx:id="colDesc" text="Nome" prefWidth="240"/>
+                <TableColumn fx:id="colUnit" text="Venda por" prefWidth="75" editable="false">
+                    <cellValueFactory><PropertyValueFactory property="unit"/></cellValueFactory>
+                </TableColumn>
                 <TableColumn fx:id="colCost" text="Custo" prefWidth="80"/>
                 <TableColumn fx:id="colProfit" text="Lucro (R$)" prefWidth="85"/>
                 <TableColumn fx:id="colMarginPercent" text="Lucro (%)" prefWidth="85"/>

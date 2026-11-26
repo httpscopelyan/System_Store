@@ -173,21 +173,29 @@ public class ProductService {
         requireProductDataEditor(actor);
         Product product = findById(id);
         ProductSnapshot beforeChange = ProductSnapshot.of(product);
-        if (price != null && product.getPrice() != null && price.compareTo(product.getPrice()) != 0) {
+        requireDescription(description);
+        requireUnit(unit);
+        if (changesPrice(product, price, unit)) {
             requirePriceEditor(actor);
         }
 
-        requireDescription(description);
-        requireUnit(unit);
+        BigDecimal newCost = costPrice;
+        BigDecimal newMinStock = minStock;
+        if (actor != null && !StaffPermissions.canSeeCostFields(actor)) {
+            requireUntouched(costPrice, product.getCostPrice());
+            requireUntouched(minStock, product.getMinStock());
+            newCost = product.getUnit().rebaseAmount(product.getCostPrice(), unit);
+            newMinStock = product.getMinStock();
+        }
         requireNonNegative(price, "O preço");
-        requireNonNegative(costPrice, "O custo");
-        requireNonNegative(minStock, "O estoque mínimo");
+        requireNonNegative(newCost, "O custo");
+        requireNonNegative(newMinStock, "O estoque mínimo");
 
         product.setDescription(description.trim());
         product.setUnit(unit);
         product.setPrice(price.setScale(2, RoundingMode.HALF_UP));
-        product.setCostPrice(costPrice.setScale(2, RoundingMode.HALF_UP));
-        product.setMinStock(minStock.setScale(3, RoundingMode.HALF_UP));
+        product.setCostPrice(newCost.setScale(2, RoundingMode.HALF_UP));
+        product.setMinStock(newMinStock.setScale(3, RoundingMode.HALF_UP));
         product.setCategory(normalizeCategory(category));
         product.setActive(active);
         Product updated = repository.save(product);
@@ -305,6 +313,20 @@ public class ProductService {
         boolean fillsCostFields = (costPrice != null && costPrice.signum() != 0)
                 || (minStock != null && minStock.signum() != 0);
         if (actor != null && fillsCostFields && !StaffPermissions.canSeeCostFields(actor)) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+    }
+
+    private boolean changesPrice(Product product, BigDecimal price, Product.Unidade unit) {
+        boolean differentValue = price != null && product.getPrice() != null
+                && price.compareTo(product.getPrice()) != 0;
+        boolean differentBasis = product.getUnit() != null
+                && product.getUnit().pricedPerHundredGrams() != unit.pricedPerHundredGrams();
+        return differentValue || differentBasis;
+    }
+
+    private void requireUntouched(BigDecimal submitted, BigDecimal stored) {
+        if (submitted != null && (stored == null || submitted.compareTo(stored) != 0)) {
             throw new ManagerAuthorizationRequiredException();
         }
     }

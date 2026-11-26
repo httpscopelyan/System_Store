@@ -17,11 +17,11 @@
                 </VBox>
                 <HBox spacing="16">
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label text="Quantidade" styleClass="form-label"/>
+                        <Label text="Quantidade (produto pesado: em KG)" styleClass="form-label"/>
                         <TextField fx:id="quantityField" promptText="Ex: 10" styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label text="Custo unitário (opcional)" styleClass="form-label"/>
+                    <VBox fx:id="unitCostBox" spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Custo unitário (opcional; produto de 100 g: custo de 100 g)" styleClass="form-label"/>
                         <TextField fx:id="unitCostField" promptText="Ex: 4,50" styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
                 </HBox>

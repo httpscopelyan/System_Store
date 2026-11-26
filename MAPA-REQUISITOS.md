@@ -202,10 +202,10 @@ com JavaFX real); falta a validação manual do dev com `mvn javafx:run`.
 | RN23 | Aviso por e-mail nunca derruba o app e não repete corpo idêntico dentro do intervalo | ✅* |
 | RN24 | Quantidade por item limitada (`sale.max_quantity_per_item`, padrão 999) | ✅* |
 | RN25 | Escolher na lista de sugestões nunca adiciona sem confirmar a quantidade | ✅* |
-| RN26 | Edição em lote: quantidade atual nunca editável; preço, custo e margem exigem gerente | ✅* |
+| RN26 | Edição em lote: preço exige a permissão "Alterar preços", custo e margem exigem gerente com "Ver custo"; sem janela de autorização (2026-11-26) | ✅* |
 | RN27 | Preço sugerido nunca sobrescreve o preço digitado pelo usuário | ✅* |
 | RN28 | Motivo (3+ caracteres) obrigatório em sangria, suprimento e ajuste de estoque | ✅* |
-| RN29 | Retificação é movimento compensatório com gerente e motivo; o original nunca é alterado | ✅* |
+| RN29 | Retificação é movimento compensatório com motivo; o original nunca é alterado. Gerente só no caixa (2026-11-26) | ✅* |
 | RN30 | Voltar usa histórico de 10 páginas e nunca reentra em telas de pagamento | ✅* |
 | RN31 | Apagar produto = inativar (nunca excluir de fato, RF03) e exige gerente | ✅* |
 | RN32 | Total do produto na venda (já adicionado + novo) não pode passar do estoque, salvo `sale.allow_negative_stock` | ✅* |

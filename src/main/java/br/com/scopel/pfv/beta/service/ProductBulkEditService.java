@@ -51,6 +51,7 @@ public class ProductBulkEditService {
     @Transactional
     public BulkResult applyCost(Collection<Long> productIds, BigDecimal cost, User actor) {
         requireManager(actor);
+        requireCostViewer(actor);
         requireNonNegative(cost, "O custo");
         BigDecimal normalized = cost.setScale(2, RoundingMode.HALF_UP);
         return update(productIds, actor, product -> {
@@ -62,6 +63,7 @@ public class ProductBulkEditService {
     @Transactional
     public BulkResult applyMarginPercent(Collection<Long> productIds, BigDecimal marginPercent, User actor) {
         requireManager(actor);
+        requireCostViewer(actor);
         requireNonNegative(marginPercent, "A margem");
         return update(productIds, actor, product -> {
             BigDecimal price = pricingSuggestionService.suggestFor(product.getCostPrice(), marginPercent);
@@ -76,6 +78,7 @@ public class ProductBulkEditService {
     @Transactional
     public BulkResult applySuggestedPrice(Collection<Long> productIds, User actor) {
         requirePriceEditor(actor);
+        requireCostViewer(actor);
         return update(productIds, actor, product -> {
             BigDecimal price = pricingSuggestionService.suggestFor(product);
             if (price == null) {
@@ -107,6 +110,7 @@ public class ProductBulkEditService {
     @Transactional
     public BulkResult applyMinStock(Collection<Long> productIds, BigDecimal minStock, User actor) {
         requireProductDataEditor(actor);
+        requireCostViewer(actor);
         requireNonNegative(minStock, "O estoque mínimo");
         BigDecimal normalized = minStock.setScale(3, RoundingMode.HALF_UP);
         return update(productIds, actor, product -> {
@@ -147,6 +151,12 @@ public class ProductBulkEditService {
 
     private void requirePriceEditor(User actor) {
         if (!StaffPermissions.canEditPrices(actor)) {
+            throw new ManagerAuthorizationRequiredException();
+        }
+    }
+
+    private void requireCostViewer(User actor) {
+        if (!StaffPermissions.canSeeCostFields(actor)) {
             throw new ManagerAuthorizationRequiredException();
         }
     }

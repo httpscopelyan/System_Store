@@ -1,5 +1,6 @@
 package br.com.scopel.pfv.beta.repository;
 
+import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.model.SaleItem;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,10 +25,12 @@ public interface SaleItemRepository extends JpaRepository<SaleItem, Long> {
 
     // Lucro aproximado: (preço vendido - custo atual do produto) * quantidade.
     @Query("""
-            select coalesce(sum(i.totalPrice - (i.product.costPrice * i.quantity)), 0) from SaleItem i
+            select coalesce(sum(i.totalPrice - (i.product.costPrice * i.quantity
+                    * (case when i.product.unit = :perHundredGrams then 10 else 1 end))), 0) from SaleItem i
             where i.sale.status = :status and i.sale.createdAt between :start and :end
             """)
     BigDecimal grossProfit(@Param("status") Sale.Status status,
                            @Param("start") LocalDateTime start,
-                           @Param("end") LocalDateTime end);
+                           @Param("end") LocalDateTime end,
+                           @Param("perHundredGrams") Product.Unidade perHundredGrams);
 }

@@ -17,17 +17,17 @@ public final class ViewOnlyMode {
 
     public static void apply(User user, TableView<?> table, TableColumn<?, ?> stockQuantityColumn,
                              TableColumn<?, ?> priceColumn) {
-        boolean stockQuantityOnly = StaffPermissions.isStockQuantityOnly(user);
-        boolean canRegister = StaffPermissions.canRegisterProducts(user);
-        if (!stockQuantityOnly && !StaffPermissions.isFullyReadOnly(user)) {
+        if (!StaffPermissions.isViewOnly(user)) {
             return;
         }
-        if (stockQuantityOnly) {
-            table.getColumns().stream()
-                    .filter(column -> column != stockQuantityColumn)
-                    .filter(column -> column != priceColumn || !StaffPermissions.canEditPrices(user))
-                    .forEach(column -> column.setEditable(false));
-        } else {
+        boolean editsQuantity = StaffPermissions.canEditStockQuantity(user);
+        boolean editsPrice = StaffPermissions.canEditPrices(user);
+        boolean canRegister = StaffPermissions.canRegisterProducts(user);
+        table.getColumns().stream()
+                .filter(column -> !(editsQuantity && column == stockQuantityColumn))
+                .filter(column -> !(editsPrice && column == priceColumn))
+                .forEach(column -> column.setEditable(false));
+        if (!editsQuantity && !editsPrice) {
             table.setEditable(false);
         }
         Node top = table;
@@ -35,11 +35,8 @@ public final class ViewOnlyMode {
             top = top.getParent();
         }
         top.lookupAll("." + EDIT_ACTION_STYLE).stream()
-                .filter(node -> !(stockQuantityOnly && node.getStyleClass().contains(QUANTITY_ACTION_STYLE)))
+                .filter(node -> !(editsQuantity && node.getStyleClass().contains(QUANTITY_ACTION_STYLE)))
                 .filter(node -> !(canRegister && node.getStyleClass().contains(REGISTER_ACTION_STYLE)))
-                .forEach(node -> {
-                    node.setVisible(false);
-                    node.setManaged(false);
-                });
+                .forEach(CostVisibility::hide);
     }
 }

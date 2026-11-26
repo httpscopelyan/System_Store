@@ -1,6 +1,7 @@
 package br.com.scopel.pfv.beta.controller;
 
 import br.com.scopel.pfv.beta.config.UserSession;
+import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.model.Purchase;
 import br.com.scopel.pfv.beta.model.PurchaseItem;
 import br.com.scopel.pfv.beta.model.Supplier;
@@ -62,6 +63,8 @@ public class PurchaseController {
             messageLabel.setText("");
         } catch (NumberFormatException e) {
             messageLabel.setText("ID de fornecedor inválido");
+        } catch (ManagerAuthorizationRequiredException notAllowed) {
+            messageLabel.setText("Seu usuário não tem permissão para ver custos.");
         } catch (Exception e) {
             messageLabel.setText("Fornecedor não encontrado");
         }

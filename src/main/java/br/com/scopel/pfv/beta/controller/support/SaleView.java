@@ -48,6 +48,7 @@ public final class SaleView {
         quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         unitPriceColumn.setCellValueFactory(new PropertyValueFactory<>("unitPrice"));
         totalPriceColumn.setCellValueFactory(new PropertyValueFactory<>("totalPrice"));
+        SaleItemCell.install(quantityColumn, unitPriceColumn);
         itemsTable.setItems(rows);
         itemsTable.setFocusTraversable(false);
     }
@@ -73,7 +74,7 @@ public final class SaleView {
         }
         for (SaleItem item : sale.getItems()) {
             rows.add(new SaleItemRow(item.getProduct().getCode(), item.getProduct().getDescription(), item.getQuantity(),
-                    item.getUnitPrice(), item.getTotalPrice()));
+                    item.getUnitPrice(), item.getTotalPrice(), item.getUnit()));
         }
         totalLabel.setText("R$ " + sale.getTotal());
         if (receiptPreview != null) {
@@ -96,7 +97,8 @@ public final class SaleView {
 
     public void showPending(Product product) {
         if (lastItemLabel != null) {
-            lastItemLabel.setText(product.getDescription() + "  —  " + MoneyFormat.format(product.getPrice()));
+            lastItemLabel.setText(product.getDescription() + "  —  " + MoneyFormat.format(product.getPrice())
+                    + product.getUnit().priceSuffix());
         }
     }
 

@@ -70,6 +70,9 @@ public class StockService {
     public Product registerEntry(String code, BigDecimal quantity, BigDecimal unitCost,
                                  String reason, User operator) {
         requireNotViewOnly(operator);
+        if (unitCost != null && operator != null && !StaffPermissions.canSeeCostFields(operator)) {
+            throw new IllegalArgumentException("Seu usuário não pode informar o custo.");
+        }
         Product product = productRepository.findByCodeIgnoreCase(code)
                 .orElseThrow(() -> new ProductNotfindException(code));
 
@@ -121,10 +124,11 @@ public class StockService {
     }
 
     @Transactional
-    public Product rectify(String code, BigDecimal correctQuantity, String reason, User authorizedBy) {
-        if (authorizedBy == null || !authorizedBy.hasManagerAccess()) {
-            throw new ManagerAuthorizationRequiredException();
+    public Product rectify(String code, BigDecimal correctQuantity, String reason, User operator) {
+        if (operator == null) {
+            throw new IllegalArgumentException("Informe quem está retificando.");
         }
+        requireStockQuantityAllowed(operator);
         String normalizedReason = MovementReason.require(reason, MAX_REASON_LENGTH);
         if (correctQuantity == null || correctQuantity.signum() < 0) {
             throw new IllegalArgumentException("A quantidade corrigida não pode ser negativa.");
@@ -140,11 +144,10 @@ public class StockService {
         productRepository.save(product);
 
         StockMovement rectification = record(product, StockMovement.Type.RETIFICACAO, delta, null,
-                normalizedReason, authorizedBy, target);
+                normalizedReason, operator, target);
         rectification.setCorrectedMovement(lastMovement);
-        rectification.setAuthorizedBy(authorizedBy);
         movementRepository.save(rectification);
-        productChangeAudit.recordStockQuantity(authorizedBy, AuditAction.STOCK_RECTIFICATION, product,
+        productChangeAudit.recordStockQuantity(operator, AuditAction.STOCK_RECTIFICATION, product,
                 previousQuantity, normalizedReason);
         return product;
     }

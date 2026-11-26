@@ -48,7 +48,8 @@ public class PriceCheckController {
     public void initialize() {
         colCode.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getCode()));
         colName.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getDescription()));
-        colPrice.setCellValueFactory(cell -> new SimpleStringProperty(MoneyFormat.format(cell.getValue().getPrice())));
+        colPrice.setCellValueFactory(cell -> new SimpleStringProperty(MoneyFormat.format(cell.getValue().getPrice())
+                + cell.getValue().getUnit().priceSuffix()));
         colStock.setCellValueFactory(cell -> new SimpleStringProperty(stockText(cell.getValue())));
         colPrice.getStyleClass().add("price-check-price-column");
         colStock.getStyleClass().add("price-check-stock-column");
@@ -107,6 +108,6 @@ public class PriceCheckController {
     }
 
     private String stockText(Product product) {
-        return MoneyFormat.quantity(product.getQuantity()) + " " + product.getUnit();
+        return MoneyFormat.quantity(product.getQuantity()) + " " + product.getUnit().stockSymbol();
     }
 }

@@ -20,7 +20,7 @@
                     <TextField fx:id="codeField" styleClass="text-input" maxWidth="Infinity"/>
                 </VBox>
                 <VBox spacing="6">
-                    <Label text="Nova quantidade (contada)" styleClass="form-label"/>
+                    <Label text="Nova quantidade contada (produto pesado: em KG)" styleClass="form-label"/>
                     <TextField fx:id="quantityField" promptText="Ex: 12" styleClass="text-input" maxWidth="Infinity"/>
                 </VBox>
                 <VBox spacing="6">

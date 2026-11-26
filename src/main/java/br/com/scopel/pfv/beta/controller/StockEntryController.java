@@ -1,6 +1,9 @@
 package br.com.scopel.pfv.beta.controller;
 
+import br.com.scopel.pfv.beta.controller.support.CostVisibility;
 import br.com.scopel.pfv.beta.controller.support.EnterToNextField;
+import br.com.scopel.pfv.beta.service.StaffPermissions;
+import javafx.scene.Node;
 import br.com.scopel.pfv.beta.controller.support.ProductCodeInput;
 import br.com.scopel.pfv.beta.service.ProductService;
 import br.com.scopel.pfv.beta.config.UserSession;
@@ -27,6 +30,7 @@ public class StockEntryController {
     @FXML private TextField codeField;
     @FXML private TextField quantityField;
     @FXML private TextField unitCostField;
+    @FXML private Node unitCostBox;
     @FXML private TextField reasonField;
     @FXML private Label costPreviewLabel;
     @FXML private Label messageLabel;
@@ -40,10 +44,15 @@ public class StockEntryController {
     @FXML
     public void initialize() {
         ProductCodeInput.attach(codeField, productService);
-        EnterToNextField.install(codeField, quantityField, unitCostField, reasonField);
-        codeField.textProperty().addListener((observable, previous, current) -> refreshCostPreview());
-        quantityField.textProperty().addListener((observable, previous, current) -> refreshCostPreview());
-        unitCostField.textProperty().addListener((observable, previous, current) -> refreshCostPreview());
+        if (StaffPermissions.canSeeCostFields(userSession.getLoggedUser())) {
+            EnterToNextField.install(codeField, quantityField, unitCostField, reasonField);
+            codeField.textProperty().addListener((observable, previous, current) -> refreshCostPreview());
+            quantityField.textProperty().addListener((observable, previous, current) -> refreshCostPreview());
+            unitCostField.textProperty().addListener((observable, previous, current) -> refreshCostPreview());
+        } else {
+            EnterToNextField.install(codeField, quantityField, reasonField);
+            CostVisibility.hide(unitCostBox, costPreviewLabel);
+        }
         String prefillCode = userSession.consumeStockEntryPrefillCode();
         if (prefillCode != null) {
             codeField.setText(prefillCode);

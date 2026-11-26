@@ -645,6 +645,8 @@ venda → bipar → somar → finalizar → baixa de estoque.
   - **Decisão:** corrigir um erro nunca edita nem apaga o registro original. Cria-se um movimento
     `RETIFICACAO` que referencia o original, com motivo obrigatório e gerente autorizador (migration V31).
     No caixa o valor é o delta assinado, de modo que o saldo reflete o valor corrigido.
+    Revisão de 2026-11-26: a retificação de **estoque** não exige mais gerente (pedido do dev); quem pode ajustar
+    quantidade pode retificar, e o movimento grava o operador. A de caixa continua com gerente.
   - **Consequências:** o resumo do caixa passou para `CashSummaryService` (testável) e trata a retificação
     na mesma coluna do movimento corrigido.
 - **0019 — Pagamento dividido persistido parte a parte (2026-11-10):**

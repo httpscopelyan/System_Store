@@ -35,7 +35,7 @@
                        styleClass="form-label"/>
                 <HBox spacing="16">
                     <VBox fx:id="costBox" spacing="6" HBox.hgrow="ALWAYS">
-                        <Label text="Custo" styleClass="form-label"/>
+                        <Label fx:id="costCaption" text="Custo" styleClass="form-label"/>
                         <TextField fx:id="costField" promptText="Ex: 6,50"
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
@@ -45,15 +45,17 @@
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label text="Preço de venda" styleClass="form-label"/>
+                        <Label fx:id="priceCaption" text="Preço de venda" styleClass="form-label"/>
                         <TextField fx:id="priceField" promptText="Ex: 9,90"
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
                 </HBox>
 
+                <Label fx:id="weightHintLabel" styleClass="form-section-title" wrapText="true"/>
+
                 <HBox spacing="16" alignment="BOTTOM_LEFT">
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label text="Quantidade" styleClass="form-label"/>
+                        <Label text="Quantidade (produto pesado: em KG)" styleClass="form-label"/>
                         <TextField fx:id="quantityField" promptText="Ex: 10"
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>

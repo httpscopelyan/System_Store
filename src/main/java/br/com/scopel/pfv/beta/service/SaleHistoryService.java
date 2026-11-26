@@ -65,7 +65,7 @@ public class SaleHistoryService {
 
     private SaleHistoryEntry.Item toItem(SaleItem item) {
         return new SaleHistoryEntry.Item(item.getProduct().getCode(), item.getProduct().getDescription(),
-                item.getQuantity(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice());
+                item.getQuantity(), item.getUnitPrice(), item.getDiscount(), item.getTotalPrice(), item.getUnit());
     }
 
     private SaleHistoryEntry.PaymentPart toPaymentPart(Payment payment) {

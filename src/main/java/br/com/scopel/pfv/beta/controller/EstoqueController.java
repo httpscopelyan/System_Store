@@ -5,6 +5,7 @@ import br.com.scopel.pfv.beta.config.Page;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.BulkCellEditor;
 import br.com.scopel.pfv.beta.controller.support.BulkEditConfirmation;
+import br.com.scopel.pfv.beta.controller.support.CostVisibility;
 import br.com.scopel.pfv.beta.controller.support.ViewOnlyMode;
 import br.com.scopel.pfv.beta.controller.support.ManagerAuthorizedAction;
 import br.com.scopel.pfv.beta.controller.support.ProductSelection;
@@ -84,20 +85,18 @@ public class EstoqueController {
     @FXML
     public void initialize() {
         User user = userSession.getLoggedUser();
-        boolean manager = user != null && user.hasManagerAccess();
+        boolean showsMargins = CostVisibility.seesMargins(user);
         selection = new ProductSelection(table);
         presenter = new ProductTablePresenter(table,
                 new ProductTablePresenter.Columns(colHandle, colCode, colDesc, colCost, colProfit,
                         colMarginPercent, colSuggestedPrice, colPrice, colMin, colStock),
-                pricingSuggestionService, selection, manager, StaffPermissions.canEditStockQuantity(user),
+                pricingSuggestionService, selection, showsMargins, StaffPermissions.canEditStockQuantity(user),
                 this::onCellEdited);
         managerAction = new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window);
-        bulkCellEditor = new BulkCellEditor(bulkEditService, selection, managerAction, BulkEditConfirmation::ask,
+        bulkCellEditor = new BulkCellEditor(bulkEditService, selection, BulkEditConfirmation::ask,
                 userSession::getLoggedUser);
         ViewOnlyMode.apply(user, table, colStock, colPrice);
-        marginsToggle.visibleProperty().set(manager);
-        marginsToggle.managedProperty().bind(marginsToggle.visibleProperty());
-        marginsToggle.setSelected(manager);
+        CostVisibility.applyToStock(user, marginsToggle, colMin, withoutCostBox, acceptSuggestionButton);
         acceptSuggestionButton.setDisable(true);
         table.getSelectionModel().getSelectedCells().addListener(
                 (ListChangeListener<TablePosition>) change -> refreshAcceptSuggestion());

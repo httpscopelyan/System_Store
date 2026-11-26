@@ -2,6 +2,7 @@ package br.com.scopel.pfv.beta.service;
 
 import br.com.scopel.pfv.beta.model.CardType;
 import br.com.scopel.pfv.beta.model.PaymentMethod;
+import br.com.scopel.pfv.beta.model.Product;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,7 +13,7 @@ public record SaleHistoryEntry(Long saleId, LocalDateTime createdAt, Long operat
                                List<Item> items, List<PaymentPart> payments) {
 
     public record Item(String productCode, String productDescription, BigDecimal quantity, BigDecimal unitPrice,
-                       BigDecimal discount, BigDecimal subtotal) {
+                       BigDecimal discount, BigDecimal subtotal, Product.Unidade unit) {
     }
 
     public record PaymentPart(PaymentMethod method, CardType cardType, BigDecimal amountReceived,

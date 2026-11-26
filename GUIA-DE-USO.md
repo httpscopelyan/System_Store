@@ -63,6 +63,13 @@ Plano de 2026-10-31 (`TASKs/IMPLEMENTATION-PLAN.md`).
 
 ---
 
+## Novidades de 2026-11-26
+
+**Sem janela de gerente no Estoque**
+- Mudar preço na tabela não abre mais a janela de gerente: quem tem *Alterar preços* muda direto, quem não tem vê o aviso de recusa.
+- *Ajuste → Retificação de erro* não pede mais gerente. O motivo continua obrigatório e o registro guarda quem fez.
+- *Apagar*, o reajuste de preços em massa e a retificação do **Caixa** continuam pedindo gerente.
+
 ## Novidades de 2026-11-25
 
 **Gaveta (F12) e impressão**
@@ -80,4 +87,4 @@ Plano de 2026-10-31 (`TASKs/IMPLEMENTATION-PLAN.md`).
 **Alterar preço sem gerente**
 - Dayana, Beatriz e Ana Clara alteram o preço na tabela do Estoque sem pedir gerente. Tudo fica no Histórico (valor anterior, novo e quem editou).
 - A conta DEV liga ou desliga isso em *Administração → Permissões → "Alterar preços"*. Vale no próximo login da pessoa.
-- Quem não tem a permissão continua precisando da autorização de um gerente, inclusive na tela "Alterar produto" e no reajuste em massa.
+- Quem não tem a permissão vê um aviso de recusa na tabela e na tela "Alterar produto"; no reajuste em massa precisa de um gerente.

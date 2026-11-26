@@ -64,7 +64,7 @@ public class QuoteService {
 
         if (existing != null) {
             existing.setQuantity(existing.getQuantity().add(quantity));
-            existing.setTotalPrice(existing.getUnitPrice().multiply(existing.getQuantity())
+            existing.setTotalPrice(product.getUnit().amountFor(existing.getUnitPrice(), existing.getQuantity())
                     .setScale(2, RoundingMode.HALF_UP));
         } else {
             QuoteItem item = new QuoteItem();
@@ -72,7 +72,8 @@ public class QuoteService {
             item.setProduct(product);
             item.setQuantity(quantity);
             item.setUnitPrice(product.getPrice());
-            item.setTotalPrice(product.getPrice().multiply(quantity).setScale(2, RoundingMode.HALF_UP));
+            item.setTotalPrice(product.getUnit().amountFor(product.getPrice(), quantity)
+                    .setScale(2, RoundingMode.HALF_UP));
             quote.getItems().add(item);
         }
 

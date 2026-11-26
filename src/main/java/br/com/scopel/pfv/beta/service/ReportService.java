@@ -1,6 +1,7 @@
 package br.com.scopel.pfv.beta.service;
 
 import br.com.scopel.pfv.beta.model.PaymentMethod;
+import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.Sale;
 import br.com.scopel.pfv.beta.repository.PaymentRepository;
 import br.com.scopel.pfv.beta.repository.SaleItemRepository;
@@ -44,7 +45,8 @@ public class ReportService {
     /** Resumo do movimento: vendas, lucro, descontos e cancelamentos no período. */
     public SalesSummary summary(LocalDateTime start, LocalDateTime end) {
         BigDecimal sales = nz(saleRepository.sumTotalByStatusAndPeriod(Sale.Status.FINALIZADA, start, end));
-        BigDecimal profit = nz(saleItemRepository.grossProfit(Sale.Status.FINALIZADA, start, end));
+        BigDecimal profit = nz(saleItemRepository.grossProfit(Sale.Status.FINALIZADA, start, end,
+                Product.Unidade.G100));
         BigDecimal discounts = nz(saleRepository.sumDiscountByStatusAndPeriod(Sale.Status.FINALIZADA, start, end));
         long canceled = saleRepository.countByStatusAndCanceledPeriod(Sale.Status.CANCELADA, start, end);
         return new SalesSummary(sales, profit, discounts, canceled);

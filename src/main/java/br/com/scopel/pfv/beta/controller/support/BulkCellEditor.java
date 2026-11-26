@@ -24,17 +24,17 @@ public final class BulkCellEditor {
                           TableColumn<Product, ?> tableColumn) {
     }
 
+    private static final String NOT_ALLOWED_MESSAGE = "Seu usuário não tem permissão para esta alteração.";
+
     private final ProductBulkEditService bulkEditService;
     private final ProductSelection selection;
-    private final ManagerAuthorizedAction managerAction;
     private final Confirmation confirmation;
     private final Supplier<User> loggedUser;
 
     public BulkCellEditor(ProductBulkEditService bulkEditService, ProductSelection selection,
-                          ManagerAuthorizedAction managerAction, Confirmation confirmation, Supplier<User> loggedUser) {
+                          Confirmation confirmation, Supplier<User> loggedUser) {
         this.bulkEditService = bulkEditService;
         this.selection = selection;
-        this.managerAction = managerAction;
         this.confirmation = confirmation;
         this.loggedUser = loggedUser;
     }
@@ -53,14 +53,11 @@ public final class BulkCellEditor {
         }
         try {
             BulkResult result = apply(edit, number, ids);
-            if (result == null) {
-                return rejected("Alteração não autorizada.", ids, edit);
-            }
             return new Outcome(true, summary(result), ids, edit.tableColumn());
         } catch (IllegalArgumentException invalidValue) {
             return rejected(invalidValue.getMessage(), ids, edit);
         } catch (ManagerAuthorizationRequiredException notAllowed) {
-            return rejected("Seu usuário não tem permissão para esta alteração.", ids, edit);
+            return rejected(NOT_ALLOWED_MESSAGE, ids, edit);
         }
     }
 
@@ -69,15 +66,14 @@ public final class BulkCellEditor {
             return new Outcome(false, "Selecione células da coluna Vr. Venda.", ids, column);
         }
         try {
-            BulkResult result = managerAction.apply(actor -> bulkEditService.applySuggestedPrice(ids, actor));
-            if (result == null) {
-                return new Outcome(false, "Alteração não autorizada.", ids, column);
-            }
+            BulkResult result = bulkEditService.applySuggestedPrice(ids, loggedUser.get());
             String skipped = result.skipped() > 0 ? " (" + result.skipped() + " sem custo)" : "";
             return new Outcome(true, "Sugestão aplicada em " + result.changed() + " de " + ids.size() + skipped,
                     ids, column);
         } catch (IllegalArgumentException invalidValue) {
             return new Outcome(false, invalidValue.getMessage(), ids, column);
+        } catch (ManagerAuthorizationRequiredException notAllowed) {
+            return new Outcome(false, NOT_ALLOWED_MESSAGE, ids, column);
         }
     }
 
@@ -95,10 +91,10 @@ public final class BulkCellEditor {
             case NAME -> bulkEditService.applyDescription(ids, edit.text(), loggedUser.get());
             case CODE -> bulkEditService.applyCode(ids.get(0), edit.text(), loggedUser.get());
             case MIN_STOCK -> bulkEditService.applyMinStock(ids, number, loggedUser.get());
-            case STOCK -> managerAction.apply(actor -> bulkEditService.applyStockQuantity(ids, number, actor));
-            case PRICE -> managerAction.apply(actor -> bulkEditService.applyPrice(ids, number, actor));
-            case COST -> managerAction.apply(actor -> bulkEditService.applyCost(ids, number, actor));
-            case MARGIN_PERCENT -> managerAction.apply(actor -> bulkEditService.applyMarginPercent(ids, number, actor));
+            case STOCK -> bulkEditService.applyStockQuantity(ids, number, loggedUser.get());
+            case PRICE -> bulkEditService.applyPrice(ids, number, loggedUser.get());
+            case COST -> bulkEditService.applyCost(ids, number, loggedUser.get());
+            case MARGIN_PERCENT -> bulkEditService.applyMarginPercent(ids, number, loggedUser.get());
         };
     }
 

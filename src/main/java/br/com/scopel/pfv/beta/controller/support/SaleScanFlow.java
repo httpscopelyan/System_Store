@@ -75,7 +75,7 @@ public final class SaleScanFlow {
         try {
             ScanInputParser.ParsedScan parsed = ScanInputParser.parse(rawInput);
             if (parsed.hasQuantity()) {
-                addItem(parsed.code(), parsed.quantity());
+                addItem(parsed.code(), stockQuantityFor(parsed.code(), parsed.quantity()));
                 return;
             }
             resolve(parsed.code());
@@ -94,7 +94,15 @@ public final class SaleScanFlow {
             view.showStatus("Informe a quantidade");
             return;
         }
-        addItem(pending.code(), quantity);
+        addItem(pending.code(), pending.stockQuantity(quantity));
+    }
+
+    private BigDecimal stockQuantityFor(String code, BigDecimal typed) {
+        try {
+            return productService.findCode(code).getUnit().stockQuantityFromTyped(typed);
+        } catch (ProductNotfindException unknownCode) {
+            return typed;
+        }
     }
 
     public void cancelPending() {
@@ -140,8 +148,8 @@ public final class SaleScanFlow {
         showCode(product.getCode());
         QuantityInput.configure(quantityField, product.getUnit());
         quantityField.setDisable(false);
-        quantityLabel.setText(pending.isWeight() ? "Peso (KG)" : "Qtd");
-        quantityField.setPromptText(pending.isWeight() ? "Ex: 0,750" : "Qtd");
+        quantityLabel.setText(pending.quantityLabel());
+        quantityField.setPromptText(pending.quantityPrompt());
         quantityField.setText(pending.isWeight() ? "" : "1");
         view.showPending(product);
         view.showStatus("");
@@ -244,10 +252,15 @@ public final class SaleScanFlow {
             quantityPreviewLabel.setText("");
             return;
         }
+        Product.Unidade unit = pending.product().getUnit();
         BigDecimal unitPrice = pending.product().getPrice();
-        String unitText = pending.isWeight() ? " kg" : "";
+        String unitText = switch (unit) {
+            case UN -> "";
+            case KG -> " kg";
+            case G100 -> " g";
+        };
         quantityPreviewLabel.setText(MoneyFormat.quantity(quantity) + unitText + " × "
-                + MoneyFormat.format(unitPrice) + " = "
-                + MoneyFormat.format(saleService.previewLineTotal(unitPrice, quantity)));
+                + MoneyFormat.format(unitPrice) + unit.priceSuffix() + " = "
+                + MoneyFormat.format(saleService.previewLineTotal(unit, unitPrice, pending.stockQuantity(quantity))));
     }
 }

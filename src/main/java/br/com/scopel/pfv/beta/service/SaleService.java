@@ -104,6 +104,7 @@ public class SaleService {
             item.setProduct(product);
             item.setQuantity(normalizedQuantity);
             item.setUnitPrice(product.getPrice());
+            item.setUnit(product.getUnit());
             item.setDiscount(BigDecimal.ZERO);
             item.setTotalPrice(lineTotal(item));
             sale.getItems().add(item);
@@ -131,7 +132,7 @@ public class SaleService {
             throw new SaleItemNotFoundException(productCode);
         }
 
-        BigDecimal gross = item.getUnitPrice().multiply(item.getQuantity()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal gross = previewLineTotal(item.getUnit(), item.getUnitPrice(), item.getQuantity());
         if (discount.compareTo(gross) > 0) {
             throw new InvalidDiscountException("maior que o valor do item");
         }
@@ -285,7 +286,7 @@ public class SaleService {
     }
 
     private BigDecimal lineTotal(SaleItem item) {
-        BigDecimal gross = item.getUnitPrice().multiply(item.getQuantity());
+        BigDecimal gross = item.getUnit().amountFor(item.getUnitPrice(), item.getQuantity());
         BigDecimal net = gross.subtract(nz(item.getDiscount()));
         if (net.compareTo(BigDecimal.ZERO) < 0) {
             net = BigDecimal.ZERO;
@@ -303,11 +304,11 @@ public class SaleService {
         return configured.signum() <= 0 ? DEFAULT_MAX_QUANTITY_PER_ITEM : configured;
     }
 
-    public BigDecimal previewLineTotal(BigDecimal unitPrice, BigDecimal quantity) {
+    public BigDecimal previewLineTotal(Product.Unidade unit, BigDecimal unitPrice, BigDecimal quantity) {
         if (unitPrice == null || quantity == null || quantity.signum() <= 0) {
             return BigDecimal.ZERO.setScale(2);
         }
-        return unitPrice.multiply(quantity).setScale(2, RoundingMode.HALF_UP);
+        return unit.amountFor(unitPrice, quantity).setScale(2, RoundingMode.HALF_UP);
     }
 
     private void requireAvailableStock(Product product, SaleItem existing, BigDecimal added) {
@@ -317,7 +318,7 @@ public class SaleService {
         BigDecimal inSale = existing == null ? BigDecimal.ZERO : existing.getQuantity();
         BigDecimal available = product.getQuantity() == null ? BigDecimal.ZERO : product.getQuantity();
         if (inSale.add(added).compareTo(available) > 0) {
-            String unit = product.getUnit() == Product.Unidade.UN ? "" : " " + product.getUnit().name().toLowerCase();
+            String unit = product.getUnit() == Product.Unidade.UN ? "" : " " + product.getUnit().stockSymbol().toLowerCase();
             throw new InvalidQuantityException("Estoque insuficiente: " + product.getDescription() + " tem apenas "
                     + available.stripTrailingZeros().toPlainString() + unit + " (já na venda: "
                     + inSale.stripTrailingZeros().toPlainString() + ")");

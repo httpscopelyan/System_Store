@@ -1,6 +1,7 @@
 package br.com.scopel.pfv.beta.service;
 
 import br.com.scopel.pfv.beta.exception.IllegalPurchaseStateException;
+import br.com.scopel.pfv.beta.exception.ManagerAuthorizationRequiredException;
 import br.com.scopel.pfv.beta.exception.PurchaseNotFoundException;
 import br.com.scopel.pfv.beta.model.Product;
 import br.com.scopel.pfv.beta.model.Purchase;
@@ -36,6 +37,9 @@ public class PurchaseService {
     }
 
     public Purchase openPurchase(Supplier supplier, String invoiceNumber, User operator) {
+        if (operator != null && !StaffPermissions.canSeeCostFields(operator)) {
+            throw new ManagerAuthorizationRequiredException();
+        }
         Purchase purchase = new Purchase();
         purchase.setSupplier(supplier);
         purchase.setOperator(operator);
@@ -70,14 +74,14 @@ public class PurchaseService {
         if (existing != null) {
             existing.setQuantity(existing.getQuantity().add(quantity));
             existing.setUnitCost(cost);
-            existing.setTotalCost(cost.multiply(existing.getQuantity()).setScale(2, RoundingMode.HALF_UP));
+            existing.setTotalCost(lineCost(product, cost, existing.getQuantity()));
         } else {
             PurchaseItem item = new PurchaseItem();
             item.setPurchase(purchase);
             item.setProduct(product);
             item.setQuantity(quantity);
             item.setUnitCost(cost);
-            item.setTotalCost(cost.multiply(quantity).setScale(2, RoundingMode.HALF_UP));
+            item.setTotalCost(lineCost(product, cost, quantity));
             purchase.getItems().add(item);
         }
 
@@ -113,6 +117,10 @@ public class PurchaseService {
         }
         purchase.setStatus(Purchase.Status.CANCELADA);
         return purchaseRepository.save(purchase);
+    }
+
+    private BigDecimal lineCost(Product product, BigDecimal unitCost, BigDecimal quantity) {
+        return product.getUnit().amountFor(unitCost, quantity).setScale(2, RoundingMode.HALF_UP);
     }
 
     private BigDecimal calculateTotal(Purchase purchase) {

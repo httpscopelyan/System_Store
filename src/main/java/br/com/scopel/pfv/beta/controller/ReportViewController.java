@@ -1,6 +1,8 @@
 package br.com.scopel.pfv.beta.controller;
 
+import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.service.ReportService;
+import br.com.scopel.pfv.beta.service.StaffPermissions;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -15,6 +17,7 @@ import java.time.LocalTime;
 public class ReportViewController {
 
     private final ReportService reportService;
+    private final UserSession userSession;
 
     @FXML private DatePicker startField;
     @FXML private DatePicker endField;
@@ -22,8 +25,9 @@ public class ReportViewController {
     @FXML private TextArea resultArea;
     @FXML private Label messageLabel;
 
-    public ReportViewController(ReportService reportService) {
+    public ReportViewController(ReportService reportService, UserSession userSession) {
         this.reportService = reportService;
+        this.userSession = userSession;
     }
 
     @FXML
@@ -44,10 +48,13 @@ public class ReportViewController {
         LocalDateTime end = e.atTime(LocalTime.MAX);
 
         ReportService.SalesSummary summary = reportService.summary(start, end);
+        String profit = StaffPermissions.canSeeCostFields(userSession.getLoggedUser())
+                ? "   |   Lucro: R$ " + summary.grossProfit().toPlainString()
+                : "";
         summaryLabel.setText(String.format(
-                "Vendas: R$ %s   |   Lucro: R$ %s   |   Descontos: R$ %s   |   Cancelamentos: %d",
+                "Vendas: R$ %s%s   |   Descontos: R$ %s   |   Cancelamentos: %d",
                 summary.totalSales().toPlainString(),
-                summary.grossProfit().toPlainString(),
+                profit,
                 summary.totalDiscounts().toPlainString(),
                 summary.canceledCount()));
 

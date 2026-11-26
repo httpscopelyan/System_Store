@@ -47,35 +47,37 @@
                         <TextField fx:id="categoryField" promptText="Ex: Bebidas"
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <VBox fx:id="minStockBox" spacing="6" HBox.hgrow="ALWAYS">
                         <Label text="Estoque mínimo" styleClass="form-label"/>
                         <TextField fx:id="minStockField" promptText="Ex: 5"
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
                 </HBox>
 
-                <Label text="Formação de preço — informe a margem para sugerir o preço de venda, ou digite o preço direto"
+                <Label fx:id="priceFormationLabel" text="Formação de preço — informe a margem para sugerir o preço de venda, ou digite o preço direto"
                        styleClass="form-label"/>
                 <HBox spacing="16">
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label text="Custo" styleClass="form-label"/>
+                    <VBox fx:id="costBox" spacing="6" HBox.hgrow="ALWAYS">
+                        <Label fx:id="costCaption" text="Custo" styleClass="form-label"/>
                         <TextField fx:id="costField" promptText="Ex: 6.50"
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <VBox fx:id="marginBox" spacing="6" HBox.hgrow="ALWAYS">
                         <Label text="Margem (%)" styleClass="form-label"/>
                         <TextField fx:id="marginField" promptText="Ex: 30"
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
                     <VBox spacing="6" HBox.hgrow="ALWAYS">
-                        <Label text="Preço de venda" styleClass="form-label"/>
+                        <Label fx:id="priceCaption" text="Preço de venda" styleClass="form-label"/>
                         <TextField fx:id="priceField" promptText="Ex: 9.90"
                                    styleClass="text-input" maxWidth="Infinity"/>
                     </VBox>
                 </HBox>
 
+                <Label fx:id="weightHintLabel" styleClass="form-section-title" wrapText="true"/>
+
                 <HBox spacing="16" alignment="CENTER_LEFT">
-                    <Label text="Lucro:" styleClass="form-label"/>
+                    <Label fx:id="profitCaption" text="Lucro:" styleClass="form-label"/>
                     <Label fx:id="profitLabel" text="-" styleClass="form-section-title"/>
                     <CheckBox fx:id="activeBox" text="Ativo">
                         <padding>

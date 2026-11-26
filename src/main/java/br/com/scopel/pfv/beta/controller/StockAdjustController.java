@@ -5,7 +5,6 @@ import br.com.scopel.pfv.beta.controller.support.ProductCodeInput;
 import br.com.scopel.pfv.beta.service.ProductService;
 import br.com.scopel.pfv.beta.config.UserSession;
 import br.com.scopel.pfv.beta.controller.support.DecimalInput;
-import br.com.scopel.pfv.beta.controller.support.ManagerAuthorizedAction;
 import br.com.scopel.pfv.beta.exception.MissingReasonException;
 import br.com.scopel.pfv.beta.exception.ProductNotfindException;
 import br.com.scopel.pfv.beta.model.Product;
@@ -17,7 +16,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.Window;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -30,7 +28,6 @@ public class StockAdjustController {
 
     private final StockService stockService;
     private final UserSession userSession;
-    private final ManagerAuthorizationController managerAuthorizationController;
 
     private final ProductService productService;
     @FXML private ComboBox<String> kindBox;
@@ -42,12 +39,10 @@ public class StockAdjustController {
     @FXML private Label messageLabel;
 
     public StockAdjustController(StockService stockService, UserSession userSession,
-                                 ManagerAuthorizationController managerAuthorizationController,
                                  ProductService productService) {
         this.productService = productService;
         this.stockService = stockService;
         this.userSession = userSession;
-        this.managerAuthorizationController = managerAuthorizationController;
     }
 
     @FXML
@@ -67,12 +62,8 @@ public class StockAdjustController {
             String code = productService.resolveCode(codeField.getText());
             String reason = reasonField.getText();
             Product product = RECTIFICATION.equals(kindBox.getValue())
-                    ? rectify(code, quantity, reason)
+                    ? stockService.rectify(code, quantity, reason, userSession.getLoggedUser())
                     : stockService.adjust(code, quantity, reason, userSession.getLoggedUser());
-            if (product == null) {
-                messageLabel.setText("Retificação não autorizada.");
-                return;
-            }
             messageLabel.setText((RECTIFICATION.equals(kindBox.getValue()) ? "Estoque retificado para "
                     : "Estoque ajustado para ") + product.getQuantity().toPlainString());
             codeField.clear();
@@ -91,20 +82,10 @@ public class StockAdjustController {
         }
     }
 
-    private Product rectify(String code, BigDecimal quantity, String reason) {
-        ManagerAuthorizedAction managerAction =
-                new ManagerAuthorizedAction(managerAuthorizationController, userSession, this::window);
-        return managerAction.apply(actor -> stockService.rectify(code, quantity, reason, actor));
-    }
-
     private void refreshKind() {
         boolean rectification = RECTIFICATION.equals(kindBox.getValue());
         saveButton.setText(rectification ? "Retificar estoque" : "Ajustar estoque");
         reasonField.setPromptText(rectification ? "Ex: Quantidade lançada errada na entrada"
                 : "Ex: Contagem de inventário");
-    }
-
-    private Window window() {
-        return messageLabel.getScene() == null ? null : messageLabel.getScene().getWindow();
     }
 }

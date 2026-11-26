@@ -122,7 +122,10 @@ public class ReceiptService {
         for (SaleItem item : sale.getItems()) {
             String desc = item.getProduct().getDescription();
             sb.append(clip(desc, WIDTH)).append('\n');
-            String calc = strip(item.getQuantity()) + " x " + money(item.getUnitPrice());
+            String quantityText = item.getUnit().pricedPerHundredGrams()
+                    ? item.getUnit().soldQuantityText(item.getQuantity())
+                    : strip(item.getQuantity());
+            String calc = quantityText + " x " + money(item.getUnitPrice()) + item.getUnit().priceSuffix();
             sb.append(leftRight(calc, money(item.getTotalPrice()))).append('\n');
         }
 

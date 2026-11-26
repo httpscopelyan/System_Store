@@ -36,4 +36,15 @@ public class SaleItem {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 4)
+    private Product.Unidade unit;
+
+    public Product.Unidade getUnit() {
+        if (unit != null) {
+            return unit;
+        }
+        return product == null || product.getUnit() == null ? Product.Unidade.UN : product.getUnit();
+    }
 }
