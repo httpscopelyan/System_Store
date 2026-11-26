@@ -1,10 +1,10 @@
 {
-  "version": "1.3.8",
-  "releaseDate": "2026-11-16",
+  "version": "1.3.10",
+  "releaseDate": "2026-11-26",
   "minJavaVersion": 24,
-  "changelog": "fix(impressora): PowerShell persistente para limpar o spooler sem atrasar F12 e impressões",
+  "changelog": "feat: preço a cada 100 g, custo só para quem tem permissão e estoque sem janela de gerente",
   "mandatory": false,
-  "sha256": "e7b0ade551ce6424089e819938b9c6f3a8fb0a08d94f53e2def66e32b447d2f7",
-  "size": 59860837,
-  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.8/scopel-store.jar"
+  "sha256": "c6356aa8ab3e4bf406b0c5970a08163a8fd2454c0d333d8f88e5958728c06a81",
+  "size": 59891438,
+  "downloadUrl": "https://github.com/httpscopelyan/System_Store/releases/download/v1.3.10/scopel-store.jar"
 }
